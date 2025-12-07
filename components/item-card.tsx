@@ -1,3 +1,5 @@
+"use client"
+
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -7,8 +9,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { MapPin, Calendar, Tag } from "lucide-react"
+import { MapPin, Calendar } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { createClient } from "@/lib/supabase"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface Item {
   id: string
@@ -29,6 +34,51 @@ interface ItemCardProps {
 
 export function ItemCard({ item, currentUserId }: ItemCardProps) {
   const isLost = item.type === 'LOST'
+  const router = useRouter()
+  const supabase = createClient()
+
+  const handleContact = async () => {
+    if (!currentUserId) {
+      toast.error("Please login to contact the owner.")
+      return
+    }
+
+    try {
+      // 1. Check if chat already exists
+      const { data: existingChats, error: fetchError } = await supabase
+        .from('chats')
+        .select('id')
+        .eq('item_id', item.id)
+        .or(`user_a.eq.${currentUserId},user_b.eq.${currentUserId}`)
+      
+      if (fetchError) throw fetchError
+
+      if (existingChats && existingChats.length > 0) {
+        router.push(`/chat/${existingChats[0].id}`)
+        return
+      }
+
+      // 2. Create new chat
+      // user_a is the item owner, user_b is the responder
+      const { data: newChat, error: createError } = await supabase
+        .from('chats')
+        .insert({
+          item_id: item.id,
+          user_a: item.user_id,
+          user_b: currentUserId
+        })
+        .select()
+        .single()
+
+      if (createError) throw createError
+
+      router.push(`/chat/${newChat.id}`)
+
+    } catch (error) {
+      console.error("Error creating chat:", error)
+      toast.error("Failed to start chat. Please try again.")
+    }
+  }
   
   return (
     <Card className="w-full hover:shadow-md transition-shadow">
@@ -66,7 +116,10 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
         {currentUserId === item.user_id ? (
            <Button variant="outline" className="w-full">Manage</Button>
         ) : (
-          <Button className={`w-full ${isLost ? 'bg-violet-600 hover:bg-violet-700' : 'bg-green-600 hover:bg-green-700'}`}>
+          <Button 
+            onClick={handleContact}
+            className={`w-full ${isLost ? 'bg-violet-600 hover:bg-violet-700' : 'bg-green-600 hover:bg-green-700'}`}
+          >
             {isLost ? "I Found This!" : "This is Mine!"}
           </Button>
         )}
