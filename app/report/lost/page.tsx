@@ -21,11 +21,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
-import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
+import { createItem } from "@/app/actions"
+import { useUser } from '@auth0/nextjs-auth0/client';
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -38,7 +38,7 @@ const formSchema = z.object({
 
 export default function ReportLostPage() {
   const router = useRouter()
-  const supabase = createClient()
+  const { user, isLoading } = useUser();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -51,39 +51,31 @@ export default function ReportLostPage() {
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      // Check if user is logged in
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        toast.error("You must be logged in to report a lost item.")
-        // In a real app, redirect to login
-        return
-      }
+    if (!user) {
+      toast.error("You must be logged in to report a lost item.")
+      return
+    }
 
-      const { error } = await supabase.from("items").insert({
+    try {
+      const result = await createItem({
         type: "LOST",
-        title: values.title,
-        category: values.category,
-        location_zone: values.location_zone,
-        bounty_text: values.bounty_text,
-        user_id: user.id,
-        status: "OPEN"
+        ...values
       })
 
-      if (error) {
-        console.error(error)
-        toast.error("Failed to submit report. Please try again.")
+      if (result.error) {
+        toast.error(result.error)
         return
       }
 
       toast.success("Lost item reported successfully!")
-      router.push("/feed") // Redirect to feed
+      router.push("/feed")
     } catch (error) {
       console.error(error)
       toast.error("An unexpected error occurred.")
     }
   }
+
+  if (isLoading) return <div className="flex min-h-screen items-center justify-center">Loading...</div>
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 relative overflow-hidden">

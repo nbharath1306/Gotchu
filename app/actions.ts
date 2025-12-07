@@ -1,11 +1,13 @@
 "use server"
 
 import { createClient } from "@/lib/supabase-server"
+import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
 
 export async function resolveItem(itemId: string) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (!user) {
     return { error: "Unauthorized" }
@@ -22,7 +24,7 @@ export async function resolveItem(itemId: string) {
     return { error: "Item not found" }
   }
 
-  if (item.user_id !== user.id) {
+  if (item.user_id !== user.sub) {
     return { error: "You can only resolve your own items" }
   }
 
@@ -46,7 +48,7 @@ export async function resolveItem(itemId: string) {
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('karma_points')
-      .eq('id', user.id)
+      .eq('id', user.sub)
       .single()
     
     if (!userError && userData) {
@@ -55,8 +57,42 @@ export async function resolveItem(itemId: string) {
       await supabase
         .from('users')
         .update({ karma_points: newKarma })
-        .eq('id', user.id)
+        .eq('id', user.sub)
     }
+  }
+
+  revalidatePath('/feed')
+  return { success: true }
+}
+
+export async function createItem(data: {
+  type: 'LOST' | 'FOUND',
+  title: string,
+  category: string,
+  location_zone: string,
+  bounty_text?: string
+}) {
+  const supabase = await createClient()
+  const session = await auth0.getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return { error: "Unauthorized" }
+  }
+
+  const { error } = await supabase.from("items").insert({
+    type: data.type,
+    title: data.title,
+    category: data.category,
+    location_zone: data.location_zone,
+    bounty_text: data.bounty_text,
+    user_id: user.sub,
+    status: "OPEN"
+  })
+
+  if (error) {
+    console.error(error)
+    return { error: "Failed to submit report" }
   }
 
   revalidatePath('/feed')

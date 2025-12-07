@@ -3,12 +3,14 @@ import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { formatDistanceToNow } from "date-fns"
+import { auth0 } from "@/lib/auth0";
 
 export const dynamic = 'force-dynamic'
 
 export default async function ChatListPage() {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (!user) {
     return <div className="p-8 text-center">Please login to view your chats.</div>
@@ -35,7 +37,7 @@ export default async function ChatListPage() {
         avatar_url
       )
     `)
-    .or(`user_a.eq.${user.id},user_b.eq.${user.id}`)
+    .or(`user_a.eq.${user.sub},user_b.eq.${user.sub}`)
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -49,7 +51,7 @@ export default async function ChatListPage() {
       <div className="space-y-4">
         {chats?.map((chat: any) => {
           // Determine the "other" user
-          const otherUser = chat.user_a_data.id === user.id ? chat.user_b_data : chat.user_a_data
+          const otherUser = chat.user_a_data.id === user.sub ? chat.user_b_data : chat.user_a_data
           
           return (
             <Link href={`/chat/${chat.id}`} key={chat.id}>

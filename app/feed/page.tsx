@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase-server"
 import { ItemCard } from "@/components/item-card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { auth0 } from "@/lib/auth0";
 
 export const dynamic = 'force-dynamic'
 
@@ -14,7 +15,8 @@ export default async function FeedPage() {
     .order('created_at', { ascending: false })
 
   // Get current user for "Manage" vs "Contact" logic
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (error) {
     return <div>Error loading feed</div>
@@ -42,7 +44,7 @@ export default async function FeedPage() {
         <TabsContent value="all" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {items?.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.id} />
+              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
             ))}
             {items?.length === 0 && (
               <div className="col-span-full text-center py-12 text-muted-foreground">
@@ -55,7 +57,7 @@ export default async function FeedPage() {
         <TabsContent value="lost" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {lostItems.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.id} />
+              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
             ))}
             {lostItems.length === 0 && (
               <div className="col-span-full text-center py-12 text-muted-foreground">
@@ -68,7 +70,7 @@ export default async function FeedPage() {
         <TabsContent value="found" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {foundItems.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.id} />
+              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
             ))}
             {foundItems.length === 0 && (
               <div className="col-span-full text-center py-12 text-muted-foreground">

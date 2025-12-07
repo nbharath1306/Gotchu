@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase-server"
 import ChatInterface from "@/components/chat-interface"
 import { redirect } from "next/navigation"
+import { auth0 } from "@/lib/auth0";
 
 interface ChatPageProps {
   params: {
@@ -10,10 +11,11 @@ interface ChatPageProps {
 
 export default async function ChatPage({ params }: ChatPageProps) {
   const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (!user) {
-    redirect("/")
+    redirect("/auth/login")
   }
 
   // Fetch chat details to verify access and get other user info
@@ -45,11 +47,11 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   // Verify user is part of this chat
-  if (chat.user_a !== user.id && chat.user_b !== user.id) {
+  if (chat.user_a !== user.sub && chat.user_b !== user.sub) {
     return <div>Access denied.</div>
   }
 
-  const otherUser = chat.user_a === user.id ? chat.user_b_data : chat.user_a_data
+  const otherUser = chat.user_a === user.sub ? chat.user_b_data : chat.user_a_data
   
   // Handle potential array return from Supabase join and type mismatch
   const otherUserFixed = Array.isArray(otherUser) ? otherUser[0] : otherUser
@@ -58,7 +60,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   return (
     <ChatInterface 
       chatId={chat.id} 
-      currentUserId={user.id} 
+      currentUserId={user.sub} 
       otherUser={otherUserFixed as any}
       itemTitle={(itemData as any).title}
     />
