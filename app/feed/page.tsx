@@ -3,67 +3,76 @@ import { FeedClient } from "@/components/feed-client"
 import { auth0 } from "@/lib/auth0"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { PlusCircle } from "lucide-react"
+import { PlusCircle, AlertCircle, CheckCircle2 } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
   const supabase = await createClient()
   
-  // Fetch items
   const { data: items, error } = await supabase
     .from('items')
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Get current user
   const session = await auth0.getSession()
   const user = session?.user
 
   if (error) {
     return (
-      <div className="container mx-auto py-8 px-4 max-w-5xl">
-        <div className="text-center py-12">
-          <p className="text-red-500">Error loading feed. Please try again.</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-16 w-16 rounded-2xl bg-red-500/20 flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-8 w-8 text-red-400" />
+          </div>
+          <h2 className="text-xl font-bold mb-2">Error Loading Feed</h2>
+          <p className="text-muted-foreground">Please try again later.</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-5xl relative">
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
+    <div className="min-h-screen relative">
+      {/* Background */}
+      <div className="fixed inset-0 -z-10 pointer-events-none">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-violet-500/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-pink-500/10 rounded-full blur-[120px]" />
       </div>
 
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Campus Feed</h1>
-          <p className="text-muted-foreground">
-            See what's been lost and found around DSU Harohalli.
-          </p>
+      <div className="container mx-auto py-8 px-4 max-w-6xl">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-black mb-3">
+              <span className="bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
+                Campus Feed
+              </span>
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-lg">
+              Discover lost and found items around DSU Harohalli campus
+            </p>
+          </div>
+          
+          <div className="flex gap-3">
+            <Link href="/report/lost">
+              <Button className="h-12 px-6 rounded-2xl bg-gradient-to-r from-red-500 to-orange-500 hover:from-red-400 hover:to-orange-400 text-white shadow-xl shadow-red-500/20 transition-all duration-300 hover:scale-105">
+                <AlertCircle className="mr-2 h-5 w-5" />
+                Report Lost
+              </Button>
+            </Link>
+            <Link href="/report/found">
+              <Button className="h-12 px-6 rounded-2xl bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-400 hover:to-emerald-400 text-white shadow-xl shadow-green-500/20 transition-all duration-300 hover:scale-105">
+                <CheckCircle2 className="mr-2 h-5 w-5" />
+                Report Found
+              </Button>
+            </Link>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <Link href="/report/lost">
-            <Button className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Report Lost
-            </Button>
-          </Link>
-          <Link href="/report/found">
-            <Button className="bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20">
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Report Found
-            </Button>
-          </Link>
-        </div>
-      </div>
 
-      {/* Feed Content */}
-      <FeedClient items={items || []} currentUserId={user?.sub} />
+        {/* Feed Content */}
+        <FeedClient items={items || []} currentUserId={user?.sub} />
+      </div>
     </div>
   )
 }
