@@ -9,11 +9,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { MapPin, Calendar } from "lucide-react"
+import { MapPin, Calendar, CheckCircle } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
+import { resolveItem } from "@/app/actions"
+import { useState } from "react"
 
 interface Item {
   id: string
@@ -36,6 +38,7 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
   const isLost = item.type === 'LOST'
   const router = useRouter()
   const supabase = createClient()
+  const [isResolving, setIsResolving] = useState(false)
 
   const handleContact = async () => {
     if (!currentUserId) {
@@ -79,6 +82,23 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
       toast.error("Failed to start chat. Please try again.")
     }
   }
+
+  const handleResolve = async () => {
+    setIsResolving(true)
+    try {
+      const result = await resolveItem(item.id)
+      if (result.error) {
+        toast.error(result.error)
+      } else {
+        toast.success(item.type === 'FOUND' ? "Item resolved! +50 Karma Points earned." : "Item resolved!")
+        router.refresh()
+      }
+    } catch (error) {
+      toast.error("Something went wrong.")
+    } finally {
+      setIsResolving(false)
+    }
+  }
   
   return (
     <Card className="w-full hover:shadow-md transition-shadow">
@@ -112,16 +132,32 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
           </div>
         )}
       </CardContent>
-      <CardFooter className="flex justify-between">
+      <CardFooter className="flex justify-between gap-2">
         {currentUserId === item.user_id ? (
-           <Button variant="outline" className="w-full">Manage</Button>
+           item.status === 'OPEN' ? (
+             <Button 
+               variant="outline" 
+               className="w-full border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+               onClick={handleResolve}
+               disabled={isResolving}
+             >
+               <CheckCircle className="mr-2 h-4 w-4" />
+               Mark as Resolved
+             </Button>
+           ) : (
+             <Button variant="secondary" className="w-full" disabled>Resolved</Button>
+           )
         ) : (
-          <Button 
-            onClick={handleContact}
-            className={`w-full ${isLost ? 'bg-violet-600 hover:bg-violet-700' : 'bg-green-600 hover:bg-green-700'}`}
-          >
-            {isLost ? "I Found This!" : "This is Mine!"}
-          </Button>
+          item.status === 'OPEN' ? (
+            <Button 
+              onClick={handleContact}
+              className={`w-full ${isLost ? 'bg-violet-600 hover:bg-violet-700' : 'bg-green-600 hover:bg-green-700'}`}
+            >
+              {isLost ? "I Found This!" : "This is Mine!"}
+            </Button>
+          ) : (
+            <Button variant="secondary" className="w-full" disabled>Item Resolved</Button>
+          )
         )}
       </CardFooter>
     </Card>
