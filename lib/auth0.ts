@@ -11,6 +11,7 @@ export const auth0 = new Auth0Client({
   // Explicitly pass other vars to ensure they are picked up if available
   clientId: process.env.AUTH0_CLIENT_ID,
   clientSecret: process.env.AUTH0_CLIENT_SECRET,
-  secret: process.env.AUTH0_SECRET,
+  // Try standard var, then custom var, then hard fail
+  secret: process.env.AUTH0_SECRET || process.env.GOTCHU_SECRET,
   appBaseUrl: process.env.APP_BASE_URL || process.env.AUTH0_BASE_URL
 });

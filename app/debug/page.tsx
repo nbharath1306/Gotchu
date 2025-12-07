@@ -16,11 +16,12 @@ export default async function DebugPage() {
           <p><strong>AUTH0_ISSUER_BASE_URL:</strong> {process.env.AUTH0_ISSUER_BASE_URL || 'MISSING'}</p>
           <p><strong>AUTH0_CLIENT_ID:</strong> {process.env.AUTH0_CLIENT_ID ? 'Present' : 'MISSING'}</p>
           <p><strong>AUTH0_CLIENT_SECRET:</strong> {process.env.AUTH0_CLIENT_SECRET ? 'Present' : 'MISSING'}</p>
-          <p><strong>AUTH0_SECRET:</strong> {secret ? `Present (Length: ${secret.length})` : 'MISSING (CRITICAL ERROR)'}</p>
+          <p><strong>AUTH0_SECRET:</strong> {process.env.AUTH0_SECRET ? 'Present' : 'MISSING'}</p>
+          <p><strong>GOTCHU_SECRET:</strong> {process.env.GOTCHU_SECRET ? 'Present' : 'MISSING'}</p>
           <p><strong>AUTH0_DOMAIN:</strong> {process.env.AUTH0_DOMAIN || 'MISSING'}</p>
         </div>
         <p className="text-red-500 font-bold mt-4">
-          If AUTH0_SECRET is MISSING, you MUST add it to Vercel Environment Variables and REDEPLOY.
+          If AUTH0_SECRET is MISSING, try adding GOTCHU_SECRET with the same value.
         </p>
       </div>
     </div>
