@@ -11,6 +11,7 @@ export const auth0 = new Auth0Client({
     scope: 'openid profile email',
   },
   signInReturnToPath: '/',
+  noContentProfileResponseWhenUnauthenticated: true,
   routes: {
     callback: '/auth/callback',
     login: '/auth/login',
