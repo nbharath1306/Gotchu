@@ -1,5 +1,6 @@
 import Link from "next/link";
 import AuthButton from "@/components/auth-button";
+import { Button } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -15,6 +16,14 @@ export default function Home() {
 
       <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-to-br before:from-violet-600 before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-to-t after:from-violet-900 after:to-transparent after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-violet-700 before:dark:opacity-10 after:dark:from-violet-900 after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
         <h1 className="text-6xl font-bold text-center">Gotchu</h1>
+      </div>
+
+      <div className="mt-8">
+        <Link href="/feed">
+          <Button variant="outline" className="rounded-full px-8 py-6 text-lg border-violet-500 text-violet-400 hover:bg-violet-950 hover:text-violet-300">
+            Browse Campus Feed
+          </Button>
+        </Link>
       </div>
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-2 lg:text-left mt-20 gap-8">
