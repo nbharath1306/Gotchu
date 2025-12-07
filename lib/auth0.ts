@@ -6,4 +6,18 @@ if (!process.env.AUTH0_SECRET) {
   console.log("AUTH0_SECRET is present (length: " + process.env.AUTH0_SECRET.length + ")");
 }
 
-export const auth0 = new Auth0Client();
+export const auth0 = new Auth0Client({
+  authorizationParameters: {
+    scope: 'openid profile email',
+  },
+  routes: {
+    callback: '/auth/callback',
+    login: '/auth/login',
+    logout: '/auth/logout'
+  },
+  session: {
+    cookie: {
+      transient: false
+    }
+  }
+});
