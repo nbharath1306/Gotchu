@@ -17,7 +17,7 @@ const navLinks = [
 export function Navbar() {
   const pathname = usePathname();
   const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
@@ -28,70 +28,61 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-300",
-        isScrolled 
-          ? "bg-white/80 backdrop-blur-xl border-b border-gray-200" 
-          : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
+        isScrolled ? "bg-white/90 backdrop-blur-sm border-b border-neutral-100" : "bg-transparent"
       )}
     >
-      <nav className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="font-bold text-xl text-gray-900">
+      <nav className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
+        <Link href="/" className="font-semibold text-neutral-900">
           Gotchu
         </Link>
 
-        {/* Desktop Nav */}
-        <div className="hidden md:flex items-center gap-8">
+        {/* Desktop */}
+        <div className="hidden md:flex items-center gap-6">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm font-medium transition-colors",
-                pathname === link.href
-                  ? "text-gray-900"
-                  : "text-gray-500 hover:text-gray-900"
+                "text-sm transition-colors",
+                pathname === link.href ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
               )}
             >
               {link.label}
             </Link>
           ))}
-        </div>
-
-        {/* Auth */}
-        <div className="hidden md:block">
           <AuthButton />
         </div>
 
-        {/* Mobile Menu Button */}
+        {/* Mobile toggle */}
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="md:hidden h-8 w-8"
+          onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </Button>
       </nav>
 
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-white border-b border-gray-200 px-6 py-4">
-          <div className="flex flex-col gap-4">
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden bg-white border-b border-neutral-100 px-6 py-4">
+          <div className="flex flex-col gap-3">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
-                onClick={() => setMobileMenuOpen(false)}
+                onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "text-sm font-medium py-2",
-                  pathname === link.href ? "text-gray-900" : "text-gray-500"
+                  "text-sm py-1",
+                  pathname === link.href ? "text-neutral-900" : "text-neutral-500"
                 )}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-4 border-t border-gray-100">
+            <div className="pt-3 border-t border-neutral-100">
               <AuthButton />
             </div>
           </div>

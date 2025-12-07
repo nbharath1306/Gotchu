@@ -17,15 +17,13 @@ export function AuthButton() {
   const { user, isLoading } = useUser();
 
   if (isLoading) {
-    return (
-      <div className="h-9 w-9 rounded-full bg-gray-100 animate-pulse" />
-    );
+    return <div className="h-8 w-8 rounded-full bg-neutral-100 animate-pulse" />;
   }
 
   if (!user) {
     return (
       <Link href="/api/auth/login">
-        <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6">
+        <Button size="sm" className="h-8 px-4 bg-neutral-900 hover:bg-neutral-800 text-white text-sm rounded-md">
           Sign In
         </Button>
       </Link>
@@ -39,30 +37,29 @@ export function AuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
-          <Avatar className="h-9 w-9 border border-gray-200">
+        <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
+          <Avatar className="h-8 w-8">
             <AvatarImage src={user.picture || ""} alt={user.name || "User"} />
-            <AvatarFallback className="bg-gray-100 text-gray-700 text-sm">
+            <AvatarFallback className="bg-neutral-100 text-neutral-600 text-xs">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg rounded-xl p-2">
+      <DropdownMenuContent align="end" className="w-48 bg-white border border-neutral-200 shadow-sm rounded-lg p-1">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium text-gray-900">{user.name}</p>
-          <p className="text-xs text-gray-500 truncate">{user.email}</p>
+          <p className="text-sm font-medium text-neutral-900 truncate">{user.name}</p>
+          <p className="text-xs text-neutral-500 truncate">{user.email}</p>
         </div>
-        <DropdownMenuSeparator className="bg-gray-100" />
+        <DropdownMenuSeparator className="bg-neutral-100" />
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center gap-2 px-3 py-2 cursor-pointer text-gray-700 hover:bg-gray-50 rounded-lg">
+          <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded cursor-pointer">
             <User className="h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-gray-100" />
         <DropdownMenuItem asChild>
-          <a href="/api/auth/logout" className="flex items-center gap-2 px-3 py-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg">
+          <a href="/api/auth/logout" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded cursor-pointer">
             <LogOut className="h-4 w-4" />
             Sign Out
           </a>
