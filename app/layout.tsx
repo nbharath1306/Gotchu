@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { Auth0Provider } from '@auth0/nextjs-auth0/client';
 import { Navbar } from "@/components/navbar";
 import { auth0 } from "@/lib/auth0";
+import { syncUser } from "@/lib/sync-user";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,6 +28,11 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth0.getSession();
+  
+  // Sync user to Supabase if logged in
+  if (session?.user) {
+    await syncUser();
+  }
   
   return (
     <html lang="en">
