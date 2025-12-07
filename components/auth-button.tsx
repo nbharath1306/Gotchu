@@ -2,6 +2,7 @@
 
 import { useUser } from '@auth0/nextjs-auth0/client';
 import { Button } from "@/components/ui/button"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
 export default function AuthButton() {
   const { user, error, isLoading } = useUser();
@@ -11,10 +12,18 @@ export default function AuthButton() {
 
   if (user) {
     return (
-      <div className="flex items-center gap-4">
-        <span className="text-sm text-muted-foreground">Hi, {user.name?.split(' ')[0] || 'User'}</span>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <Avatar className="h-8 w-8 border border-white/10">
+            <AvatarImage src={user.picture || ''} alt={user.name || 'User'} />
+            <AvatarFallback>{user.name?.[0] || 'U'}</AvatarFallback>
+          </Avatar>
+          <span className="text-sm text-muted-foreground hidden sm:inline-block">
+            {user.name?.split(' ')[0] || 'User'}
+          </span>
+        </div>
         <a href="/auth/logout">
-          <Button variant="outline" size="sm" className="glass border-white/10 hover:bg-white/10">
+          <Button variant="outline" size="sm" className="glass border-white/10 hover:bg-white/10 h-8">
             Logout
           </Button>
         </a>
