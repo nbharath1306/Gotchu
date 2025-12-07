@@ -24,25 +24,25 @@ export default function Home() {
 
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-2 lg:text-left mt-20 gap-8">
         <Link href="/report/lost" className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900/30">
-          <h2 className=`mb-3 text-2xl font-semibold`>
+          <h2 className="mb-3 text-2xl font-semibold">
             Lost Something?{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
           </h2>
-          <p className=`m-0 max-w-[30ch] text-sm opacity-50`>
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Report a lost item and let the community help you find it.
           </p>
         </Link>
 
         <Link href="/report/found" className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-zinc-700 hover:bg-zinc-900/30">
-          <h2 className=`mb-3 text-2xl font-semibold`>
+          <h2 className="mb-3 text-2xl font-semibold">
             Found Something?{" "}
             <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
               -&gt;
             </span>
           </h2>
-          <p className=`m-0 max-w-[30ch] text-sm opacity-50`>
+          <p className="m-0 max-w-[30ch] text-sm opacity-50">
             Report a found item and earn Karma points.
           </p>
         </Link>

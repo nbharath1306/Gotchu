@@ -7,7 +7,7 @@ import { formatDistanceToNow } from "date-fns"
 export const dynamic = 'force-dynamic'
 
 export default async function ChatListPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {

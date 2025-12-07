@@ -9,7 +9,7 @@ interface ChatPageProps {
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
-  const supabase = createClient()
+  const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
@@ -50,13 +50,17 @@ export default async function ChatPage({ params }: ChatPageProps) {
   }
 
   const otherUser = chat.user_a === user.id ? chat.user_b_data : chat.user_a_data
+  
+  // Handle potential array return from Supabase join and type mismatch
+  const otherUserFixed = Array.isArray(otherUser) ? otherUser[0] : otherUser
+  const itemData = Array.isArray(chat.item) ? chat.item[0] : chat.item
 
   return (
     <ChatInterface 
       chatId={chat.id} 
       currentUserId={user.id} 
-      otherUser={otherUser}
-      itemTitle={chat.item.title}
+      otherUser={otherUserFixed as any}
+      itemTitle={(itemData as any).title}
     />
   )
 }

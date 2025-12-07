@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 export const dynamic = 'force-dynamic'
 
 export default async function FeedPage() {
-  const supabase = createClient()
+  const supabase = await createClient()
   
   // Fetch items
   const { data: items, error } = await supabase
