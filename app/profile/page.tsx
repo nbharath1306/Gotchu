@@ -30,12 +30,11 @@ export default async function ProfilePage() {
   return (
     <ProfileClient 
       user={{
-        id: user.sub,
         name: user.name,
         email: user.email,
         picture: user.picture,
       }}
-      userData={userData}
+      profile={userData ? { karma: userData.karma_points } : null}
       items={userItems || []}
     />
   )

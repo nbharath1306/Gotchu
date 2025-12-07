@@ -1,77 +1,102 @@
-"use client"
+"use client";
 
-import { useUser } from '@auth0/nextjs-auth0/client';
-import { Button } from "@/components/ui/button"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { LogOut, Loader2, Sparkles } from "lucide-react"
-import { motion } from "framer-motion"
-import Link from "next/link"
+import { useUser } from "@auth0/nextjs-auth0";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { User, LogOut, Settings } from "lucide-react";
 
-export default function AuthButton() {
-  const { user, error, isLoading } = useUser();
+export function AuthButton() {
+  const { user, isLoading } = useUser();
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Loader2 className="h-4 w-4 animate-spin" />
-        <span className="text-sm">Loading...</span>
-      </div>
-    )
-  }
-  
-  if (error) {
-    return <div className="text-sm text-red-400">{error.message}</div>;
+      <div className="h-9 w-20 bg-zinc-800 rounded-lg animate-pulse" />
+    );
   }
 
-  if (user) {
+  if (!user) {
     return (
-      <div className="flex items-center gap-3">
-        <Link href="/profile">
-          <motion.div 
-            whileHover={{ scale: 1.05 }}
-            className="flex items-center gap-3 px-3 py-2 rounded-xl bg-white/5 border border-white/10 hover:border-violet-500/30 transition-all cursor-pointer"
-          >
-            <div className="relative">
-              <Avatar className="h-8 w-8 border-2 border-violet-500/50">
-                <AvatarImage src={user.picture || ''} alt={user.name || 'User'} />
-                <AvatarFallback className="bg-gradient-to-br from-violet-500 to-pink-500 text-white text-sm">
-                  {user.name?.[0] || 'U'}
-                </AvatarFallback>
-              </Avatar>
-              <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-green-500 border-2 border-zinc-900" />
-            </div>
-            <span className="text-sm font-medium hidden sm:inline-block">
-              {user.name?.split(' ')[0] || 'User'}
-            </span>
-          </motion.div>
-        </Link>
-        <a href="/auth/logout">
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-            <Button 
-              variant="outline" 
-              size="sm" 
-              className="h-10 px-4 rounded-xl border-white/10 bg-white/5 hover:bg-red-500/10 hover:border-red-500/30 hover:text-red-400 transition-all"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
-              Logout
-            </Button>
-          </motion.div>
-        </a>
-      </div>
-    )
-  }
-
-  return (
-    <a href="/auth/login">
-      <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+      <Link href="/api/auth/login">
         <Button 
           size="sm" 
-          className="h-10 px-6 rounded-xl bg-gradient-to-r from-violet-500 to-pink-500 hover:from-violet-400 hover:to-pink-400 text-white shadow-lg shadow-violet-500/25 transition-all"
+          className="bg-white text-black hover:bg-zinc-200 font-medium"
         >
-          <Sparkles className="h-4 w-4 mr-2" />
-          Login
+          Sign In
         </Button>
-      </motion.div>
-    </a>
-  )
+      </Link>
+    );
+  }
+
+  const initials = user.name
+    ? user.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "U";
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button 
+          variant="ghost" 
+          className="h-9 w-9 rounded-full p-0 hover:bg-zinc-800"
+        >
+          <Avatar className="h-8 w-8">
+            <AvatarImage src={user.picture || ""} alt={user.name || "User"} />
+            <AvatarFallback className="bg-zinc-700 text-white text-xs">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent 
+        align="end" 
+        className="w-56 bg-zinc-900 border-zinc-800"
+      >
+        <div className="px-3 py-2">
+          <p className="text-sm font-medium text-white">{user.name}</p>
+          <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+        </div>
+        <DropdownMenuSeparator className="bg-zinc-800" />
+        <DropdownMenuItem asChild>
+          <Link 
+            href="/profile" 
+            className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer"
+          >
+            <User className="h-4 w-4" />
+            Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link 
+            href="/profile" 
+            className="flex items-center gap-2 text-zinc-300 hover:text-white cursor-pointer"
+          >
+            <Settings className="h-4 w-4" />
+            Settings
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator className="bg-zinc-800" />
+        <DropdownMenuItem asChild>
+          <a 
+            href="/api/auth/logout" 
+            className="flex items-center gap-2 text-red-400 hover:text-red-300 cursor-pointer"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </a>
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }

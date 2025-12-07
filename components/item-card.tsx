@@ -1,303 +1,110 @@
-"use client"
+"use client";
 
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { MapPin, Calendar, CheckCircle, Package, Smartphone, Key, CreditCard, MessageCircle, Sparkles } from "lucide-react"
-import { formatDistanceToNow } from "date-fns"
-import { createClient } from "@/lib/supabase"
-import { useRouter } from "next/navigation"
-import { toast } from "sonner"
-import { resolveItem } from "@/app/actions"
-import { useState } from "react"
-import { motion } from "framer-motion"
-
-interface Item {
-  id: string
-  type: 'LOST' | 'FOUND'
-  title: string
-  description?: string | null
-  category: string
-  location_zone: string
-  status: 'OPEN' | 'RESOLVED'
-  bounty_text?: string | null
-  image_url?: string | null
-  created_at: string
-  user_id: string
-}
+import { Item } from "@/types";
+import { formatDistanceToNow } from "date-fns";
+import { MapPin, Clock, MessageCircle, CheckCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface ItemCardProps {
-  item: Item
-  currentUserId?: string
+  item: Item;
+  onResolve?: (id: string) => void;
+  showActions?: boolean;
 }
 
-const categoryIcons: Record<string, React.ReactNode> = {
-  Electronics: <Smartphone className="h-8 w-8" />,
-  ID: <CreditCard className="h-8 w-8" />,
-  Keys: <Key className="h-8 w-8" />,
-  Other: <Package className="h-8 w-8" />,
-}
-
-const categoryEmojis: Record<string, string> = {
-  Electronics: "📱",
-  ID: "🪪",
-  Keys: "🔑",
-  Other: "📦",
-}
-
-export function ItemCard({ item, currentUserId }: ItemCardProps) {
-  const isLost = item.type === 'LOST'
-  const router = useRouter()
-  const supabase = createClient()
-  const [isResolving, setIsResolving] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
-
-  const handleContact = async () => {
-    if (!currentUserId) {
-      toast.error("Please login to contact the owner.")
-      return
-    }
-
-    try {
-      const { data: existingChats, error: fetchError } = await supabase
-        .from('chats')
-        .select('id')
-        .eq('item_id', item.id)
-        .or(`user_a.eq.${currentUserId},user_b.eq.${currentUserId}`)
-      
-      if (fetchError) throw fetchError
-
-      if (existingChats && existingChats.length > 0) {
-        router.push(`/chat/${existingChats[0].id}`)
-        return
-      }
-
-      const { data: newChat, error: createError } = await supabase
-        .from('chats')
-        .insert({
-          item_id: item.id,
-          user_a: item.user_id,
-          user_b: currentUserId
-        })
-        .select()
-        .single()
-
-      if (createError) throw createError
-      router.push(`/chat/${newChat.id}`)
-
-    } catch (error) {
-      console.error("Error creating chat:", error)
-      toast.error("Failed to start chat. Please try again.")
-    }
-  }
-
-  const handleResolve = async () => {
-    setIsResolving(true)
-    try {
-      const result = await resolveItem(item.id)
-      if (result.error) {
-        toast.error(result.error)
-      } else {
-        toast.success(item.type === 'FOUND' ? "Item resolved! +50 Karma Points earned. ⭐" : "Item resolved!")
-        router.refresh()
-      }
-    } catch (error) {
-      toast.error("Something went wrong.")
-    } finally {
-      setIsResolving(false)
-    }
-  }
+export function ItemCard({ item, onResolve, showActions = true }: ItemCardProps) {
+  const isResolved = item.status === "resolved";
   
+  const statusStyles: Record<string, string> = {
+    open: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+    lost: "bg-red-500/10 text-red-400 border-red-500/20",
+    found: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    resolved: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  };
+
+  // Determine badge style: use item.type for open items, otherwise use status
+  const badgeStyle = item.status === "open" 
+    ? statusStyles[item.type] || statusStyles.open
+    : statusStyles[item.status] || statusStyles.open;
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ y: -5 }}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
-      className={`group relative rounded-3xl overflow-hidden transition-all duration-500 ${
-        item.status === 'RESOLVED' ? 'opacity-60' : ''
-      }`}
+    <div 
+      className={cn(
+        "group relative rounded-xl border bg-zinc-900/50 p-5 transition-all duration-200",
+        isResolved 
+          ? "border-zinc-800/50 opacity-60" 
+          : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900"
+      )}
     >
-      {/* Glow Effect */}
-      <div className={`absolute -inset-0.5 bg-gradient-to-r ${
-        isLost 
-          ? 'from-red-500 via-orange-500 to-red-500' 
-          : 'from-green-500 via-emerald-500 to-green-500'
-      } rounded-3xl blur opacity-0 group-hover:opacity-30 transition-opacity duration-500`} />
-      
-      {/* Card Content */}
-      <div className="relative bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden">
-        {/* Header with Gradient */}
-        <div className={`relative h-32 ${
-          isLost 
-            ? 'bg-gradient-to-br from-red-500/20 via-orange-500/10 to-transparent' 
-            : 'bg-gradient-to-br from-green-500/20 via-emerald-500/10 to-transparent'
-        }`}>
-          {/* Category Icon */}
-          <div className="absolute inset-0 flex items-center justify-center">
-            <motion.div
-              animate={{ 
-                scale: isHovered ? 1.1 : 1,
-                rotate: isHovered ? 5 : 0 
-              }}
-              className={`h-20 w-20 rounded-2xl ${
-                isLost 
-                  ? 'bg-gradient-to-br from-red-500/30 to-orange-500/30 text-red-400' 
-                  : 'bg-gradient-to-br from-green-500/30 to-emerald-500/30 text-green-400'
-              } flex items-center justify-center backdrop-blur-sm border border-white/10`}
-            >
-              <span className="text-4xl">{categoryEmojis[item.category]}</span>
-            </motion.div>
-          </div>
-
-          {/* Badges */}
-          <div className="absolute top-4 left-4 flex gap-2">
-            <Badge className={`${
-              isLost 
-                ? 'bg-red-500/90 hover:bg-red-500 shadow-lg shadow-red-500/25' 
-                : 'bg-green-500/90 hover:bg-green-500 shadow-lg shadow-green-500/25'
-            } text-white font-bold px-3 py-1`}>
-              {item.type}
-            </Badge>
-          </div>
-
-          {item.status === 'RESOLVED' && (
-            <div className="absolute top-4 right-4">
-              <Badge className="bg-zinc-800/90 text-zinc-300 border border-zinc-700">
-                <CheckCircle className="h-3 w-3 mr-1" />
-                Resolved
-              </Badge>
-            </div>
-          )}
-
-          {/* Floating Particles on Hover */}
-          {isHovered && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="absolute inset-0 pointer-events-none"
-            >
-              {[...Array(5)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ y: 100, opacity: 0 }}
-                  animate={{ 
-                    y: -20, 
-                    opacity: [0, 1, 0],
-                    x: Math.random() * 40 - 20 
-                  }}
-                  transition={{ 
-                    duration: 1.5, 
-                    delay: i * 0.1,
-                    repeat: Infinity 
-                  }}
-                  className={`absolute bottom-0 left-1/2 h-2 w-2 rounded-full ${
-                    isLost ? 'bg-red-400' : 'bg-green-400'
-                  }`}
-                  style={{ left: `${20 + i * 15}%` }}
-                />
-              ))}
-            </motion.div>
-          )}
+      {/* Header */}
+      <div className="flex items-start justify-between gap-4 mb-3">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-white truncate">{item.title}</h3>
+          <p className="text-sm text-zinc-500 mt-1">{item.category}</p>
         </div>
+        <Badge 
+          variant="outline" 
+          className={cn("text-xs font-medium capitalize shrink-0", badgeStyle)}
+        >
+          {item.status === "open" ? item.type : item.status}
+        </Badge>
+      </div>
 
-        {/* Content */}
-        <div className="p-6 space-y-4">
-          <div>
-            <h3 className="text-xl font-bold mb-2 group-hover:text-violet-400 transition-colors line-clamp-1">
-              {item.title}
-            </h3>
-            <div className="flex flex-wrap gap-2">
-              <Badge variant="outline" className="border-white/10 bg-white/5 text-xs">
-                {item.category}
-              </Badge>
-            </div>
-          </div>
+      {/* Description */}
+      {item.description && (
+        <p className="text-sm text-zinc-400 line-clamp-2 mb-4">
+          {item.description}
+        </p>
+      )}
 
-          <div className="space-y-2">
-            <div className="flex items-center text-sm text-muted-foreground">
-              <div className="h-8 w-8 rounded-lg bg-violet-500/10 flex items-center justify-center mr-3">
-                <MapPin className="h-4 w-4 text-violet-400" />
-              </div>
-              <span>{item.location_zone.replace(/_/g, ' ')}</span>
-            </div>
-            <div className="flex items-center text-sm text-muted-foreground">
-              <div className="h-8 w-8 rounded-lg bg-pink-500/10 flex items-center justify-center mr-3">
-                <Calendar className="h-4 w-4 text-pink-400" />
-              </div>
-              <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
-            </div>
-          </div>
-          
-          {item.bounty_text && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              className={`p-4 rounded-2xl border ${
-                isLost 
-                  ? 'bg-amber-500/10 border-amber-500/20' 
-                  : 'bg-violet-500/10 border-violet-500/20'
-              }`}
-            >
-              <div className="flex items-center gap-2 mb-1">
-                <Sparkles className={`h-4 w-4 ${isLost ? 'text-amber-400' : 'text-violet-400'}`} />
-                <span className={`text-sm font-semibold ${isLost ? 'text-amber-400' : 'text-violet-400'}`}>
-                  {isLost ? "Reward" : "Drop-off"}
-                </span>
-              </div>
-              <p className="text-sm text-muted-foreground">{item.bounty_text}</p>
-            </motion.div>
-          )}
-
-          {/* Action Button */}
-          <div className="pt-2">
-            {currentUserId === item.user_id ? (
-              item.status === 'OPEN' ? (
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 rounded-2xl border-green-500/30 bg-green-500/10 text-green-400 hover:bg-green-500/20 hover:border-green-500/50 transition-all duration-300"
-                  onClick={handleResolve}
-                  disabled={isResolving}
-                >
-                  <CheckCircle className="mr-2 h-5 w-5" />
-                  Mark as Resolved
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 rounded-2xl border-zinc-700 bg-zinc-800/50 text-zinc-500" 
-                  disabled
-                >
-                  <CheckCircle className="mr-2 h-5 w-5" />
-                  Resolved
-                </Button>
-              )
-            ) : (
-              item.status === 'OPEN' ? (
-                <Button 
-                  onClick={handleContact}
-                  className={`w-full h-12 rounded-2xl font-semibold text-white shadow-xl transition-all duration-300 hover:scale-[1.02] ${
-                    isLost 
-                      ? 'bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 shadow-violet-500/25' 
-                      : 'bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-500 hover:to-emerald-500 shadow-green-500/25'
-                  }`}
-                >
-                  <MessageCircle className="mr-2 h-5 w-5" />
-                  {isLost ? "I Found This!" : "This is Mine!"}
-                </Button>
-              ) : (
-                <Button 
-                  variant="outline" 
-                  className="w-full h-12 rounded-2xl border-zinc-700 bg-zinc-800/50 text-zinc-500" 
-                  disabled
-                >
-                  Item Resolved
-                </Button>
-              )
-            )}
-          </div>
+      {/* Meta info */}
+      <div className="flex flex-wrap items-center gap-4 text-xs text-zinc-500 mb-4">
+        <div className="flex items-center gap-1.5">
+          <MapPin className="h-3.5 w-3.5" />
+          <span className="truncate max-w-[150px]">{item.location}</span>
+        </div>
+        <div className="flex items-center gap-1.5">
+          <Clock className="h-3.5 w-3.5" />
+          <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
         </div>
       </div>
-    </motion.div>
-  )
+
+      {/* Actions */}
+      {showActions && !isResolved && (
+        <div className="flex items-center gap-2 pt-3 border-t border-zinc-800">
+          <Link href={`/chat/${item.id}`} className="flex-1">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="w-full text-zinc-400 hover:text-white hover:bg-zinc-800"
+            >
+              <MessageCircle className="h-4 w-4 mr-2" />
+              Contact
+            </Button>
+          </Link>
+          {onResolve && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onResolve(item.id)}
+              className="flex-1 text-zinc-400 hover:text-emerald-400 hover:bg-emerald-500/10"
+            >
+              <CheckCircle className="h-4 w-4 mr-2" />
+              Resolve
+            </Button>
+          )}
+        </div>
+      )}
+
+      {/* Resolved indicator */}
+      {isResolved && (
+        <div className="flex items-center gap-2 pt-3 border-t border-zinc-800 text-zinc-500">
+          <CheckCircle className="h-4 w-4 text-blue-400" />
+          <span className="text-sm">Item has been resolved</span>
+        </div>
+      )}
+    </div>
+  );
 }
