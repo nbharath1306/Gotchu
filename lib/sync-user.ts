@@ -17,7 +17,6 @@ export async function syncUser() {
     email: user.email,
     full_name: user.name || user.nickname || user.email,
     avatar_url: user.picture,
-    updated_at: new Date().toISOString(),
   };
 
   // Upsert user into Supabase
@@ -26,8 +25,10 @@ export async function syncUser() {
     .upsert(userData, { onConflict: 'id' });
 
   if (error) {
-    console.error("Error syncing user to Supabase:", error);
+    console.error("Error syncing user to Supabase:", error.message);
+    return null;
   }
 
+  console.log("User synced successfully:", user.sub);
   return user;
 }
