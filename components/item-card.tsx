@@ -101,34 +101,34 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
   }
   
   return (
-    <Card className="w-full hover:shadow-md transition-shadow">
+    <Card className="w-full glass border-white/10 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 group">
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <div className="space-y-1">
-            <CardTitle className="text-xl font-bold">{item.title}</CardTitle>
+            <CardTitle className="text-xl font-bold group-hover:text-violet-500 transition-colors">{item.title}</CardTitle>
             <div className="flex gap-2">
-              <Badge variant={isLost ? "destructive" : "default"} className={isLost ? "bg-red-500" : "bg-green-500"}>
+              <Badge variant={isLost ? "destructive" : "default"} className={isLost ? "bg-red-500/80 hover:bg-red-500" : "bg-green-500/80 hover:bg-green-500"}>
                 {item.type}
               </Badge>
-              <Badge variant="outline">{item.category}</Badge>
-              {item.status === 'RESOLVED' && <Badge variant="secondary">RESOLVED</Badge>}
+              <Badge variant="outline" className="border-white/10 bg-white/5">{item.category}</Badge>
+              {item.status === 'RESOLVED' && <Badge variant="secondary" className="bg-zinc-800 text-zinc-400">RESOLVED</Badge>}
             </div>
           </div>
         </div>
       </CardHeader>
       <CardContent className="space-y-3">
         <div className="flex items-center text-sm text-muted-foreground">
-          <MapPin className="mr-2 h-4 w-4" />
+          <MapPin className="mr-2 h-4 w-4 text-violet-500" />
           {item.location_zone.replace('_', ' ')}
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
-          <Calendar className="mr-2 h-4 w-4" />
+          <Calendar className="mr-2 h-4 w-4 text-violet-500" />
           {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
         </div>
         
         {item.bounty_text && (
-          <div className="mt-2 p-2 bg-zinc-100 dark:bg-zinc-900 rounded-md text-sm">
-            <span className="font-semibold">{isLost ? "Bounty:" : "Drop-off:"}</span> {item.bounty_text}
+          <div className="mt-2 p-3 bg-white/5 rounded-lg text-sm border border-white/5">
+            <span className="font-semibold text-violet-400">{isLost ? "Bounty:" : "Drop-off:"}</span> {item.bounty_text}
           </div>
         )}
       </CardContent>
@@ -137,7 +137,7 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
            item.status === 'OPEN' ? (
              <Button 
                variant="outline" 
-               className="w-full border-green-600 text-green-600 hover:bg-green-50 dark:hover:bg-green-950"
+               className="w-full border-green-600/50 text-green-600 hover:bg-green-500/10 hover:border-green-600"
                onClick={handleResolve}
                disabled={isResolving}
              >
@@ -145,18 +145,18 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
                Mark as Resolved
              </Button>
            ) : (
-             <Button variant="secondary" className="w-full" disabled>Resolved</Button>
+             <Button variant="secondary" className="w-full bg-white/5 text-muted-foreground" disabled>Resolved</Button>
            )
         ) : (
           item.status === 'OPEN' ? (
             <Button 
               onClick={handleContact}
-              className={`w-full ${isLost ? 'bg-violet-600 hover:bg-violet-700' : 'bg-green-600 hover:bg-green-700'}`}
+              className={`w-full shadow-lg ${isLost ? 'bg-violet-600 hover:bg-violet-700 shadow-violet-500/20' : 'bg-green-600 hover:bg-green-700 shadow-green-500/20'}`}
             >
               {isLost ? "I Found This!" : "This is Mine!"}
             </Button>
           ) : (
-            <Button variant="secondary" className="w-full" disabled>Item Resolved</Button>
+            <Button variant="secondary" className="w-full bg-white/5 text-muted-foreground" disabled>Item Resolved</Button>
           )
         )}
       </CardFooter>

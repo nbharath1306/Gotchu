@@ -50,11 +50,11 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 glass">
       <div className="container flex h-16 items-center justify-between px-4">
         <div className="flex items-center gap-2 font-bold text-xl">
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-violet-600">Gotchu</span>
+            <span className="text-gradient font-extrabold text-2xl tracking-tight">Gotchu</span>
           </Link>
         </div>
 
@@ -64,8 +64,8 @@ export function Navbar() {
             <Link
               key={route.href}
               href={route.href}
-              className={`transition-colors hover:text-foreground/80 ${
-                route.active ? "text-foreground" : "text-foreground/60"
+              className={`transition-all duration-200 hover:text-violet-500 ${
+                route.active ? "text-violet-600 font-semibold" : "text-muted-foreground"
               }`}
             >
               {route.label}
@@ -86,22 +86,22 @@ export function Navbar() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+            <SheetContent side="right" className="w-[300px] sm:w-[400px] glass border-l border-white/10">
               <nav className="flex flex-col gap-4 mt-8">
                 {routes.map((route) => (
                   <Link
                     key={route.href}
                     href={route.href}
                     onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-2 text-lg font-medium transition-colors hover:text-foreground/80 ${
-                      route.active ? "text-foreground" : "text-foreground/60"
+                    className={`flex items-center gap-3 text-lg font-medium transition-colors p-2 rounded-lg hover:bg-white/5 ${
+                      route.active ? "text-violet-600 bg-violet-500/10" : "text-muted-foreground"
                     }`}
                   >
                     <route.icon className="h-5 w-5" />
                     {route.label}
                   </Link>
                 ))}
-                <div className="mt-4">
+                <div className="mt-4 pt-4 border-t border-white/10">
                   <AuthButton />
                 </div>
               </nav>

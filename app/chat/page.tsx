@@ -44,8 +44,8 @@ export default async function ChatListPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 max-w-2xl">
-      <h1 className="text-2xl font-bold mb-6">Your Messages</h1>
+    <div className="container mx-auto py-8 px-4 max-w-2xl min-h-[calc(100vh-4rem)]">
+      <h1 className="text-3xl font-bold mb-8 text-gradient">Your Messages</h1>
       <div className="space-y-4">
         {chats?.map((chat: any) => {
           // Determine the "other" user
@@ -53,16 +53,19 @@ export default async function ChatListPage() {
           
           return (
             <Link href={`/chat/${chat.id}`} key={chat.id}>
-              <Card className="hover:bg-zinc-50 dark:hover:bg-zinc-900 transition-colors cursor-pointer">
+              <Card className="glass border-white/10 hover:bg-white/10 dark:hover:bg-white/5 transition-all duration-200 cursor-pointer group">
                 <CardHeader className="flex flex-row items-center gap-4 p-4">
-                  <Avatar>
+                  <Avatar className="h-12 w-12 border-2 border-violet-500/20">
                     <AvatarImage src={otherUser.avatar_url} />
-                    <AvatarFallback>{otherUser.full_name?.[0] || 'U'}</AvatarFallback>
+                    <AvatarFallback className="bg-violet-500/10 text-violet-500">{otherUser.full_name?.[0] || 'U'}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1">
-                    <CardTitle className="text-base">{otherUser.full_name || 'Anonymous User'}</CardTitle>
+                    <CardTitle className="text-base group-hover:text-violet-500 transition-colors">{otherUser.full_name || 'Anonymous User'}</CardTitle>
                     <p className="text-sm text-muted-foreground">
-                      Regarding: <span className="font-medium text-foreground">{chat.item.title}</span> ({chat.item.type})
+                      Regarding: <span className="font-medium text-foreground">{chat.item.title}</span> 
+                      <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${chat.item.type === 'LOST' ? 'bg-red-500/10 text-red-500' : 'bg-green-500/10 text-green-500'}`}>
+                        {chat.item.type}
+                      </span>
                     </p>
                   </div>
                   <div className="text-xs text-muted-foreground">
@@ -74,8 +77,8 @@ export default async function ChatListPage() {
           )
         })}
         {chats?.length === 0 && (
-          <div className="text-center text-muted-foreground py-12">
-            No active chats.
+          <div className="text-center text-muted-foreground py-12 glass rounded-xl border-dashed border-2 border-white/10">
+            No active chats. Start a conversation from the feed!
           </div>
         )}
       </div>

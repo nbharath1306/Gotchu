@@ -76,7 +76,7 @@ export default function ReportFoundPage() {
       }
 
       toast.success("Found item reported successfully! You earned +50 Karma.")
-      router.push("/")
+      router.push("/feed")
     } catch (error) {
       console.error(error)
       toast.error("An unexpected error occurred.")
@@ -84,10 +84,16 @@ export default function ReportFoundPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 dark:bg-black">
-      <Card className="w-full max-w-lg">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-600/10 blur-[120px]" />
+      </div>
+
+      <Card className="w-full max-w-lg glass border-white/10 shadow-2xl shadow-green-500/5">
         <CardHeader>
-          <CardTitle>Report a Found Item</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gradient bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400">Report a Found Item</CardTitle>
           <CardDescription>
             Thank you for being a good samaritan!
           </CardDescription>
@@ -100,88 +106,83 @@ export default function ReportFoundPage() {
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>What did you find?</FormLabel>
+                    <FormLabel>Item Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Blue Water Bottle" {...field} />
+                      <Input placeholder="e.g. Black Wallet" {...field} className="bg-white/5 border-white/10 focus:border-green-500/50" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Electronics">Electronics</SelectItem>
+                          <SelectItem value="ID">ID Cards</SelectItem>
+                          <SelectItem value="Keys">Keys</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Electronics">Electronics</SelectItem>
-                        <SelectItem value="ID">ID / Docs</SelectItem>
-                        <SelectItem value="Keys">Keys</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location_zone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Where did you find it?</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
-                        <SelectItem value="Canteen">Canteen</SelectItem>
-                        <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
-                        <SelectItem value="Library">Library</SelectItem>
-                        <SelectItem value="Hostels">Hostels</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="location_zone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Found Location</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
+                          <SelectItem value="Canteen">Canteen</SelectItem>
+                          <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
+                          <SelectItem value="Library">Library</SelectItem>
+                          <SelectItem value="Hostels">Hostels</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
                 name="drop_off_point"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Drop-off Point / Current Location</FormLabel>
+                    <FormLabel>Drop-off Point (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="e.g. Handed over to Security Gate 1, or 'It is with me'"
-                        className="resize-none"
-                        {...field}
-                      />
+                      <Input placeholder="e.g. Security Desk" {...field} className="bg-white/5 border-white/10 focus:border-green-500/50" />
                     </FormControl>
                     <FormDescription>
-                      Let the owner know where they can collect it.
+                      Where can the owner collect this item?
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700">
-                Submit Found Report
-              </Button>
+              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20">Submit Report</Button>
             </form>
           </Form>
         </CardContent>

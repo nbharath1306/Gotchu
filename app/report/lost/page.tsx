@@ -78,7 +78,7 @@ export default function ReportLostPage() {
       }
 
       toast.success("Lost item reported successfully!")
-      router.push("/") // Redirect to home or feed
+      router.push("/feed") // Redirect to feed
     } catch (error) {
       console.error(error)
       toast.error("An unexpected error occurred.")
@@ -86,10 +86,16 @@ export default function ReportLostPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 dark:bg-black">
-      <Card className="w-full max-w-lg">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 relative overflow-hidden">
+       {/* Background Gradients */}
+       <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
+      </div>
+
+      <Card className="w-full max-w-lg glass border-white/10 shadow-2xl shadow-violet-500/5">
         <CardHeader>
-          <CardTitle>Report a Lost Item</CardTitle>
+          <CardTitle className="text-2xl font-bold text-gradient">Report a Lost Item</CardTitle>
           <CardDescription>
             Help us help you find your item. Fill out the details below.
           </CardDescription>
@@ -104,89 +110,81 @@ export default function ReportLostPage() {
                   <FormItem>
                     <FormLabel>Item Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Black Leather Wallet" {...field} />
+                      <Input placeholder="e.g. Blue Hydro Flask" {...field} className="bg-white/5 border-white/10 focus:border-violet-500/50" />
                     </FormControl>
-                    <FormDescription>
-                      Be specific. Include brand or color if possible.
-                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+              
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="category"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Category</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10">
+                            <SelectValue placeholder="Select category" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Electronics">Electronics</SelectItem>
+                          <SelectItem value="ID">ID Cards</SelectItem>
+                          <SelectItem value="Keys">Keys</SelectItem>
+                          <SelectItem value="Other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Electronics">Electronics</SelectItem>
-                        <SelectItem value="ID">ID / Docs</SelectItem>
-                        <SelectItem value="Keys">Keys</SelectItem>
-                        <SelectItem value="Other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="location_zone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Last Seen Location</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a location" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
-                        <SelectItem value="Canteen">Canteen</SelectItem>
-                        <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
-                        <SelectItem value="Library">Library</SelectItem>
-                        <SelectItem value="Hostels">Hostels</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <FormField
+                  control={form.control}
+                  name="location_zone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Last Seen Location</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger className="bg-white/5 border-white/10">
+                            <SelectValue placeholder="Select location" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
+                          <SelectItem value="Canteen">Canteen</SelectItem>
+                          <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
+                          <SelectItem value="Library">Library</SelectItem>
+                          <SelectItem value="Hostels">Hostels</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
 
               <FormField
                 control={form.control}
                 name="bounty_text"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Bounty (Optional)</FormLabel>
+                    <FormLabel>Bounty / Reward (Optional)</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="e.g. I'll buy you a coffee!"
-                        className="resize-none"
-                        {...field}
-                      />
+                      <Input placeholder="e.g. Coffee on me!" {...field} className="bg-white/5 border-white/10 focus:border-violet-500/50" />
                     </FormControl>
                     <FormDescription>
-                      Offer a small reward to motivate the finder.
+                      Offering a small reward can encourage people to help.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-
-              <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700">
-                Submit Report
-              </Button>
+              <Button type="submit" className="w-full bg-violet-600 hover:bg-violet-700 text-white shadow-lg shadow-violet-500/20">Submit Report</Button>
             </form>
           </Form>
         </CardContent>
