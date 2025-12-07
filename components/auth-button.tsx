@@ -11,19 +11,19 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Loader2 } from "lucide-react";
 
 export function AuthButton() {
   const { user, isLoading } = useUser();
 
   if (isLoading) {
-    return <div className="h-8 w-8 rounded-full bg-neutral-100 animate-pulse" />;
+    return <Loader2 className="h-5 w-5 animate-spin text-slate-400" />;
   }
 
   if (!user) {
     return (
       <Link href="/api/auth/login">
-        <Button size="sm" className="h-8 px-4 bg-neutral-900 hover:bg-neutral-800 text-white text-sm rounded-md">
+        <Button className="bg-slate-900 hover:bg-slate-800 text-white font-medium rounded-lg shadow-sm transition-all hover:shadow-md">
           Sign In
         </Button>
       </Link>
@@ -37,29 +37,29 @@ export function AuthButton() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-8 w-8 rounded-full p-0">
-          <Avatar className="h-8 w-8">
+        <Button variant="ghost" className="h-10 w-10 rounded-full p-0 hover:bg-slate-100 transition-colors">
+          <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
             <AvatarImage src={user.picture || ""} alt={user.name || "User"} />
-            <AvatarFallback className="bg-neutral-100 text-neutral-600 text-xs">
+            <AvatarFallback className="bg-teal-50 text-teal-700 font-medium text-sm">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-48 bg-white border border-neutral-200 shadow-sm rounded-lg p-1">
-        <div className="px-3 py-2">
-          <p className="text-sm font-medium text-neutral-900 truncate">{user.name}</p>
-          <p className="text-xs text-neutral-500 truncate">{user.email}</p>
+      <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl border-slate-100 shadow-xl bg-white/95 backdrop-blur-sm">
+        <div className="px-3 py-2.5">
+          <p className="text-sm font-semibold text-slate-900 truncate">{user.name}</p>
+          <p className="text-xs text-slate-500 truncate">{user.email}</p>
         </div>
-        <DropdownMenuSeparator className="bg-neutral-100" />
+        <DropdownMenuSeparator className="bg-slate-100 my-1" />
         <DropdownMenuItem asChild>
-          <Link href="/profile" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded cursor-pointer">
+          <Link href="/profile" className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-slate-600 hover:text-teal-700 hover:bg-teal-50 rounded-lg cursor-pointer transition-colors">
             <User className="h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <a href="/api/auth/logout" className="flex items-center gap-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-50 rounded cursor-pointer">
+          <a href="/api/auth/logout" className="flex items-center gap-2 px-3 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg cursor-pointer transition-colors">
             <LogOut className="h-4 w-4" />
             Sign Out
           </a>

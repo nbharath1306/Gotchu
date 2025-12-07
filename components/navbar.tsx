@@ -10,8 +10,8 @@ import { cn } from "@/lib/utils";
 
 const navLinks = [
   { href: "/feed", label: "Feed" },
-  { href: "/report/lost", label: "Report Lost" },
-  { href: "/report/found", label: "Report Found" },
+  { href: "/report/lost", label: "I Lost Something" },
+  { href: "/report/found", label: "I Found Something" },
 ];
 
 export function Navbar() {
@@ -28,61 +28,70 @@ export function Navbar() {
   return (
     <header
       className={cn(
-        "fixed top-0 left-0 right-0 z-50 transition-all duration-200",
-        isScrolled ? "bg-white/90 backdrop-blur-sm border-b border-neutral-100" : "bg-transparent"
+        "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-in-out",
+        isScrolled 
+          ? "bg-white/80 backdrop-blur-md border-b border-slate-100 py-3" 
+          : "bg-transparent py-5"
       )}
     >
-      <nav className="max-w-4xl mx-auto px-6 h-14 flex items-center justify-between">
-        <Link href="/" className="font-semibold text-neutral-900">
-          Gotchu
+      <nav className="max-w-5xl mx-auto px-6 flex items-center justify-between">
+        <Link href="/" className="flex items-center gap-2 group">
+          <div className="w-8 h-8 rounded-xl bg-teal-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-teal-600/20 transition-transform group-hover:scale-105">
+            G
+          </div>
+          <span className="font-bold text-xl text-slate-900 tracking-tight">Gotchu</span>
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden md:flex items-center gap-8">
           {navLinks.map((link) => (
             <Link
               key={link.href}
               href={link.href}
               className={cn(
-                "text-sm transition-colors",
-                pathname === link.href ? "text-neutral-900" : "text-neutral-500 hover:text-neutral-900"
+                "text-sm font-medium transition-colors",
+                pathname === link.href 
+                  ? "text-teal-600" 
+                  : "text-slate-500 hover:text-slate-900"
               )}
             >
               {link.label}
             </Link>
           ))}
-          <AuthButton />
+          <div className="pl-4 border-l border-slate-200">
+            <AuthButton />
+          </div>
         </div>
 
         {/* Mobile toggle */}
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-8 w-8"
+          className="md:hidden text-slate-600"
           onClick={() => setMobileOpen(!mobileOpen)}
         >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       </nav>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="md:hidden bg-white border-b border-neutral-100 px-6 py-4">
-          <div className="flex flex-col gap-3">
+        <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-slate-100 px-6 py-6 shadow-xl animate-in slide-in-from-top-5">
+          <div className="flex flex-col gap-4">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 className={cn(
-                  "text-sm py-1",
-                  pathname === link.href ? "text-neutral-900" : "text-neutral-500"
+                  "text-base font-medium py-2 border-b border-slate-50",
+                  pathname === link.href ? "text-teal-600" : "text-slate-600"
                 )}
               >
                 {link.label}
               </Link>
             ))}
-            <div className="pt-3 border-t border-neutral-100">
+            <div className="pt-2">
               <AuthButton />
             </div>
           </div>

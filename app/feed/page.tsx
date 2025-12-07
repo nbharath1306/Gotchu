@@ -1,6 +1,7 @@
 import { createSupabaseServer } from "@/lib/supabase-server";
 import { FeedClient } from "@/components/feed-client";
 import { Item } from "@/types";
+import { AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +16,15 @@ export default async function FeedPage() {
   if (error) {
     console.error("Error fetching items:", error);
     return (
-      <div className="min-h-screen bg-[#09090b] pt-24 flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-xl font-semibold text-white mb-2">Something went wrong</h2>
-          <p className="text-zinc-500">Unable to load items. Please try again later.</p>
+      <div className="min-h-screen bg-slate-50 pt-24 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-6 w-6 text-rose-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-900 mb-2">Unable to load feed</h2>
+          <p className="text-slate-500">
+            We encountered an issue while fetching the latest items. Please try refreshing the page.
+          </p>
         </div>
       </div>
     );

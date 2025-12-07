@@ -2,10 +2,11 @@
 
 import { Item } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { MapPin, Clock, CheckCircle } from "lucide-react";
+import { MapPin, Clock, CheckCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { motion } from "framer-motion";
 
 interface ItemCardProps {
   item: Item;
@@ -15,69 +16,85 @@ interface ItemCardProps {
 
 export function ItemCard({ item, onResolve, showActions = true }: ItemCardProps) {
   const isResolved = item.status === "resolved";
+  const isLost = item.type === "lost";
   
   return (
-    <div 
+    <motion.div 
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
       className={cn(
-        "bg-white border rounded-lg p-5 transition-colors",
-        isResolved ? "border-neutral-100 opacity-50" : "border-neutral-200 hover:border-neutral-300"
+        "group relative bg-white border rounded-2xl p-6 transition-all duration-300",
+        isResolved 
+          ? "border-slate-100 opacity-60 bg-slate-50" 
+          : "border-slate-100 hover:border-teal-200 hover:shadow-lg hover:shadow-teal-900/5"
       )}
     >
-      {/* Header */}
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div className="min-w-0">
-          <h3 className="font-medium text-neutral-900 truncate">{item.title}</h3>
-          <p className="text-sm text-neutral-500">{item.category}</p>
-        </div>
+      {/* Status Badge */}
+      <div className="absolute top-6 right-6">
         <span className={cn(
-          "px-2 py-0.5 rounded text-xs font-medium shrink-0",
-          item.status === "resolved"
-            ? "bg-neutral-100 text-neutral-500"
-            : item.type === "lost"
-              ? "bg-red-50 text-red-600"
-              : "bg-green-50 text-green-600"
+          "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium tracking-wide",
+          isResolved
+            ? "bg-slate-100 text-slate-500"
+            : isLost
+              ? "bg-rose-50 text-rose-600 border border-rose-100"
+              : "bg-teal-50 text-teal-600 border border-teal-100"
         )}>
-          {item.status === "resolved" ? "Resolved" : item.type === "lost" ? "Lost" : "Found"}
+          {isResolved ? "Resolved" : isLost ? "Lost" : "Found"}
         </span>
       </div>
 
-      {/* Description */}
-      {item.description && (
-        <p className="text-sm text-neutral-600 mb-3 line-clamp-2">{item.description}</p>
-      )}
+      {/* Content */}
+      <div className="pr-20">
+        <h3 className="text-lg font-semibold text-slate-900 mb-1 group-hover:text-teal-700 transition-colors">
+          {item.title}
+        </h3>
+        <p className="text-sm text-slate-500 font-medium mb-3 uppercase tracking-wider text-[10px]">
+          {item.category}
+        </p>
+        
+        {item.description && (
+          <p className="text-slate-600 mb-5 line-clamp-2 leading-relaxed">
+            {item.description}
+          </p>
+        )}
 
-      {/* Meta */}
-      <div className="flex flex-wrap gap-3 text-xs text-neutral-500 mb-4">
-        <span className="flex items-center gap-1">
-          <MapPin className="h-3 w-3" />
-          {item.location}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="h-3 w-3" />
-          {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-        </span>
+        <div className="flex flex-wrap gap-4 text-sm text-slate-400">
+          <div className="flex items-center gap-1.5">
+            <MapPin className="h-4 w-4 text-slate-300" />
+            <span>{item.location}</span>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <Clock className="h-4 w-4 text-slate-300" />
+            <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
+          </div>
+        </div>
       </div>
 
       {/* Actions */}
       {showActions && !isResolved && (
-        <div className="flex gap-2 pt-3 border-t border-neutral-100">
+        <div className="mt-6 pt-4 border-t border-slate-50 flex items-center justify-between gap-3">
           <Link href={`/chat/${item.id}`} className="flex-1">
-            <Button variant="outline" size="sm" className="w-full h-8 text-xs border-neutral-200 text-neutral-600 hover:bg-neutral-50">
-              Contact
+            <Button 
+              variant="ghost" 
+              className="w-full justify-between text-slate-600 hover:text-teal-700 hover:bg-teal-50 group/btn"
+            >
+              <span className="font-medium">Contact {isLost ? "Owner" : "Finder"}</span>
+              <ArrowRight className="h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
             </Button>
           </Link>
+          
           {onResolve && (
             <Button
-              size="sm"
+              variant="outline"
               onClick={() => onResolve(item.id)}
-              className="h-8 text-xs bg-neutral-900 hover:bg-neutral-800 text-white"
+              className="border-slate-200 text-slate-600 hover:bg-slate-50 hover:text-slate-900"
             >
-              <CheckCircle className="h-3 w-3 mr-1" />
+              <CheckCircle className="h-4 w-4 mr-2" />
               Resolve
             </Button>
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

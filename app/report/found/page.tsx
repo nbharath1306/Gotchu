@@ -22,17 +22,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { createItem } from "@/app/actions"
 import { useUser } from '@auth0/nextjs-auth0/client'
-import { CheckCircle2, MapPin, Tag, MapPinned, FileText, Loader2, Star } from "lucide-react"
+import { AlertCircle, MapPin, Tag, MapPinned, FileText, Loader2, Star, ArrowLeft } from "lucide-react"
 import { useState } from "react"
+import Link from "next/link"
+import { motion } from "framer-motion"
 
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: "Title must be at least 2 characters.",
+    message: "Please provide a descriptive title.",
   }),
   description: z.string().optional(),
   category: z.enum(["Electronics", "ID", "Keys", "Other"]),
@@ -66,11 +67,7 @@ export default function ReportFoundPage() {
     try {
       const result = await createItem({
         type: "FOUND",
-        title: values.title,
-        description: values.description,
-        category: values.category,
-        location_zone: values.location_zone,
-        bounty_text: values.drop_off_point
+        ...values
       })
 
       if (result.error) {
@@ -78,7 +75,7 @@ export default function ReportFoundPage() {
         return
       }
 
-      toast.success("Found item reported successfully! You earned +50 Karma. ⭐")
+      toast.success("Thank you for your honesty!")
       router.push("/feed")
     } catch (error) {
       console.error(error)
@@ -90,192 +87,177 @@ export default function ReportFoundPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+      <div className="flex min-h-screen items-center justify-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
-        <Card className="w-full max-w-md glass border-white/10">
-          <CardContent className="pt-6 text-center">
-            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
-            <h2 className="text-xl font-bold mb-2">Login Required</h2>
-            <p className="text-muted-foreground mb-4">Please log in to report a found item.</p>
-            <Button asChild className="bg-green-600 hover:bg-green-700">
-              <a href="/auth/login">Login</a>
+      <div className="flex min-h-screen items-center justify-center p-4 bg-slate-50">
+        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8 text-center">
+          <div className="w-16 h-16 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="h-8 w-8 text-amber-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Authentication Required</h2>
+          <p className="text-slate-500 mb-8">Please sign in to report a found item. This helps us keep the community safe.</p>
+          <Link href="/api/auth/login">
+            <Button className="w-full bg-teal-600 hover:bg-teal-700 text-white h-12 text-base rounded-xl">
+              Sign In
             </Button>
-          </CardContent>
-        </Card>
+          </Link>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Gradients */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
-        <div className="absolute top-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-green-600/10 blur-[120px]" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-emerald-600/10 blur-[120px]" />
-      </div>
+    <div className="min-h-screen bg-slate-50 py-20 px-4">
+      <div className="max-w-2xl mx-auto">
+        <Link href="/" className="inline-flex items-center text-slate-500 hover:text-slate-900 mb-8 transition-colors">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back to Home
+        </Link>
 
-      <Card className="w-full max-w-lg glass border-white/10 shadow-2xl shadow-green-500/5">
-        <CardHeader className="text-center">
-          <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="h-8 w-8 text-green-500" />
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-3xl shadow-xl shadow-slate-200/50 overflow-hidden"
+        >
+          <div className="bg-teal-700 p-8 text-white">
+            <div className="flex items-center gap-3 mb-2">
+              <Star className="h-6 w-6 text-teal-200" />
+              <h1 className="text-3xl font-bold">What did you find?</h1>
+            </div>
+            <p className="text-teal-100">Thank you for your honesty. Let's get this back to its owner.</p>
           </div>
-          <CardTitle className="text-2xl font-bold">Report a Found Item</CardTitle>
-          <CardDescription className="flex items-center justify-center gap-2">
-            Thank you for being a good samaritan! 
-            <span className="inline-flex items-center gap-1 text-amber-500">
-              <Star className="h-4 w-4" />
-              +50 Karma
-            </span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <Tag className="h-4 w-4 text-green-500" />
-                      Item Name
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="e.g. Black Wallet, Student ID Card" 
-                        {...field} 
-                        className="bg-white/5 border-white/10 focus:border-green-500/50 h-11" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <FileText className="h-4 w-4 text-green-500" />
-                      Description (Optional)
-                    </FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Add details to help the owner identify their item..."
-                        {...field}
-                        className="bg-white/5 border-white/10 focus:border-green-500/50 min-h-[80px] resize-none"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="category"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Category</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+          <div className="p-8">
+            <Form {...form}>
+              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                <div className="grid gap-6 md:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="title"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Item Name</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="bg-white/5 border-white/10 h-11">
-                            <SelectValue placeholder="Select category" />
-                          </SelectTrigger>
+                          <Input placeholder="e.g. Black Wallet" {...field} className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-teal-500" />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Electronics">📱 Electronics</SelectItem>
-                          <SelectItem value="ID">🪪 ID Cards</SelectItem>
-                          <SelectItem value="Keys">🔑 Keys</SelectItem>
-                          <SelectItem value="Other">📦 Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                <FormField
-                  control={form.control}
-                  name="location_zone"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="flex items-center gap-2">
-                        <MapPin className="h-4 w-4 text-green-500" />
-                        Found At
-                      </FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormField
+                    control={form.control}
+                    name="category"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Category</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 bg-slate-50 border-slate-200 focus:ring-teal-500">
+                              <SelectValue placeholder="Select category" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Electronics">Electronics</SelectItem>
+                            <SelectItem value="ID">ID Cards</SelectItem>
+                            <SelectItem value="Keys">Keys</SelectItem>
+                            <SelectItem value="Other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="location_zone"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Found Location</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger className="h-12 bg-slate-50 border-slate-200 focus:ring-teal-500">
+                              <SelectValue placeholder="Select location" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
+                            <SelectItem value="Canteen">Canteen</SelectItem>
+                            <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
+                            <SelectItem value="Library">Library</SelectItem>
+                            <SelectItem value="Hostels">Hostels</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel>Description</FormLabel>
                         <FormControl>
-                          <SelectTrigger className="bg-white/5 border-white/10 h-11">
-                            <SelectValue placeholder="Select location" />
-                          </SelectTrigger>
+                          <Textarea 
+                            placeholder="Any distinguishing marks, stickers, or details..." 
+                            className="min-h-[120px] bg-slate-50 border-slate-200 focus-visible:ring-teal-500 resize-none" 
+                            {...field} 
+                          />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="Innovation_Labs">Innovation Labs</SelectItem>
-                          <SelectItem value="Canteen">Canteen</SelectItem>
-                          <SelectItem value="Bus_Bay">Bus Bay</SelectItem>
-                          <SelectItem value="Library">Library</SelectItem>
-                          <SelectItem value="Hostels">Hostels</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={form.control}
+                    name="drop_off_point"
+                    render={({ field }) => (
+                      <FormItem className="col-span-2">
+                        <FormLabel className="flex items-center gap-2">
+                          <MapPinned className="h-4 w-4 text-teal-600" />
+                          Drop-off Point (Optional)
+                        </FormLabel>
+                        <FormControl>
+                          <Input placeholder="e.g. Security Desk, Lost & Found Office" {...field} className="h-12 bg-slate-50 border-slate-200 focus-visible:ring-teal-500" />
+                        </FormControl>
+                        <FormDescription>
+                          If you left it somewhere safe, let us know where.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <Button 
+                  type="submit" 
+                  className="w-full h-14 text-lg bg-teal-600 hover:bg-teal-700 text-white rounded-xl shadow-lg shadow-teal-600/20 transition-all hover:scale-[1.02]"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                      Submitting...
+                    </>
+                  ) : (
+                    "Report Found Item"
                   )}
-                />
-              </div>
-
-              <FormField
-                control={form.control}
-                name="drop_off_point"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="flex items-center gap-2">
-                      <MapPinned className="h-4 w-4 text-violet-500" />
-                      Drop-off Point (Optional)
-                    </FormLabel>
-                    <FormControl>
-                      <Input 
-                        placeholder="e.g. Security Desk, Library Counter" 
-                        {...field} 
-                        className="bg-white/5 border-white/10 focus:border-green-500/50 h-11" 
-                      />
-                    </FormControl>
-                    <FormDescription className="text-xs">
-                      Where can the owner collect this item?
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <Button 
-                type="submit" 
-                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 text-base font-medium"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit Found Item Report"
-                )}
-              </Button>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+                </Button>
+              </form>
+            </Form>
+          </div>
+        </motion.div>
+      </div>
     </div>
   )
 }
