@@ -1,6 +1,7 @@
 "use client";
 
 import { useUser } from "@auth0/nextjs-auth0";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
@@ -10,73 +11,59 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { User, LogOut, Loader2 } from "lucide-react";
-import Link from "next/link";
+import { User, LogOut } from "lucide-react";
 
 export function AuthButton() {
   const { user, isLoading } = useUser();
 
   if (isLoading) {
     return (
-      <Button variant="ghost" size="sm" disabled className="text-zinc-500">
-        <Loader2 className="w-4 h-4 animate-spin" />
-      </Button>
+      <div className="h-9 w-9 rounded-full bg-gray-100 animate-pulse" />
     );
   }
 
   if (!user) {
     return (
-      <a href="/auth/login">
-        <Button className="bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-medium px-5 h-9 rounded-full shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 transition-all">
+      <Link href="/api/auth/login">
+        <Button className="bg-gray-900 hover:bg-gray-800 text-white rounded-full px-6">
           Sign In
         </Button>
-      </a>
+      </Link>
     );
   }
 
   const initials = user.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
     : "U";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button 
-          variant="ghost" 
-          className="relative h-9 w-9 rounded-full p-0 ring-2 ring-violet-500/20 hover:ring-violet-500/40 transition-all"
-        >
-          <Avatar className="h-9 w-9">
+        <Button variant="ghost" className="relative h-9 w-9 rounded-full p-0">
+          <Avatar className="h-9 w-9 border border-gray-200">
             <AvatarImage src={user.picture || ""} alt={user.name || "User"} />
-            <AvatarFallback className="bg-gradient-to-r from-violet-600 to-purple-600 text-white text-xs font-bold">
+            <AvatarFallback className="bg-gray-100 text-gray-700 text-sm">
               {initials}
             </AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent 
-        align="end" 
-        className="w-56 bg-zinc-900/95 backdrop-blur-xl border-zinc-800 text-white p-2 rounded-xl"
-      >
+      <DropdownMenuContent align="end" className="w-56 bg-white border border-gray-200 shadow-lg rounded-xl p-2">
         <div className="px-3 py-2">
-          <p className="text-sm font-medium text-white">{user.name}</p>
-          <p className="text-xs text-zinc-500 truncate">{user.email}</p>
+          <p className="text-sm font-medium text-gray-900">{user.name}</p>
+          <p className="text-xs text-gray-500 truncate">{user.email}</p>
         </div>
-        <DropdownMenuSeparator className="bg-zinc-800" />
-        <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-white/5 focus:bg-white/5">
-          <Link href="/profile" className="flex items-center gap-2 text-zinc-300">
-            <User className="w-4 h-4" />
+        <DropdownMenuSeparator className="bg-gray-100" />
+        <DropdownMenuItem asChild>
+          <Link href="/profile" className="flex items-center gap-2 px-3 py-2 cursor-pointer text-gray-700 hover:bg-gray-50 rounded-lg">
+            <User className="h-4 w-4" />
             Profile
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-zinc-800" />
-        <DropdownMenuItem asChild className="rounded-lg cursor-pointer hover:bg-red-500/10 focus:bg-red-500/10 text-red-400">
-          <a href="/api/auth/logout" className="flex items-center gap-2">
-            <LogOut className="w-4 h-4" />
+        <DropdownMenuSeparator className="bg-gray-100" />
+        <DropdownMenuItem asChild>
+          <a href="/api/auth/logout" className="flex items-center gap-2 px-3 py-2 cursor-pointer text-red-600 hover:bg-red-50 rounded-lg">
+            <LogOut className="h-4 w-4" />
             Sign Out
           </a>
         </DropdownMenuItem>
