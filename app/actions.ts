@@ -91,8 +91,8 @@ export async function createItem(data: {
   })
 
   if (error) {
-    console.error(error)
-    return { error: "Failed to submit report" }
+    console.error("Supabase insert error:", error)
+    return { error: `Failed to submit report: ${error.message}` }
   }
 
   revalidatePath('/feed')
