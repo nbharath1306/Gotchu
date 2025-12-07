@@ -21,8 +21,6 @@ export const auth0 = new Auth0Client({
     inactivityDuration: 60 * 60 * 24, // 1 day
     cookie: {
       transient: false,
-      httpOnly: true,
-      secure: true,
       sameSite: 'lax'
     }
   }
