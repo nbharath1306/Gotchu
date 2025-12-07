@@ -10,7 +10,7 @@ export const auth0 = new Auth0Client({
   authorizationParameters: {
     scope: 'openid profile email',
   },
-  signInReturnToPath: '/callback-debug',
+  signInReturnToPath: '/',
   routes: {
     callback: '/auth/callback',
     login: '/auth/login',
