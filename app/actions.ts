@@ -1,12 +1,13 @@
 "use server"
 
 import { createClient } from "@/lib/supabase-server"
+import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
 
 export async function resolveItem(itemId: string) {
   const supabase = await createClient()
-  // TODO: Re-implement auth check
-  const user = { sub: 'temp-user' }; // Temporary bypass for cleanup
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (!user) {
     return { error: "Unauthorized" }
@@ -72,8 +73,8 @@ export async function createItem(data: {
   bounty_text?: string
 }) {
   const supabase = await createClient()
-  // TODO: Re-implement auth check
-  const user = { sub: 'temp-user' }; // Temporary bypass for cleanup
+  const session = await auth0.getSession();
+  const user = session?.user;
 
   if (!user) {
     return { error: "Unauthorized" }
