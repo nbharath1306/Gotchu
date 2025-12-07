@@ -4,7 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import AuthButton from "@/components/auth-button"
-import { Home, Search, PlusCircle, MessageSquare, Menu } from "lucide-react"
+import { Home, Search, PlusCircle, MessageSquare, Menu, User } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -46,6 +46,12 @@ export function Navbar() {
       label: "Messages",
       icon: MessageSquare,
       active: pathname === "/chat",
+    },
+    {
+      href: "/profile",
+      label: "Profile",
+      icon: User,
+      active: pathname === "/profile",
     },
   ]
 

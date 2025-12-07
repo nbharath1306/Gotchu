@@ -14,6 +14,7 @@ import {
   FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -25,12 +26,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "sonner"
 import { useRouter } from "next/navigation"
 import { createItem } from "@/app/actions"
-import { useUser } from '@auth0/nextjs-auth0/client';
+import { useUser } from '@auth0/nextjs-auth0/client'
+import { CheckCircle2, MapPin, Tag, MapPinned, FileText, Loader2, Star } from "lucide-react"
+import { useState } from "react"
 
 const formSchema = z.object({
   title: z.string().min(2, {
     message: "Title must be at least 2 characters.",
   }),
+  description: z.string().optional(),
   category: z.enum(["Electronics", "ID", "Keys", "Other"]),
   location_zone: z.enum(["Innovation_Labs", "Canteen", "Bus_Bay", "Library", "Hostels"]),
   drop_off_point: z.string().optional(),
@@ -38,12 +42,14 @@ const formSchema = z.object({
 
 export default function ReportFoundPage() {
   const router = useRouter()
-  const { user, isLoading } = useUser();
+  const { user, isLoading } = useUser()
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       title: "",
+      description: "",
       category: "Other",
       location_zone: "Innovation_Labs",
       drop_off_point: "",
@@ -56,10 +62,12 @@ export default function ReportFoundPage() {
       return
     }
 
+    setIsSubmitting(true)
     try {
       const result = await createItem({
         type: "FOUND",
         title: values.title,
+        description: values.description,
         category: values.category,
         location_zone: values.location_zone,
         bounty_text: values.drop_off_point
@@ -70,15 +78,40 @@ export default function ReportFoundPage() {
         return
       }
 
-      toast.success("Found item reported successfully! You earned +50 Karma.")
+      toast.success("Found item reported successfully! You earned +50 Karma. ⭐")
       router.push("/feed")
     } catch (error) {
       console.error(error)
       toast.error("An unexpected error occurred.")
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
-  if (isLoading) return <div className="flex min-h-screen items-center justify-center">Loading...</div>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-green-500" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+        <Card className="w-full max-w-md glass border-white/10">
+          <CardContent className="pt-6 text-center">
+            <CheckCircle2 className="h-12 w-12 text-green-500 mx-auto mb-4" />
+            <h2 className="text-xl font-bold mb-2">Login Required</h2>
+            <p className="text-muted-foreground mb-4">Please log in to report a found item.</p>
+            <Button asChild className="bg-green-600 hover:bg-green-700">
+              <a href="/auth/login">Login</a>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
     <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4 relative overflow-hidden">
@@ -89,23 +122,58 @@ export default function ReportFoundPage() {
       </div>
 
       <Card className="w-full max-w-lg glass border-white/10 shadow-2xl shadow-green-500/5">
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold text-gradient bg-gradient-to-r from-green-600 to-emerald-600 dark:from-green-400 dark:to-emerald-400">Report a Found Item</CardTitle>
-          <CardDescription>
-            Thank you for being a good samaritan!
+        <CardHeader className="text-center">
+          <div className="h-16 w-16 rounded-full bg-green-500/20 flex items-center justify-center mx-auto mb-4">
+            <CheckCircle2 className="h-8 w-8 text-green-500" />
+          </div>
+          <CardTitle className="text-2xl font-bold">Report a Found Item</CardTitle>
+          <CardDescription className="flex items-center justify-center gap-2">
+            Thank you for being a good samaritan! 
+            <span className="inline-flex items-center gap-1 text-amber-500">
+              <Star className="h-4 w-4" />
+              +50 Karma
+            </span>
           </CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
               <FormField
                 control={form.control}
                 name="title"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Item Name</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <Tag className="h-4 w-4 text-green-500" />
+                      Item Name
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Black Wallet" {...field} className="bg-white/5 border-white/10 focus:border-green-500/50" />
+                      <Input 
+                        placeholder="e.g. Black Wallet, Student ID Card" 
+                        {...field} 
+                        className="bg-white/5 border-white/10 focus:border-green-500/50 h-11" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-green-500" />
+                      Description (Optional)
+                    </FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Add details to help the owner identify their item..."
+                        {...field}
+                        className="bg-white/5 border-white/10 focus:border-green-500/50 min-h-[80px] resize-none"
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -121,15 +189,15 @@ export default function ReportFoundPage() {
                       <FormLabel>Category</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-white/5 border-white/10">
+                          <SelectTrigger className="bg-white/5 border-white/10 h-11">
                             <SelectValue placeholder="Select category" />
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="Electronics">Electronics</SelectItem>
-                          <SelectItem value="ID">ID Cards</SelectItem>
-                          <SelectItem value="Keys">Keys</SelectItem>
-                          <SelectItem value="Other">Other</SelectItem>
+                          <SelectItem value="Electronics">📱 Electronics</SelectItem>
+                          <SelectItem value="ID">🪪 ID Cards</SelectItem>
+                          <SelectItem value="Keys">🔑 Keys</SelectItem>
+                          <SelectItem value="Other">📦 Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
@@ -142,10 +210,13 @@ export default function ReportFoundPage() {
                   name="location_zone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Found Location</FormLabel>
+                      <FormLabel className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-green-500" />
+                        Found At
+                      </FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
-                          <SelectTrigger className="bg-white/5 border-white/10">
+                          <SelectTrigger className="bg-white/5 border-white/10 h-11">
                             <SelectValue placeholder="Select location" />
                           </SelectTrigger>
                         </FormControl>
@@ -168,18 +239,39 @@ export default function ReportFoundPage() {
                 name="drop_off_point"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Drop-off Point (Optional)</FormLabel>
+                    <FormLabel className="flex items-center gap-2">
+                      <MapPinned className="h-4 w-4 text-violet-500" />
+                      Drop-off Point (Optional)
+                    </FormLabel>
                     <FormControl>
-                      <Input placeholder="e.g. Security Desk" {...field} className="bg-white/5 border-white/10 focus:border-green-500/50" />
+                      <Input 
+                        placeholder="e.g. Security Desk, Library Counter" 
+                        {...field} 
+                        className="bg-white/5 border-white/10 focus:border-green-500/50 h-11" 
+                      />
                     </FormControl>
-                    <FormDescription>
+                    <FormDescription className="text-xs">
                       Where can the owner collect this item?
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white shadow-lg shadow-green-500/20">Submit Report</Button>
+
+              <Button 
+                type="submit" 
+                className="w-full h-12 bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20 text-base font-medium"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Found Item Report"
+                )}
+              </Button>
             </form>
           </Form>
         </CardContent>

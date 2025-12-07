@@ -7,15 +7,15 @@ import {
   CardContent,
   CardFooter,
   CardHeader,
-  CardTitle,
 } from "@/components/ui/card"
-import { MapPin, Calendar, CheckCircle } from "lucide-react"
+import { MapPin, Calendar, CheckCircle, Package, Smartphone, Key, CreditCard, MoreHorizontal } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { createClient } from "@/lib/supabase"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { resolveItem } from "@/app/actions"
 import { useState } from "react"
+import Image from "next/image"
 
 interface Item {
   id: string
@@ -25,6 +25,7 @@ interface Item {
   location_zone: string
   status: 'OPEN' | 'RESOLVED'
   bounty_text?: string | null
+  image_url?: string | null
   created_at: string
   user_id: string
 }
@@ -32,6 +33,13 @@ interface Item {
 interface ItemCardProps {
   item: Item
   currentUserId?: string
+}
+
+const categoryIcons: Record<string, React.ReactNode> = {
+  Electronics: <Smartphone className="h-6 w-6" />,
+  ID: <CreditCard className="h-6 w-6" />,
+  Keys: <Key className="h-6 w-6" />,
+  Other: <Package className="h-6 w-6" />,
 }
 
 export function ItemCard({ item, currentUserId }: ItemCardProps) {
@@ -101,34 +109,67 @@ export function ItemCard({ item, currentUserId }: ItemCardProps) {
   }
   
   return (
-    <Card className="w-full glass border-white/10 hover:shadow-lg hover:shadow-violet-500/5 transition-all duration-300 group">
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <div className="space-y-1">
-            <CardTitle className="text-xl font-bold group-hover:text-violet-500 transition-colors">{item.title}</CardTitle>
-            <div className="flex gap-2">
-              <Badge variant={isLost ? "destructive" : "default"} className={isLost ? "bg-red-500/80 hover:bg-red-500" : "bg-green-500/80 hover:bg-green-500"}>
-                {item.type}
-              </Badge>
-              <Badge variant="outline" className="border-white/10 bg-white/5">{item.category}</Badge>
-              {item.status === 'RESOLVED' && <Badge variant="secondary" className="bg-zinc-800 text-zinc-400">RESOLVED</Badge>}
+    <Card className={`w-full overflow-hidden glass border-white/10 hover:shadow-xl transition-all duration-300 group ${item.status === 'RESOLVED' ? 'opacity-60' : ''}`}>
+      {/* Image or Category Icon Header */}
+      <div className={`relative h-32 ${isLost ? 'bg-gradient-to-br from-red-500/20 to-orange-500/20' : 'bg-gradient-to-br from-green-500/20 to-emerald-500/20'}`}>
+        {item.image_url ? (
+          <Image
+            src={item.image_url}
+            alt={item.title}
+            fill
+            className="object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`h-16 w-16 rounded-full ${isLost ? 'bg-red-500/20 text-red-500' : 'bg-green-500/20 text-green-500'} flex items-center justify-center`}>
+              {categoryIcons[item.category] || <Package className="h-6 w-6" />}
             </div>
           </div>
+        )}
+        {/* Type Badge */}
+        <div className="absolute top-3 left-3">
+          <Badge className={`${isLost ? 'bg-red-500 hover:bg-red-600' : 'bg-green-500 hover:bg-green-600'} text-white font-medium`}>
+            {item.type}
+          </Badge>
+        </div>
+        {/* Status Badge */}
+        {item.status === 'RESOLVED' && (
+          <div className="absolute top-3 right-3">
+            <Badge variant="secondary" className="bg-zinc-800/80 text-zinc-300">
+              <CheckCircle className="h-3 w-3 mr-1" />
+              Resolved
+            </Badge>
+          </div>
+        )}
+      </div>
+
+      <CardHeader className="pb-2 pt-4">
+        <h3 className="text-lg font-bold group-hover:text-violet-500 transition-colors line-clamp-1">
+          {item.title}
+        </h3>
+        <div className="flex gap-2 mt-1">
+          <Badge variant="outline" className="border-white/10 bg-white/5 text-xs">
+            {item.category}
+          </Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-3">
+
+      <CardContent className="space-y-2 pb-3">
         <div className="flex items-center text-sm text-muted-foreground">
-          <MapPin className="mr-2 h-4 w-4 text-violet-500" />
-          {item.location_zone.replace('_', ' ')}
+          <MapPin className="mr-2 h-4 w-4 text-violet-500 flex-shrink-0" />
+          <span className="truncate">{item.location_zone.replace(/_/g, ' ')}</span>
         </div>
         <div className="flex items-center text-sm text-muted-foreground">
-          <Calendar className="mr-2 h-4 w-4 text-violet-500" />
+          <Calendar className="mr-2 h-4 w-4 text-violet-500 flex-shrink-0" />
           {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
         </div>
         
         {item.bounty_text && (
-          <div className="mt-2 p-3 bg-white/5 rounded-lg text-sm border border-white/5">
-            <span className="font-semibold text-violet-400">{isLost ? "Bounty:" : "Drop-off:"}</span> {item.bounty_text}
+          <div className="mt-3 p-3 bg-white/5 rounded-lg text-sm border border-white/5">
+            <span className={`font-semibold ${isLost ? 'text-amber-400' : 'text-violet-400'}`}>
+              {isLost ? "🎁 Reward:" : "📍 Drop-off:"}
+            </span>{" "}
+            <span className="text-muted-foreground">{item.bounty_text}</span>
           </div>
         )}
       </CardContent>

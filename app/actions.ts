@@ -68,6 +68,7 @@ export async function resolveItem(itemId: string) {
 export async function createItem(data: {
   type: 'LOST' | 'FOUND',
   title: string,
+  description?: string,
   category: string,
   location_zone: string,
   bounty_text?: string
@@ -83,6 +84,7 @@ export async function createItem(data: {
   const { error } = await supabase.from("items").insert({
     type: data.type,
     title: data.title,
+    description: data.description,
     category: data.category,
     location_zone: data.location_zone,
     bounty_text: data.bounty_text,

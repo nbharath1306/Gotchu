@@ -1,7 +1,9 @@
 import { createClient } from "@/lib/supabase-server"
-import { ItemCard } from "@/components/item-card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { auth0 } from "@/lib/auth0";
+import { FeedClient } from "@/components/feed-client"
+import { auth0 } from "@/lib/auth0"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { PlusCircle } from "lucide-react"
 
 export const dynamic = 'force-dynamic'
 
@@ -14,72 +16,54 @@ export default async function FeedPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  // Get current user for "Manage" vs "Contact" logic
-  const session = await auth0.getSession();
-  const user = session?.user;
+  // Get current user
+  const session = await auth0.getSession()
+  const user = session?.user
 
   if (error) {
-    return <div>Error loading feed</div>
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-5xl">
+        <div className="text-center py-12">
+          <p className="text-red-500">Error loading feed. Please try again.</p>
+        </div>
+      </div>
+    )
   }
 
-  const lostItems = items?.filter(item => item.type === 'LOST') || []
-  const foundItems = items?.filter(item => item.type === 'FOUND') || []
-
   return (
-    <div className="container mx-auto py-8 px-4 max-w-4xl">
-      <div className="flex flex-col space-y-4 mb-8">
-        <h1 className="text-3xl font-bold tracking-tight">Campus Feed</h1>
-        <p className="text-muted-foreground">
-          See what's been lost and found around DSU Harohalli.
-        </p>
+    <div className="container mx-auto py-8 px-4 max-w-5xl relative">
+      {/* Background Gradients */}
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden -z-10 pointer-events-none">
+        <div className="absolute top-[-20%] right-[-10%] w-[40%] h-[40%] rounded-full bg-violet-600/10 blur-[120px]" />
+        <div className="absolute bottom-[-20%] left-[-10%] w-[40%] h-[40%] rounded-full bg-indigo-600/10 blur-[120px]" />
       </div>
 
-      <Tabs defaultValue="all" className="w-full">
-        <TabsList className="grid w-full grid-cols-3 mb-8">
-          <TabsTrigger value="all">All Items</TabsTrigger>
-          <TabsTrigger value="lost">Lost Items</TabsTrigger>
-          <TabsTrigger value="found">Found Items</TabsTrigger>
-        </TabsList>
+      {/* Header */}
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Campus Feed</h1>
+          <p className="text-muted-foreground">
+            See what's been lost and found around DSU Harohalli.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/report/lost">
+            <Button className="bg-red-500 hover:bg-red-600 text-white shadow-lg shadow-red-500/20">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Report Lost
+            </Button>
+          </Link>
+          <Link href="/report/found">
+            <Button className="bg-green-500 hover:bg-green-600 text-white shadow-lg shadow-green-500/20">
+              <PlusCircle className="mr-2 h-4 w-4" />
+              Report Found
+            </Button>
+          </Link>
+        </div>
+      </div>
 
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {items?.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
-            ))}
-            {items?.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                No items reported yet.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="lost" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {lostItems.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
-            ))}
-            {lostItems.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                No lost items reported.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="found" className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {foundItems.map((item) => (
-              <ItemCard key={item.id} item={item} currentUserId={user?.sub} />
-            ))}
-            {foundItems.length === 0 && (
-              <div className="col-span-full text-center py-12 text-muted-foreground">
-                No found items reported.
-              </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+      {/* Feed Content */}
+      <FeedClient items={items || []} currentUserId={user?.sub} />
     </div>
   )
 }
