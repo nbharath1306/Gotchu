@@ -73,7 +73,7 @@ export function FeedClient({ items }: FeedClientProps) {
                   placeholder="Search database..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="input-swiss pl-12"
+                  className="input-swiss !pl-12"
                 />
               </div>
               
