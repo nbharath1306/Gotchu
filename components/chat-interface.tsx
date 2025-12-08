@@ -70,20 +70,22 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     e.preventDefault()
     if (!newMessage.trim()) return
 
+    const messageToSend = newMessage.trim()
+    setNewMessage("") // Optimistic clear
+
     const { error } = await supabase
       .from('messages')
       .insert({
         chat_id: chatId,
         sender_id: currentUserId,
-        content: newMessage.trim()
+        content: messageToSend
       })
 
     if (error) {
       console.error('Error sending message:', error)
+      setNewMessage(messageToSend) // Restore on error
       return
     }
-
-    setNewMessage("")
   }
 
   return (
