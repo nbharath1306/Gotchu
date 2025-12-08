@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { motion } from "framer-motion"
+import { AuthButton } from "@/components/auth-button"
 import { 
   ArrowRight,
   ArrowUpRight,
@@ -97,8 +98,9 @@ export default function Home() {
             <span className="font-display text-xl font-bold tracking-tight text-[#111111]">GOTCHU</span>
             <span className="pill-tag">BETA</span>
           </Link>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-4">
             <Link href="/feed" className="text-sm font-medium text-[#111111] hover:text-[#0055FF] transition-colors">Live Feed</Link>
+            <AuthButton />
           </div>
         </div>
       </header>
