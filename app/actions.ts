@@ -104,73 +104,112 @@ export async function createItem(data: {
 }
 
 export async function submitReportAction(formData: FormData) {
-  const supabase = await createClient()
-  const session = await auth0.getSession();
-  const user = session?.user;
+  console.log("submitReportAction started");
+  try {
+    const supabase = await createClient()
+    console.log("Supabase client created");
 
-  if (!user) {
-    return { error: "Unauthorized" }
-  }
-
-  const title = formData.get("title") as string
-  const description = formData.get("description") as string
-  const category = formData.get("category") as string
-  const location = formData.get("location") as string
-  const date = formData.get("date") as string
-  const type = formData.get("type") as "LOST" | "FOUND"
-  const imageFile = formData.get("image") as File
-
-  let imageUrl = null
-  if (imageFile && imageFile.size > 0) {
-    const fileExt = imageFile.name.split(".").pop()
-    const fileName = `${Math.random()}.${fileExt}`
-    
-    // Convert File to ArrayBuffer for upload
-    const arrayBuffer = await imageFile.arrayBuffer()
-    const buffer = new Uint8Array(arrayBuffer)
-
-    const { error: uploadError } = await supabase.storage
-      .from("items")
-      .upload(fileName, buffer, {
-        contentType: imageFile.type,
-        upsert: false
-      })
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError)
-      return { error: "Failed to upload image" }
+    let session;
+    try {
+      session = await auth0.getSession();
+    } catch (authError) {
+      console.error("Auth0 getSession error:", authError);
+      return { error: "Authentication failed" };
     }
     
-    const { data: { publicUrl } } = supabase.storage
+    const user = session?.user;
+
+    if (!user) {
+      console.log("No user found in session");
+      return { error: "Unauthorized" }
+    }
+    console.log("User authenticated:", user.sub);
+
+    const title = formData.get("title") as string
+    const description = formData.get("description") as string
+    const category = formData.get("category") as string
+    const location = formData.get("location") as string
+    const date = formData.get("date") as string
+    const type = formData.get("type") as "LOST" | "FOUND"
+    const imageFile = formData.get("image") as File
+
+    console.log("Form data parsed:", { title, category, location, date, type });
+
+    let imageUrl = null
+    if (imageFile && imageFile.size > 0) {
+      console.log("Processing image upload...");
+      try {
+        const fileExt = imageFile.name.split(".").pop()
+        const fileName = `${Math.random()}.${fileExt}`
+        
+        const arrayBuffer = await imageFile.arrayBuffer()
+        const buffer = new Uint8Array(arrayBuffer)
+
+        const { error: uploadError } = await supabase.storage
+          .from("items")
+          .upload(fileName, buffer, {
+            contentType: imageFile.type,
+            upsert: false
+          })
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError)
+          return { error: "Failed to upload image: " + uploadError.message }
+        }
+        
+        const { data: { publicUrl } } = supabase.storage
+          .from("items")
+          .getPublicUrl(fileName)
+          
+        imageUrl = publicUrl
+        console.log("Image uploaded successfully:", imageUrl);
+      } catch (uploadEx) {
+        console.error("Exception during image upload:", uploadEx);
+        return { error: "Image upload crashed" };
+      }
+    }
+
+    console.log("Inserting item into database...");
+    const { data: newItem, error: insertError } = await supabase
       .from("items")
-      .getPublicUrl(fileName)
-      
-    imageUrl = publicUrl
+      .insert({
+        title,
+        description,
+        category,
+        location_zone: location,
+        date_reported: date,
+        image_url: imageUrl,
+        type,
+        user_id: user.sub,
+        status: "OPEN"
+      })
+      .select()
+      .single()
+
+    if (insertError) {
+      console.error("Insert error:", insertError)
+      return { error: "Database error: " + insertError.message }
+    }
+
+    if (!newItem) {
+      console.error("Insert succeeded but no item returned");
+      return { error: "Failed to retrieve created item" }
+    }
+
+    console.log("Item created successfully:", newItem.id);
+
+    try {
+      revalidatePath('/feed')
+    } catch (revalidateError) {
+      console.error("revalidatePath error:", revalidateError);
+      // Ignore revalidation error, it's not critical for the user response
+    }
+
+    return { success: true, itemId: newItem.id }
+  } catch (e: any) {
+    console.error("CRITICAL ERROR in submitReportAction:", e)
+    return { error: "Server error: " + (e.message || "Unknown error") }
   }
-
-  const { data: newItem, error: insertError } = await supabase
-    .from("items")
-    .insert({
-      title,
-      description,
-      category,
-      location_zone: location,
-      date_reported: date,
-      image_url: imageUrl,
-      type,
-      user_id: user.sub,
-      status: "OPEN"
-    })
-    .select()
-    .single()
-
-  if (insertError) {
-    console.error("Insert error:", insertError)
-    return { error: insertError.message }
-  }
-
-  revalidatePath('/feed')
-  return { success: true, itemId: newItem.id }
 }
 
 export async function startChat(itemId: string) {
