@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter } from "next/navigation"
-import { Upload, AlertCircle, CheckCircle2, ArrowLeft } from "lucide-react"
+import { Upload, AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { submitReportAction } from "@/app/actions"
@@ -170,9 +170,16 @@ export default function ReportFound() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full btn-primary py-4 text-sm font-bold tracking-widest"
+                  className="w-full btn-primary py-4 text-sm font-bold tracking-widest flex items-center justify-center gap-2"
                 >
-                  {loading ? "PROCESSING..." : "SUBMIT REPORT"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      PROCESSING...
+                    </>
+                  ) : (
+                    "SUBMIT REPORT"
+                  )}
                 </button>
               </div>
             </form>
