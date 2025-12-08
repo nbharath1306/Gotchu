@@ -16,8 +16,8 @@ interface FeedClientProps {
 
 const filters = [
   { value: "all", label: "All Items" },
-  { value: "lost", label: "Lost" },
-  { value: "found", label: "Found" },
+  { value: "LOST", label: "Lost" },
+  { value: "FOUND", label: "Found" },
 ];
 
 export function FeedClient({ items: initialItems }: FeedClientProps) {
@@ -28,9 +28,9 @@ export function FeedClient({ items: initialItems }: FeedClientProps) {
   const filteredItems = items.filter((item) => {
     const matchesFilter = activeFilter === "all" || item.type === activeFilter;
     const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.location_zone.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch && item.status !== "resolved";
+    return matchesFilter && matchesSearch && item.status !== "RESOLVED";
   });
 
   return (

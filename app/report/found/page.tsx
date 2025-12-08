@@ -65,9 +65,16 @@ export default function ReportFoundPage() {
 
     setIsSubmitting(true)
     try {
+      const description = values.drop_off_point 
+        ? `${values.description || ""}\n\nDrop-off Point: ${values.drop_off_point}`
+        : values.description || "";
+
       const result = await createItem({
-        type: "found",
-        ...values
+        type: "FOUND",
+        title: values.title,
+        description,
+        category: values.category,
+        location_zone: values.location_zone,
       })
 
       if (result.error) {

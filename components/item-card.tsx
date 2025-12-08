@@ -24,8 +24,8 @@ const CategoryIcon = ({ category }: { category: string }) => {
 };
 
 export function ItemCard({ item, onResolve, showActions = true }: ItemCardProps) {
-  const isResolved = item.status === "resolved";
-  const isLost = item.type === "lost";
+  const isResolved = item.status === "RESOLVED";
+  const isLost = item.type === "LOST";
   
   return (
     <motion.div 
@@ -68,7 +68,7 @@ export function ItemCard({ item, onResolve, showActions = true }: ItemCardProps)
         <div className="space-y-2">
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <MapPin className="h-4 w-4 text-slate-400 shrink-0" />
-            <span className="truncate">{item.location}</span>
+            <span className="truncate">{item.location_zone}</span>
           </div>
           <div className="flex items-center gap-2 text-sm text-slate-500">
             <Clock className="h-4 w-4 text-slate-400 shrink-0" />

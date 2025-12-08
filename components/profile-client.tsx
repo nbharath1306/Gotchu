@@ -24,8 +24,8 @@ interface ProfileClientProps {
 
 const tabs = [
   { value: "all", label: "All Activity" },
-  { value: "lost", label: "Lost Items" },
-  { value: "found", label: "Found Items" },
+  { value: "LOST", label: "Lost Items" },
+  { value: "FOUND", label: "Found Items" },
   { value: "resolved", label: "Resolved" },
 ];
 
@@ -34,8 +34,8 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
 
   const filteredItems = items.filter((item) => {
     if (activeTab === "all") return true;
-    if (activeTab === "resolved") return item.status === "resolved";
-    return item.type === activeTab && item.status !== "resolved";
+    if (activeTab === "resolved") return item.status === "RESOLVED";
+    return item.type === activeTab && item.status !== "RESOLVED";
   });
 
   const initials = user.name

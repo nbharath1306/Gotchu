@@ -1,15 +1,15 @@
 export interface Item {
   id: string;
   user_id: string;
-  type: "lost" | "found";
+  type: "LOST" | "FOUND";
   title: string;
   description?: string;
   category: string;
-  location: string;
+  location_zone: string;
   date: string;
   contact: string;
   image_url?: string;
-  status: "open" | "resolved";
+  status: "OPEN" | "RESOLVED";
   created_at: string;
   updated_at?: string;
 }

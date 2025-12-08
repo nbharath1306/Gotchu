@@ -67,11 +67,9 @@ export default function ReportLostPage() {
         title: values.title,
         description: values.description || "",
         category: values.category,
-        location: values.location_zone,
-        type: "lost",
-        status: "open",
-        image_url: null,
-        bounty_text: values.bounty_text || null,
+        location_zone: values.location_zone,
+        type: "LOST",
+        bounty_text: values.bounty_text || undefined,
       })
 
       if (result.success) {
