@@ -38,7 +38,7 @@ export default async function ItemPage({ params }: ItemPageProps) {
       <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Invalid Item ID</h1>
-          <p className="text-[#666666] mb-4">The item ID provided is not valid.</p>
+          <p className="text-[#666666] mb-4">The item ID provided is not valid: "{params.id}"</p>
           <Link href="/feed" className="text-blue-600 hover:underline">
             Back to Feed
           </Link>

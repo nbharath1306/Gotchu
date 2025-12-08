@@ -101,9 +101,6 @@ export async function createItem(data: {
   }
 
   return { success: true, itemId: newItem.id }
-
-  revalidatePath('/feed')
-  return { success: true }
 }
 
 export async function submitReportAction(formData: FormData) {
