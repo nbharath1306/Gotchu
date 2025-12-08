@@ -42,35 +42,27 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
   
-  /* Custom Animations */
-  --animate-float: float 8s ease-in-out infinite;
-  --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  --animate-aurora: aurora 20s linear infinite;
-  --animate-mesh: mesh 20s ease-in-out infinite alternate;
+  /* Refined Animations */
+  --animate-fade-in: fadeIn 0.5s ease-out forwards;
+  --animate-slide-up: slideUp 0.5s ease-out forwards;
   
-  @keyframes float {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-20px); }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
   }
-
-  @keyframes aurora {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-
-  @keyframes mesh {
-    0% { background-position: 0% 0%; }
-    100% { background-position: 100% 100%; }
+  
+  @keyframes slideUp {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
   }
 }
 
 :root {
-  --radius: 1.5rem;
+  --radius: 0.75rem; /* 12px - Modern Standard */
   
-  /* Ultra-Clean Future Base */
-  --background: 210 40% 98%; 
-  --foreground: 222 47% 11%;
+  /* Professional Clean Base */
+  --background: 210 40% 98%; /* Slate 50 */
+  --foreground: 222 47% 11%; /* Slate 900 */
   
   --card: 0 0% 100%;
   --card-foreground: 222 47% 11%;
@@ -78,11 +70,11 @@
   --popover: 0 0% 100%;
   --popover-foreground: 222 47% 11%;
   
-  /* Neon Teal */
-  --primary: 173 80% 40%;
+  /* Brand: Trustworthy Teal */
+  --primary: 173 58% 39%; /* Teal 700 - Solid, Readable */
   --primary-foreground: 0 0% 100%;
   
-  --secondary: 210 40% 96.1%;
+  --secondary: 210 40% 96.1%; /* Slate 100 */
   --secondary-foreground: 222.2 47.4% 11.2%;
   
   --muted: 210 40% 96.1%;
@@ -94,9 +86,9 @@
   --destructive: 0 84.2% 60.2%;
   --destructive-foreground: 210 40% 98%;
   
-  --border: 214.3 31.8% 91.4%;
+  --border: 214.3 31.8% 91.4%; /* Slate 200 */
   --input: 214.3 31.8% 91.4%;
-  --ring: 173 80% 40%;
+  --ring: 173 58% 39%;
 }
 
 .dark {
@@ -106,8 +98,8 @@
   --card-foreground: 210 40% 98%;
   --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
-  --primary: 173 80% 50%;
-  --primary-foreground: 222 47% 11%;
+  --primary: 173 58% 39%;
+  --primary-foreground: 210 40% 98%;
   --secondary: 217.2 32.6% 17.5%;
   --secondary-foreground: 210 40% 98%;
   --muted: 217.2 32.6% 17.5%;
@@ -118,7 +110,7 @@
   --destructive-foreground: 210 40% 98%;
   --border: 217.2 32.6% 17.5%;
   --input: 217.2 32.6% 17.5%;
-  --ring: 173 80% 50%;
+  --ring: 173 58% 39%;
 }
 
 @layer base {
@@ -126,36 +118,30 @@
     @apply border-border;
   }
   body {
-    @apply bg-slate-50 text-foreground antialiased selection:bg-teal-500/20 selection:text-teal-900;
-    font-feature-settings: "rlig" 1, "calt" 1, "ss01" 1;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
   
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold text-slate-900;
+    @apply tracking-tight font-bold text-slate-900 dark:text-slate-50;
   }
 }
 
 @layer utilities {
-  .bg-mesh {
-    background-color: #f8fafc;
-    background-image: 
-      radial-gradient(at 0% 0%, hsla(173, 80%, 90%, 1) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, hsla(220, 80%, 90%, 1) 0px, transparent 50%),
-      radial-gradient(at 100% 100%, hsla(190, 80%, 90%, 1) 0px, transparent 50%),
-      radial-gradient(at 0% 100%, hsla(260, 80%, 95%, 1) 0px, transparent 50%);
-    background-size: 150% 150%;
-    animation: mesh 20s ease-in-out infinite alternate;
+  /* Subtle Dot Pattern - Adds texture without reducing readability */
+  .bg-dot-pattern {
+    background-color: transparent;
+    background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
-  .glass-panel {
-    @apply bg-white/40 backdrop-blur-2xl border border-white/60 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+  /* Clean Card - High Contrast, Subtle Depth */
+  .card-clean {
+    @apply bg-white border border-slate-200 shadow-sm rounded-2xl transition-all duration-200 hover:shadow-md hover:border-slate-300;
   }
   
-  .glass-card-hover {
-    @apply transition-all duration-500 hover:bg-white/60 hover:shadow-[0_8px_32px_0_rgba(31,38,135,0.1)] hover:-translate-y-1 hover:border-white/80;
-  }
-
-  .text-glow {
-    text-shadow: 0 0 20px rgba(20, 184, 166, 0.3);
+  /* Focus Ring - Accessibility */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-500;
   }
 }

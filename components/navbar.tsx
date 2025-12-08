@@ -21,38 +21,32 @@ export function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   return (
     <>
-      <motion.header
-        initial={{ y: -100, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        className="fixed top-6 left-0 right-0 z-50 flex justify-center px-4 pointer-events-none"
+      <header
+        className={cn(
+          "fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b",
+          isScrolled
+            ? "bg-white/95 backdrop-blur-sm border-slate-200 shadow-sm"
+            : "bg-white border-transparent"
+        )}
       >
-        <nav 
-          className={cn(
-            "pointer-events-auto flex items-center justify-between gap-8 px-6 py-3 rounded-full transition-all duration-500 ease-out",
-            isScrolled || mobileOpen
-              ? "bg-white/80 backdrop-blur-2xl border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.04)] w-full max-w-5xl" 
-              : "bg-white/40 backdrop-blur-xl border border-white/30 shadow-[0_8px_30px_rgb(0,0,0,0.02)] w-full max-w-4xl"
-          )}
-        >
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
-            <div className="relative w-10 h-10 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-teal-900/20 transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
               G
-              <div className="absolute inset-0 rounded-xl bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
             </div>
-            <span className="font-bold text-xl text-slate-900 tracking-tight hidden sm:block group-hover:text-teal-700 transition-colors">Gotchu</span>
+            <span className="font-bold text-xl text-slate-900 tracking-tight">Gotchu</span>
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex items-center gap-1 bg-slate-100/50 p-1.5 rounded-full border border-slate-200/50 backdrop-blur-sm">
+          <nav className="hidden md:flex items-center gap-6">
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -60,20 +54,18 @@ export function Navbar() {
                   key={link.href}
                   href={link.href}
                   className={cn(
-                    "relative px-5 py-2 text-sm font-semibold rounded-full transition-all duration-300",
-                    isActive 
-                      ? "text-teal-700 bg-white shadow-sm" 
-                      : "text-slate-500 hover:text-slate-900 hover:bg-white/60"
+                    "text-sm font-medium transition-colors hover:text-slate-900",
+                    isActive ? "text-slate-900 font-semibold" : "text-slate-500"
                   )}
                 >
                   {link.label}
                 </Link>
               );
             })}
-          </div>
+          </nav>
 
           {/* Right Side */}
-          <div className="hidden md:flex items-center gap-4 shrink-0">
+          <div className="hidden md:flex items-center gap-4">
             <AuthButton />
           </div>
 
@@ -81,45 +73,47 @@ export function Navbar() {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden text-slate-600 hover:bg-slate-100 rounded-full"
+            className="md:hidden"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
-        </nav>
-      </motion.header>
+        </div>
+      </header>
 
       {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -20, scale: 0.95 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-            className="fixed top-28 left-4 right-4 z-40 bg-white/90 backdrop-blur-3xl border border-white/60 rounded-[2rem] shadow-2xl p-8 md:hidden origin-top"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-x-0 top-16 z-40 bg-white border-b border-slate-200 p-4 md:hidden shadow-lg"
           >
-            <div className="flex flex-col gap-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setMobileOpen(false)}
-                  className={cn(
-                    "px-6 py-4 text-lg font-semibold rounded-2xl transition-all",
-                    pathname === link.href
-                      ? "bg-teal-50 text-teal-700"
-                      : "text-slate-600 hover:bg-slate-50"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-              <div className="h-px bg-slate-100 my-2" />
-              <div className="px-2">
+            <nav className="flex flex-col gap-2">
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={() => setMobileOpen(false)}
+                    className={cn(
+                      "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-slate-100 text-slate-900"
+                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+              <div className="pt-4 mt-2 border-t border-slate-100">
                 <AuthButton />
               </div>
-            </div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>

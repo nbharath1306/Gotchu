@@ -51,35 +51,37 @@ export default function ReportLostPage() {
     defaultValues: {
       title: "",
       description: "",
-      category: "Other",
-      location_zone: "Innovation_Labs",
       bounty_text: "",
     },
   })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     if (!user) {
-      toast.error("You must be logged in to report a lost item.")
+      toast.error("You must be logged in to report an item")
       return
     }
 
     setIsSubmitting(true)
     try {
       const result = await createItem({
-        type: "LOST",
-        ...values
+        title: values.title,
+        description: values.description || "",
+        category: values.category,
+        location: values.location_zone,
+        type: "lost",
+        status: "open",
+        image_url: null,
+        bounty_text: values.bounty_text || null,
       })
 
-      if (result.error) {
-        toast.error(result.error)
-        return
+      if (result.success) {
+        toast.success("Report submitted successfully")
+        router.push("/feed")
+      } else {
+        toast.error("Failed to submit report")
       }
-
-      toast.success("Report submitted. We'll help you find it.")
-      router.push("/feed")
     } catch (error) {
-      console.error(error)
-      toast.error("An unexpected error occurred.")
+      toast.error("An error occurred")
     } finally {
       setIsSubmitting(false)
     }
@@ -87,22 +89,22 @@ export default function ReportLostPage() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-50">
-        <Loader2 className="h-8 w-8 animate-spin text-teal-600" />
+      <div className="min-h-screen flex items-center justify-center bg-slate-50">
+        <Loader2 className="h-8 w-8 animate-spin text-slate-400" />
       </div>
     )
   }
 
   if (!user) {
     return (
-      <div className="flex min-h-screen items-center justify-center p-4 bg-slate-50 bg-noise">
-        <div className="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 text-center border border-white/20">
-          <div className="w-16 h-16 bg-amber-100 rounded-2xl flex items-center justify-center mx-auto mb-6 rotate-3">
-            <AlertCircle className="h-8 w-8 text-amber-600" />
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+        <div className="bg-white p-8 rounded-xl shadow-sm border border-slate-200 max-w-md w-full text-center">
+          <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+            <AlertCircle className="h-6 w-6 text-amber-600" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Authentication Required</h2>
-          <p className="text-slate-500 mb-8">Please sign in to report a lost item.</p>
-          <Button asChild className="w-full h-12 text-lg rounded-xl bg-teal-600 hover:bg-teal-700">
+          <h2 className="text-xl font-bold text-slate-900 mb-2">Authentication Required</h2>
+          <p className="text-slate-500 mb-6">Please sign in to report a lost item.</p>
+          <Button asChild className="w-full">
             <a href="/api/auth/login">Sign In</a>
           </Button>
         </div>
@@ -111,33 +113,32 @@ export default function ReportLostPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50/50 bg-noise flex flex-col">
-      <div className="flex-1 pt-32 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen bg-slate-50 bg-dot-pattern flex flex-col">
+      <div className="flex-1 pt-24 pb-20 px-4 sm:px-6">
         <div className="max-w-2xl mx-auto">
           <Link 
             href="/feed" 
-            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-900 mb-8 transition-colors group"
+            className="inline-flex items-center text-sm text-slate-500 hover:text-slate-900 mb-6 transition-colors group"
           >
             <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
             Back to Feed
           </Link>
 
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white/20 overflow-hidden"
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 p-8 text-white relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 shadow-inner border border-white/10">
-                  <Search className="h-6 w-6 text-white" />
+            <div className="bg-slate-900 p-8 text-white">
+              <div className="flex items-center gap-4 mb-4">
+                <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center border border-white/10">
+                  <Search className="h-5 w-5 text-white" />
                 </div>
-                <h1 className="text-3xl font-bold mb-2">Lost Something?</h1>
-                <p className="text-rose-50 text-lg max-w-md">
-                  Don't worry, we'll help you find it. Provide as many details as possible to help others identify your item.
-                </p>
+                <h1 className="text-2xl font-bold">Lost Something?</h1>
               </div>
+              <p className="text-slate-300 max-w-md">
+                Don't worry, we'll help you find it. Provide as many details as possible.
+              </p>
             </div>
 
             <div className="p-8">
@@ -151,10 +152,10 @@ export default function ReportLostPage() {
                         <FormLabel className="text-slate-700 font-medium">What did you lose?</FormLabel>
                         <FormControl>
                           <div className="relative">
-                            <FileText className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
+                            <FileText className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
                             <Input 
                               placeholder="e.g. Black Leather Wallet, iPhone 13" 
-                              className="pl-11 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
+                              className="pl-10" 
                               {...field} 
                             />
                           </div>
@@ -173,7 +174,7 @@ export default function ReportLostPage() {
                           <FormLabel className="text-slate-700 font-medium">Category</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 bg-slate-50 border-slate-200 rounded-xl">
+                              <SelectTrigger>
                                 <div className="flex items-center">
                                   <Tag className="h-4 w-4 mr-2 text-slate-400" />
                                   <SelectValue placeholder="Select category" />
@@ -200,10 +201,10 @@ export default function ReportLostPage() {
                           <FormLabel className="text-slate-700 font-medium">Last Seen Location</FormLabel>
                           <Select onValueChange={field.onChange} defaultValue={field.value}>
                             <FormControl>
-                              <SelectTrigger className="h-12 bg-slate-50 border-slate-200 rounded-xl">
+                              <SelectTrigger>
                                 <div className="flex items-center">
                                   <MapPin className="h-4 w-4 mr-2 text-slate-400" />
-                                  <SelectValue placeholder="Select location" />
+                                  <SelectValue placeholder="Select zone" />
                                 </div>
                               </SelectTrigger>
                             </FormControl>
@@ -223,38 +224,14 @@ export default function ReportLostPage() {
 
                   <FormField
                     control={form.control}
-                    name="bounty_text"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-slate-700 font-medium">Reward (Optional)</FormLabel>
-                        <FormControl>
-                          <div className="relative">
-                            <Gift className="absolute left-3.5 top-3.5 h-5 w-5 text-slate-400" />
-                            <Input 
-                              placeholder="e.g. Coffee on me, $20 reward" 
-                              className="pl-11 h-12 bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl" 
-                              {...field} 
-                            />
-                          </div>
-                        </FormControl>
-                        <FormDescription className="text-slate-400">
-                          Offering a small reward can encourage people to help.
-                        </FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={form.control}
                     name="description"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-slate-700 font-medium">Description (Optional)</FormLabel>
+                        <FormLabel className="text-slate-700 font-medium">Description</FormLabel>
                         <FormControl>
                           <Textarea 
-                            placeholder="Any distinctive features, scratches, or stickers..." 
-                            className="min-h-[120px] bg-slate-50 border-slate-200 focus:bg-white transition-all rounded-xl resize-none p-4" 
+                            placeholder="Any distinguishing features, scratches, or contents..."
+                            className="min-h-[120px] resize-none"
                             {...field} 
                           />
                         </FormControl>
@@ -263,25 +240,40 @@ export default function ReportLostPage() {
                     )}
                   />
 
-                  <div className="pt-4">
-                    <Button 
-                      type="submit" 
-                      className="w-full h-14 text-lg font-semibold rounded-xl bg-rose-600 hover:bg-rose-700 shadow-lg shadow-rose-900/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                      disabled={isSubmitting}
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                          Submitting...
-                        </>
-                      ) : (
-                        "Submit Report"
-                      )}
-                    </Button>
-                    <p className="text-center text-sm text-slate-400 mt-4">
-                      By submitting, you agree to our community guidelines.
-                    </p>
-                  </div>
+                  <FormField
+                    control={form.control}
+                    name="bounty_text"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-slate-700 font-medium">Reward (Optional)</FormLabel>
+                        <FormControl>
+                          <div className="relative">
+                            <Gift className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" />
+                            <Input 
+                              placeholder="e.g. Coffee, 0, Eternal Gratitude" 
+                              className="pl-10" 
+                              {...field} 
+                            />
+                          </div>
+                        </FormControl>
+                        <FormDescription>
+                          Offering a small reward can encourage faster returns.
+                        </FormDescription>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button type="submit" className="w-full h-11 text-base" disabled={isSubmitting}>
+                    {isSubmitting ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Submitting...
+                      </>
+                    ) : (
+                      "Submit Report"
+                    )}
+                  </Button>
                 </form>
               </Form>
             </div>
