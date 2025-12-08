@@ -31,30 +31,38 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const session = await auth0.getSession()
   const user = session?.user
 
-  const { data: item, error } = await supabase
+  const { data: itemData, error: itemError } = await supabase
     .from('items')
-    .select(`
-      *,
-      user:users (
-        full_name,
-        avatar_url,
-        karma_points
-      )
-    `)
+    .select('*')
     .eq('id', params.id)
     .single()
 
-  if (error || !item) {
+  if (itemError || !itemData) {
+    console.error("Error fetching item:", itemError)
     return (
       <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Item Not Found</h1>
+          <p className="text-red-500 mb-4">{itemError?.message}</p>
           <Link href="/feed" className="text-blue-600 hover:underline">
             Back to Feed
           </Link>
         </div>
       </div>
     )
+  }
+
+  // Fetch user details separately to avoid join issues
+  const { data: itemUser, error: userError } = await supabase
+    .from('users')
+    .select('full_name, avatar_url, karma_points')
+    .eq('id', itemData.user_id)
+    .single()
+    
+  // Combine data
+  const item = {
+    ...itemData,
+    user: itemUser || { full_name: 'Unknown', avatar_url: null, karma_points: 0 }
   }
 
   const isOwner = user?.sub === item.user_id
