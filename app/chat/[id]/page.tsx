@@ -67,6 +67,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
   // Handle case where otherUser might be an array (though single() should prevent this, types might be weird)
   const otherUserData = Array.isArray(otherUser) ? otherUser[0] : otherUser
 
+  const itemData = Array.isArray(chat.item) ? chat.item[0] : chat.item
+
   return (
     <div className="min-h-screen bg-[#F2F2F2] flex flex-col">
       <header className="bg-white border-b-2 border-[#111111] sticky top-0 z-10">
@@ -83,7 +85,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
                 {otherUserData?.full_name || 'Unknown User'}
               </h1>
               <p className="text-xs text-[#666666] font-mono">
-                {chat.item?.title || 'Item Chat'}
+                {itemData?.title || 'Item Chat'}
               </p>
             </div>
           </div>
@@ -99,7 +101,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
               full_name: otherUserData?.full_name || 'Unknown User',
               avatar_url: otherUserData?.avatar_url || ''
             }}
-            itemTitle={chat.item?.title || 'Item'}
+            itemTitle={itemData?.title || 'Item'}
           />
         </div>
       </main>

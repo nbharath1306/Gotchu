@@ -78,7 +78,7 @@ export function ItemCard({ item, index = 0 }: ItemCardProps) {
             <div className="space-y-2">
               <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
                 <MapPin className="w-3 h-3" />
-                <span className="truncate uppercase tracking-wide">{item.location}</span>
+                <span className="truncate uppercase tracking-wide">{item.location_zone}</span>
               </div>
               <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
                 <Clock className="w-3 h-3" />
