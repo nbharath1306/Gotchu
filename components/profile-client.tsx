@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { 
   Mail, 
   Trophy,
@@ -78,12 +77,10 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
           >
             <div className="relative">
               {user.picture ? (
-                <Image
+                <img
                   src={user.picture}
                   alt={user.name || "Profile"}
-                  width={100}
-                  height={100}
-                  className="rounded-full border border-[#E5E5E5]"
+                  className="w-[100px] h-[100px] rounded-full border border-[#E5E5E5] object-cover"
                 />
               ) : (
                 <div className="w-24 h-24 rounded-full bg-[#F2F2F2] flex items-center justify-center border border-[#E5E5E5]">
