@@ -12,11 +12,17 @@ import {
   Clock,
   MapPin,
   ArrowRight,
-  LogOut
+  LogOut,
+  Settings,
+  Shield,
+  Radio
 } from "lucide-react";
 import { motion } from "framer-motion";
 import Link from "next/link";
 import { format } from "date-fns";
+import { Item } from "@/types";
+import { ItemCard } from "@/components/item-card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProfileUser {
   name?: string;
@@ -26,16 +32,6 @@ interface ProfileUser {
 
 interface ProfileData {
   karma: number;
-}
-
-interface Item {
-  id: string;
-  title: string;
-  type: "LOST" | "FOUND";
-  status: "OPEN" | "RESOLVED";
-  category: string;
-  location_zone: string;
-  created_at: string;
 }
 
 interface ProfileClientProps {
@@ -53,186 +49,204 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
   const itemsFound = items.filter(i => i.type === "FOUND").length;
   const itemsResolved = items.filter(i => i.status === "RESOLVED").length;
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="min-h-screen bg-[#F2F2F2]">
-      <div className="pt-24 md:pt-28 pb-32 md:pb-20 px-4 sm:px-6">
-        <div className="max-w-4xl mx-auto">
-          {/* Profile Header */}
-          <motion.div
+    <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-20 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto">
+        
+        {/* Header Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* User Card */}
+          <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="card-swiss overflow-hidden mb-6 bg-white"
+            className="lg:col-span-2 card-swiss bg-white p-8 flex flex-col sm:flex-row items-start sm:items-center gap-6"
           >
-            {/* Banner */}
-            <div className="h-24 bg-black relative" />
+            <div className="relative">
+              {user.picture ? (
+                <Image
+                  src={user.picture}
+                  alt={user.name || "Profile"}
+                  width={100}
+                  height={100}
+                  className="rounded-full border border-[#E5E5E5]"
+                />
+              ) : (
+                <div className="w-24 h-24 rounded-full bg-[#F2F2F2] flex items-center justify-center border border-[#E5E5E5]">
+                  <span className="text-3xl font-bold text-[#666666]">{user.name?.charAt(0) || "U"}</span>
+                </div>
+              )}
+              <div className="absolute -bottom-2 -right-2 bg-black text-white text-[10px] font-mono px-2 py-1 rounded-full border-2 border-white">
+                LVL {karmaLevel}
+              </div>
+            </div>
             
-            {/* Profile Info */}
-            <div className="px-6 sm:px-8 pb-8 -mt-12 relative">
-              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6">
-                {/* Avatar */}
-                <div className="relative">
-                  {user.picture ? (
-                    <Image
-                      src={user.picture}
-                      alt={user.name || "Profile"}
-                      width={96}
-                      height={96}
-                      className="rounded-full border-4 border-white"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center text-white text-3xl font-bold border-4 border-white">
-                      {user.name?.charAt(0) || "U"}
-                    </div>
-                  )}
-                  {karmaLevel >= 5 && (
-                    <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white">
-                      <Trophy className="h-3.5 w-3.5 text-black" />
-                    </div>
-                  )}
+            <div className="flex-1">
+              <h1 className="text-3xl font-display font-bold text-[#111111] mb-1">{user.name}</h1>
+              <div className="flex items-center gap-2 text-[#666666] font-mono text-sm mb-4">
+                <Mail className="w-4 h-4" />
+                {user.email}
+              </div>
+              
+              {/* Karma Progress */}
+              <div className="max-w-md">
+                <div className="flex justify-between text-[10px] font-mono uppercase tracking-wider mb-1">
+                  <span>Karma Points</span>
+                  <span>{karmaProgress}/100 to Lvl {karmaLevel + 1}</span>
                 </div>
-                
-                {/* Name & Email */}
-                <div className="text-center sm:text-left flex-1 pb-2">
-                  <h1 className="text-2xl font-display font-bold text-[#111111] tracking-tight">{user.name}</h1>
-                  <p className="text-[#666666] flex items-center justify-center sm:justify-start gap-2 mt-1 text-sm font-mono">
-                    <Mail className="h-4 w-4" />
-                    {user.email}
-                  </p>
+                <div className="h-2 bg-[#F2F2F2] rounded-full overflow-hidden">
+                  <div 
+                    className="h-full bg-[#00C853]" 
+                    style={{ width: `${karmaProgress}%` }}
+                  />
                 </div>
+              </div>
+            </div>
 
-                {/* Logout Button */}
-                <div className="pb-2">
-                  <a 
-                    href="/auth/logout"
-                    className="btn-primary px-4 py-2 text-xs flex items-center gap-2"
-                  >
-                    <LogOut className="h-3 w-3" />
-                    DISCONNECT
-                  </a>
+            <div className="flex flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
+              <button className="btn-outline py-2 text-xs w-full sm:w-auto">
+                EDIT PROFILE
+              </button>
+              <a href="/auth/logout" className="btn-primary py-2 text-xs w-full sm:w-auto text-center bg-red-600 hover:bg-red-700 border-red-600">
+                SIGN OUT
+              </a>
+            </div>
+          </motion.div>
+
+          {/* Stats Card */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="card-swiss bg-white p-8 flex flex-col justify-center"
+          >
+            <h3 className="label-caps mb-6">LIFETIME STATS</h3>
+            <div className="grid grid-cols-2 gap-y-8 gap-x-4">
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsReported}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Radio className="w-3 h-3" /> LOST
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsFound}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> FOUND
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsResolved}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> RESOLVED
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{karma}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Trophy className="w-3 h-3" /> KARMA
                 </div>
               </div>
             </div>
           </motion.div>
+        </div>
 
-          {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-            {/* Karma Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="card-swiss p-6 bg-white"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-xs font-bold font-mono text-[#666666] uppercase tracking-wider">Karma Score</h3>
-                <TrendingUp className="h-4 w-4 text-green-600" />
-              </div>
-              <div className="flex items-end gap-2 mb-2">
-                <span className="text-4xl font-display font-bold text-[#111111]">{karma}</span>
-                <span className="text-sm font-mono text-[#666666] mb-1.5">PTS</span>
-              </div>
-              <div className="w-full bg-[#FFFFFF] h-1.5 rounded-full overflow-hidden">
-                <div 
-                  className="bg-black h-full rounded-full" 
-                  style={{ width: `${karmaProgress}%` }}
-                />
-              </div>
-              <p className="text-[10px] font-mono text-[#666666] mt-2 text-right">
-                LEVEL {karmaLevel} • {100 - karmaProgress} PTS TO NEXT
-              </p>
-            </motion.div>
-
-            {/* Activity Stats */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="card-swiss p-6 bg-white md:col-span-2"
-            >
-              <h3 className="text-xs font-bold font-mono text-[#666666] uppercase tracking-wider mb-6">Activity Overview</h3>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-4 bg-[#FFFFFF] border border-[#E5E5E5]">
-                  <Package className="h-5 w-5 mx-auto mb-2 text-[#666666]" />
-                  <div className="text-2xl font-bold font-display">{itemsReported}</div>
-                  <div className="text-[10px] font-mono text-[#666666] uppercase">Reported</div>
-                </div>
-                <div className="text-center p-4 bg-[#FFFFFF] border border-[#E5E5E5]">
-                  <Search className="h-5 w-5 mx-auto mb-2 text-[#666666]" />
-                  <div className="text-2xl font-bold font-display">{itemsFound}</div>
-                  <div className="text-[10px] font-mono text-[#666666] uppercase">Found</div>
-                </div>
-                <div className="text-center p-4 bg-[#FFFFFF] border border-[#E5E5E5]">
-                  <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-green-600" />
-                  <div className="text-2xl font-bold font-display">{itemsResolved}</div>
-                  <div className="text-[10px] font-mono text-[#666666] uppercase">Resolved</div>
-                </div>
-              </div>
-            </motion.div>
+        {/* Content Tabs */}
+        <Tabs defaultValue="all" className="w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-display font-bold text-[#111111]">ACTIVITY HISTORY</h2>
+            <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto hidden sm:inline-flex">
+              <TabsTrigger value="all" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">ALL ITEMS</TabsTrigger>
+              <TabsTrigger value="lost" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">LOST</TabsTrigger>
+              <TabsTrigger value="found" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">FOUND</TabsTrigger>
+              <TabsTrigger value="resolved" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">RESOLVED</TabsTrigger>
+            </TabsList>
           </div>
 
-          {/* Recent Activity List */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-          >
-            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2">
-              <Clock className="h-4 w-4" />
-              RECENT LOGS
-            </h2>
-            
-            {items.length === 0 ? (
-              <div className="card-swiss p-12 text-center bg-white border-dashed">
-                <p className="text-[#666666] font-mono text-sm">NO ACTIVITY RECORDED</p>
-                <Link href="/report/lost" className="mt-4 inline-block text-xs font-bold underline decoration-2 underline-offset-4 hover:text-[#666666]">
-                  FILE FIRST REPORT
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {items.map((item) => (
-                  <div 
-                    key={item.id}
-                    className="card-swiss p-4 bg-white hover:border-black transition-colors group"
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="flex items-center gap-4">
-                        <div className={`w-2 h-2 rounded-full ${
-                          item.type === 'LOST' ? 'bg-red-500' : 'bg-blue-500'
-                        }`} />
-                        
-                        <div>
-                          <h3 className="font-bold text-sm">{item.title}</h3>
-                          <div className="flex items-center gap-3 mt-1">
-                            <span className="text-[10px] font-mono text-[#666666] flex items-center gap-1">
-                              <MapPin className="h-3 w-3" />
-                              {item.location_zone.replace('_', ' ')}
-                            </span>
-                            <span className="text-[10px] font-mono text-[#666666]">
-                              {format(new Date(item.created_at), 'MMM d, yyyy')}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
+          {/* Mobile Tabs (Select or Scroll) - Simplified for now, just hiding the list on mobile is bad UX, let's show it */}
+          <div className="sm:hidden mb-6 overflow-x-auto pb-2">
+            <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto inline-flex w-full">
+              <TabsTrigger value="all" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">ALL</TabsTrigger>
+              <TabsTrigger value="lost" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">LOST</TabsTrigger>
+              <TabsTrigger value="found" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">FOUND</TabsTrigger>
+              <TabsTrigger value="resolved" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">DONE</TabsTrigger>
+            </TabsList>
+          </div>
 
-                      <div className="flex items-center gap-4">
-                        <span className={`text-[10px] font-mono font-bold px-2 py-1 border ${
-                          item.status === 'RESOLVED'
-                            ? 'bg-green-50 text-green-700 border-green-200'
-                            : 'bg-[#FFFFFF] text-[#666666] border-[#E5E5E5]'
-                        }`}>
-                          {item.status}
-                        </span>
-                        <ArrowRight className="h-4 w-4 text-[#666666] group-hover:text-black transition-colors" />
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </motion.div>
-        </div>
+          <TabsContent value="all">
+            <ItemsGrid items={items} />
+          </TabsContent>
+          
+          <TabsContent value="lost">
+            <ItemsGrid items={items.filter(i => i.type === "LOST")} />
+          </TabsContent>
+          
+          <TabsContent value="found">
+            <ItemsGrid items={items.filter(i => i.type === "FOUND")} />
+          </TabsContent>
+          
+          <TabsContent value="resolved">
+            <ItemsGrid items={items.filter(i => i.status === "RESOLVED")} />
+          </TabsContent>
+        </Tabs>
+
       </div>
     </div>
+  );
+}
+
+function ItemsGrid({ items }: { items: Item[] }) {
+  if (items.length === 0) {
+    return (
+      <div className="text-center py-20 border border-dashed border-[#E5E5E5] rounded-lg bg-white">
+        <div className="w-16 h-16 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-4">
+          <Package className="w-8 h-8 text-[#666666]" />
+        </div>
+        <h3 className="text-lg font-bold text-[#111111] mb-2">NO ITEMS FOUND</h3>
+        <p className="text-[#666666] font-mono text-sm">NO ACTIVITY RECORDED IN THIS CATEGORY</p>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div 
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.05
+          }
+        }
+      }}
+      className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    >
+      {items.map((item) => (
+        <motion.div
+          key={item.id}
+          variants={{
+            hidden: { opacity: 0, y: 20 },
+            visible: { opacity: 1, y: 0 }
+          }}
+        >
+          <ItemCard item={item} />
+        </motion.div>
+      ))}
+    </motion.div>
   );
 }
