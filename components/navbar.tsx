@@ -23,6 +23,8 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname()
 
+  if (pathname === "/") return null
+
   return (
     <>
       {/* Desktop Top Bar */}
