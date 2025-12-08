@@ -87,7 +87,11 @@ export default async function ChatListPage() {
         ) : (
           <div className="space-y-4">
             {chats.map((chat: any) => {
-              const otherUser = chat.user_a_data.id === user.sub ? chat.user_b_data : chat.user_a_data
+              const userA = Array.isArray(chat.user_a_data) ? chat.user_a_data[0] : chat.user_a_data
+              const userB = Array.isArray(chat.user_b_data) ? chat.user_b_data[0] : chat.user_b_data
+              const item = Array.isArray(chat.item) ? chat.item[0] : chat.item
+              
+              const otherUser = userA.id === user.sub ? userB : userA
               
               return (
                 <Link 
@@ -119,14 +123,14 @@ export default async function ChatListPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-mono px-1.5 py-0.5 border ${
-                          chat.item.type === 'LOST' 
+                          item.type === 'LOST' 
                             ? 'bg-red-50 text-red-600 border-red-100' 
                             : 'bg-blue-50 text-blue-600 border-blue-100'
                         }`}>
-                          {chat.item.type}
+                          {item.type}
                         </span>
                         <p className="text-xs text-[#666666] truncate font-mono">
-                          REF: {chat.item.title}
+                          REF: {item.title}
                         </p>
                       </div>
                     </div>

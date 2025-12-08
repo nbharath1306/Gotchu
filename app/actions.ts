@@ -167,3 +167,58 @@ export async function submitReportAction(formData: FormData) {
   revalidatePath('/feed')
   return { success: true }
 }
+
+export async function startChat(itemId: string) {
+  const supabase = await createClient()
+  const session = await auth0.getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return { error: "Unauthorized" }
+  }
+
+  // 1. Fetch item to get owner
+  const { data: item, error: itemError } = await supabase
+    .from('items')
+    .select('user_id')
+    .eq('id', itemId)
+    .single()
+
+  if (itemError || !item) {
+    return { error: "Item not found" }
+  }
+
+  if (item.user_id === user.sub) {
+    return { error: "You cannot chat with yourself" }
+  }
+
+  // 2. Check if chat already exists
+  const { data: existingChat, error: chatError } = await supabase
+    .from('chats')
+    .select('id')
+    .eq('item_id', itemId)
+    .or(`and(user_a.eq.${user.sub},user_b.eq.${item.user_id}),and(user_a.eq.${item.user_id},user_b.eq.${user.sub})`)
+    .single()
+
+  if (existingChat) {
+    return { chatId: existingChat.id }
+  }
+
+  // 3. Create new chat
+  const { data: newChat, error: createError } = await supabase
+    .from('chats')
+    .insert({
+      item_id: itemId,
+      user_a: user.sub,
+      user_b: item.user_id
+    })
+    .select()
+    .single()
+
+  if (createError) {
+    console.error("Create chat error:", createError)
+    return { error: "Failed to create chat" }
+  }
+
+  return { chatId: newChat.id }
+}
