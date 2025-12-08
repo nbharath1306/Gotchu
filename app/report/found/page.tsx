@@ -120,6 +120,19 @@ export default function ReportFound() {
 
               <div className="space-y-2">
                 <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
+                  Category
+                </label>
+                <select name="category" required className="input-swiss w-full">
+                  <option value="">SELECT CATEGORY</option>
+                  <option value="Electronics">ELECTRONICS</option>
+                  <option value="ID">ID / CARDS</option>
+                  <option value="Keys">KEYS</option>
+                  <option value="Other">OTHER</option>
+                </select>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                   Location Zone
                 </label>
                 <select name="location" required className="input-swiss w-full">

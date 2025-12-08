@@ -113,6 +113,7 @@ export async function submitReportAction(formData: FormData) {
 
   const title = formData.get("title") as string
   const description = formData.get("description") as string
+  const category = formData.get("category") as string
   const location = formData.get("location") as string
   const date = formData.get("date") as string
   const type = formData.get("type") as "LOST" | "FOUND"
@@ -151,6 +152,7 @@ export async function submitReportAction(formData: FormData) {
     .insert({
       title,
       description,
+      category,
       location_zone: location,
       date_reported: date,
       image_url: imageUrl,
