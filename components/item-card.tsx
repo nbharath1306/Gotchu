@@ -36,7 +36,7 @@ export function ItemCard({ item, index = 0 }: ItemCardProps) {
       <Link href={`/chat/${item.id}`}>
         <div className="card-swiss p-0 overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all duration-200">
           {item.image_url && (
-            <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-paper)]">
+            <div className="relative aspect-[4/3] overflow-hidden bg-[#F2F2F2]">
               <img src={item.image_url} alt={item.title} className="img-sharp w-full h-full" />
               <div className="absolute top-3 right-3">
                 {isResolved ? (
@@ -51,7 +51,7 @@ export function ItemCard({ item, index = 0 }: ItemCardProps) {
           )}
           
           {!item.image_url && (
-            <div className="aspect-[4/3] bg-[var(--bg-paper)] flex items-center justify-center relative border-b border-[var(--border-default)]">
+            <div className="aspect-[4/3] bg-[#F2F2F2] flex items-center justify-center relative border-b border-[#E5E5E5]">
               <span className="text-6xl grayscale opacity-50 group-hover:scale-110 transition-transform duration-300">
                 {categoryEmojis[item.category] || "📦"}
               </span>
@@ -69,18 +69,18 @@ export function ItemCard({ item, index = 0 }: ItemCardProps) {
 
           <div className="p-5">
             <div className="flex justify-between items-start mb-3">
-              <h3 className="font-bold text-lg text-[var(--text-primary)] leading-tight line-clamp-1 group-hover:underline decoration-2 underline-offset-4">
+              <h3 className="font-bold text-lg text-[#111111] leading-tight line-clamp-1 group-hover:underline decoration-2 underline-offset-4">
                 {item.title}
               </h3>
-              <ArrowUpRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-[var(--text-primary)] transition-colors" />
+              <ArrowUpRight className="w-4 h-4 text-[#666666] group-hover:text-[#111111] transition-colors" />
             </div>
             
             <div className="space-y-2">
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#666666]">
                 <MapPin className="w-3 h-3" />
                 <span className="truncate uppercase tracking-wide">{item.location_zone}</span>
               </div>
-              <div className="flex items-center gap-2 text-xs font-mono text-[var(--text-secondary)]">
+              <div className="flex items-center gap-2 text-xs font-mono text-[#666666]">
                 <Clock className="w-3 h-3" />
                 <span>{formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}</span>
               </div>

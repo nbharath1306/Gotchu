@@ -13,7 +13,7 @@ export default async function ChatListPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-[var(--bg-paper)] flex items-center justify-center p-4">
+      <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center p-4">
         <div className="text-center">
           <h2 className="font-display font-bold text-xl mb-2">AUTHENTICATION REQUIRED</h2>
           <Link href="/auth/login" className="btn-primary inline-block px-6 py-2">
@@ -51,7 +51,7 @@ export default async function ChatListPage() {
   if (error) {
     console.error(error)
     return (
-      <div className="min-h-screen bg-[var(--bg-paper)] pt-24 px-4">
+      <div className="min-h-screen bg-[#F2F2F2] pt-24 px-4">
         <div className="max-w-2xl mx-auto text-center p-8 border border-red-200 bg-red-50 text-red-600 font-mono text-sm">
           SYSTEM ERROR: UNABLE TO LOAD CHANNELS
         </div>
@@ -60,26 +60,26 @@ export default async function ChatListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-paper)] pt-24 pb-12 px-4">
+    <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8 flex items-end justify-between border-b border-[var(--border-default)] pb-4">
+        <div className="mb-8 flex items-end justify-between border-b border-[#E5E5E5] pb-4">
           <div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-[var(--text-primary)]">
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-[#111111]">
               MESSAGES
             </h1>
-            <p className="text-[var(--text-secondary)] mt-1 font-mono text-xs uppercase tracking-wider">
+            <p className="text-[#666666] mt-1 font-mono text-xs uppercase tracking-wider">
               SECURE CHANNELS: {chats?.length || 0} ACTIVE
             </p>
           </div>
         </div>
 
         {(!chats || chats.length === 0) ? (
-          <div className="text-center py-20 border border-dashed border-[var(--border-default)]">
-            <div className="w-16 h-16 bg-[var(--bg-surface)] rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--border-default)]">
-              <MessageSquare className="h-6 w-6 text-[var(--text-secondary)]" />
+          <div className="text-center py-20 border border-dashed border-[#E5E5E5]">
+            <div className="w-16 h-16 bg-[#FFFFFF] rounded-full flex items-center justify-center mx-auto mb-6 border border-[#E5E5E5]">
+              <MessageSquare className="h-6 w-6 text-[#666666]" />
             </div>
-            <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 font-display">NO ACTIVE CHANNELS</h3>
-            <p className="text-[var(--text-secondary)] font-mono text-sm">INITIATE COMMUNICATION VIA FEED</p>
+            <h3 className="text-lg font-bold text-[#111111] mb-2 font-display">NO ACTIVE CHANNELS</h3>
+            <p className="text-[#666666] font-mono text-sm">INITIATE COMMUNICATION VIA FEED</p>
             <Link href="/feed" className="mt-6 inline-block btn-primary px-6 py-3 text-xs">
               BROWSE DATABASE
             </Link>
@@ -101,10 +101,10 @@ export default async function ChatListPage() {
                         <img 
                           src={otherUser.avatar_url} 
                           alt={otherUser.full_name}
-                          className="w-12 h-12 rounded-full border border-[var(--border-default)]"
+                          className="w-12 h-12 rounded-full border border-[#E5E5E5]"
                         />
                       ) : (
-                        <div className="w-12 h-12 rounded-full bg-[var(--bg-surface)] flex items-center justify-center text-[var(--text-primary)] font-bold border border-[var(--border-default)]">
+                        <div className="w-12 h-12 rounded-full bg-[#FFFFFF] flex items-center justify-center text-[#111111] font-bold border border-[#E5E5E5]">
                           {otherUser.full_name?.[0] || 'U'}
                         </div>
                       )}
@@ -113,7 +113,7 @@ export default async function ChatListPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="font-bold text-sm truncate pr-2">{otherUser.full_name}</h3>
-                        <span className="text-[10px] font-mono text-[var(--text-secondary)] whitespace-nowrap">
+                        <span className="text-[10px] font-mono text-[#666666] whitespace-nowrap">
                           {formatDistanceToNow(new Date(chat.created_at), { addSuffix: true })}
                         </span>
                       </div>
@@ -125,13 +125,13 @@ export default async function ChatListPage() {
                         }`}>
                           {chat.item.type}
                         </span>
-                        <p className="text-xs text-[var(--text-secondary)] truncate font-mono">
+                        <p className="text-xs text-[#666666] truncate font-mono">
                           REF: {chat.item.title}
                         </p>
                       </div>
                     </div>
 
-                    <ArrowRight className="w-4 h-4 text-[var(--text-secondary)] group-hover:text-black transition-colors" />
+                    <ArrowRight className="w-4 h-4 text-[#666666] group-hover:text-black transition-colors" />
                   </div>
                 </Link>
               )

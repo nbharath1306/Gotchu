@@ -21,7 +21,7 @@
 
 @layer base {
   body {
-    @apply bg-[var(--bg-paper)] text-[var(--text-primary)] font-sans;
+    @apply bg-[#F2F2F2] text-[#111111] font-sans;
   }
 }
 
@@ -51,27 +51,27 @@
   }
 
   .input-swiss {
-    @apply bg-white border border-[var(--border-default)] px-4 py-3 text-[var(--text-primary)] placeholder-[var(--text-muted)] focus:outline-none focus:border-black transition-colors duration-200 w-full;
+    @apply bg-white border border-[#E5E5E5] px-4 py-3 text-[#111111] placeholder-[#999999] focus:outline-none focus:border-black transition-colors duration-200 w-full;
   }
 
   .label-caps {
-    @apply text-[10px] font-mono uppercase tracking-widest text-[var(--text-secondary)];
+    @apply text-[10px] font-mono uppercase tracking-widest text-[#666666];
   }
 
   .pill-tag {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono border border-[var(--border-default)] bg-[var(--bg-paper)];
+    @apply px-2 py-1 rounded-full text-[10px] font-mono border border-[#E5E5E5] bg-[#F2F2F2];
   }
 
   .pill-lost {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[var(--accent-alert)] text-white;
+    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#FF3B30] text-white;
   }
 
   .pill-found {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[var(--accent-success)] text-white;
+    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#00C853] text-white;
   }
   
   .pill-resolved {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[var(--text-secondary)] text-white;
+    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#666666] text-white;
   }
 
   .grid-bg {

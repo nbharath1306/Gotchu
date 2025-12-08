@@ -15,7 +15,7 @@ export default function ReportFound() {
   const [success, setSuccess] = useState(false)
   const router = useRouter()
 
-  if (isLoading) return <div className="min-h-screen bg-[var(--bg-paper)]" />
+  if (isLoading) return <div className="min-h-screen bg-[#F2F2F2]" />
   
   if (!user) {
     router.push("/auth/login")
@@ -47,11 +47,11 @@ export default function ReportFound() {
   }
 
   return (
-    <div className="min-h-screen bg-[var(--bg-paper)] pt-24 pb-12 px-4">
+    <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-12 px-4">
       <div className="max-w-2xl mx-auto">
         <Link 
           href="/"
-          className="inline-flex items-center text-sm font-mono text-[var(--text-secondary)] hover:text-black mb-8 transition-colors"
+          className="inline-flex items-center text-sm font-mono text-[#666666] hover:text-black mb-8 transition-colors"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />
           RETURN TO FEED
@@ -62,15 +62,15 @@ export default function ReportFound() {
           animate={{ opacity: 1, y: 0 }}
           className="card-swiss p-8 md:p-12 bg-white"
         >
-          <div className="mb-8 border-b border-[var(--border-default)] pb-8">
+          <div className="mb-8 border-b border-[#E5E5E5] pb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-3 h-3 bg-blue-500 rounded-full animate-pulse" />
               <span className="font-mono text-xs font-bold text-blue-500 tracking-widest">REPORT TYPE: FOUND</span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-[var(--text-primary)]">
+            <h1 className="text-3xl md:text-4xl font-display font-bold text-[#111111]">
               ITEM SECURED
             </h1>
-            <p className="text-[var(--text-secondary)] mt-2">
+            <p className="text-[#666666] mt-2">
               Submit details for a found item. Thank you for your honesty.
             </p>
           </div>
@@ -88,13 +88,13 @@ export default function ReportFound() {
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold mb-2">REPORT FILED</h3>
-              <p className="text-[var(--text-secondary)] font-mono text-sm">REDIRECTING TO DATABASE...</p>
+              <p className="text-[#666666] font-mono text-sm">REDIRECTING TO DATABASE...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                     Item Name
                   </label>
                   <input
@@ -106,7 +106,7 @@ export default function ReportFound() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                     Date Found
                   </label>
                   <input
@@ -119,7 +119,7 @@ export default function ReportFound() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                   Location Zone
                 </label>
                 <select name="location" required className="input-swiss w-full">
@@ -134,7 +134,7 @@ export default function ReportFound() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                   Description
                 </label>
                 <textarea
@@ -147,7 +147,7 @@ export default function ReportFound() {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[var(--text-secondary)]">
+                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                   Evidence (Image)
                 </label>
                 <div className="relative">
@@ -157,16 +157,16 @@ export default function ReportFound() {
                     accept="image/*"
                     className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                   />
-                  <div className="border border-dashed border-[var(--border-default)] p-8 text-center hover:bg-[var(--bg-surface)] transition-colors">
-                    <Upload className="w-6 h-6 mx-auto mb-2 text-[var(--text-secondary)]" />
-                    <span className="text-sm font-mono text-[var(--text-secondary)]">
+                  <div className="border border-dashed border-[#E5E5E5] p-8 text-center hover:bg-[#FFFFFF] transition-colors">
+                    <Upload className="w-6 h-6 mx-auto mb-2 text-[#666666]" />
+                    <span className="text-sm font-mono text-[#666666]">
                       CLICK TO UPLOAD IMAGE
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-6 border-t border-[var(--border-default)]">
+              <div className="pt-6 border-t border-[#E5E5E5]">
                 <button
                   type="submit"
                   disabled={loading}

@@ -22,16 +22,16 @@ export function AuthButton() {
 
   return (
     <div className="flex items-center gap-4">
-      <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-[var(--border-default)] rounded-full bg-white">
+      <div className="hidden md:flex items-center gap-2 px-3 py-1.5 border border-[#E5E5E5] rounded-full bg-white">
         <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-        <span className="text-xs font-mono text-[var(--text-secondary)] truncate max-w-[150px]">
+        <span className="text-xs font-mono text-[#666666] truncate max-w-[150px]">
           {user.email}
         </span>
       </div>
       
       <a
         href="/auth/logout"
-        className="p-2 text-[var(--text-secondary)] hover:text-black transition-colors"
+        className="p-2 text-[#666666] hover:text-black transition-colors"
         title="Sign Out"
       >
         <LogOut className="h-5 w-5" />

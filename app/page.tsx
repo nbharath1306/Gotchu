@@ -49,10 +49,10 @@ function Stats() {
           className="card-swiss p-6 md:p-8"
         >
           <div className="flex items-center gap-2 mb-4">
-            <stat.icon className="h-4 w-4 text-[var(--text-secondary)]" strokeWidth={2} />
+            <stat.icon className="h-4 w-4 text-[#666666]" strokeWidth={2} />
             <span className="label-caps">{stat.label}</span>
           </div>
-          <div className="number-display text-4xl md:text-5xl text-[var(--text-primary)]">
+          <div className="number-display text-4xl md:text-5xl text-[#111111]">
             {stat.value}
           </div>
         </motion.div>
@@ -76,11 +76,11 @@ function FeatureCard({
       variants={itemVariants}
       className="card-swiss p-8 group"
     >
-      <span className="label-caps text-[var(--accent-alert)] mb-4 block">{number}</span>
-      <h3 className="text-xl font-display font-bold text-[var(--text-primary)] mb-3 tracking-tight">
+      <span className="label-caps text-[#FF3B30] mb-4 block">{number}</span>
+      <h3 className="text-xl font-display font-bold text-[#111111] mb-3 tracking-tight">
         {title}
       </h3>
-      <p className="text-[var(--text-secondary)] leading-relaxed">
+      <p className="text-[#666666] leading-relaxed">
         {description}
       </p>
     </motion.div>
@@ -91,14 +91,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-[var(--bg-paper)]">
       {/* Top Bar */}
-      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-paper)]/80 backdrop-blur-xl border-b border-[var(--border-default)]">
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#F2F2F2]/80 backdrop-blur-xl border-b border-[#E5E5E5]">
         <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
-            <span className="font-display text-xl font-bold tracking-tight">GOTCHU</span>
+            <span className="font-display text-xl font-bold tracking-tight text-[#111111]">GOTCHU</span>
             <span className="pill-tag">BETA</span>
           </Link>
           <div className="flex items-center gap-2">
-            <Link href="/feed" className="text-sm font-medium hover:text-[var(--accent-blue)] transition-colors">Live Feed</Link>
+            <Link href="/feed" className="text-sm font-medium text-[#111111] hover:text-[#0055FF] transition-colors">Live Feed</Link>
           </div>
         </div>
       </header>
@@ -115,11 +115,11 @@ export default function Home() {
             <div className="lg:col-span-8">
               <motion.div variants={itemVariants} className="mb-8">
                 <span className="pill-tag mb-4 inline-block">CAMPUS PROTOCOL V2</span>
-                <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-8 text-[var(--text-primary)]">
+                <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-8 text-[#111111]">
                   LOST & FOUND<br />
                   REIMAGINED.
                 </h1>
-                <p className="text-xl md:text-2xl text-[var(--text-secondary)] max-w-2xl leading-relaxed font-light">
+                <p className="text-xl md:text-2xl text-[#666666] max-w-2xl leading-relaxed font-light">
                   A decentralized recovery system for the modern campus. 
                   Report items instantly. Track status in real-time.
                 </p>
@@ -189,17 +189,17 @@ export default function Home() {
           {/* CTA Section */}
           <motion.div 
             variants={itemVariants}
-            className="bg-[var(--text-primary)] text-white p-12 md:p-24 rounded-none relative overflow-hidden"
+            className="bg-[#111111] text-white p-12 md:p-24 rounded-none relative overflow-hidden"
           >
             <div className="relative z-10 max-w-3xl">
-              <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight">
+              <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight text-white">
                 READY TO RECOVER?
               </h2>
               <p className="text-lg text-gray-400 mb-8 max-w-xl">
                 Join thousands of students using Gotchu to keep their belongings safe.
               </p>
               <Link href="/feed">
-                <button className="bg-white text-black px-8 py-4 font-bold tracking-tight hover:bg-[var(--accent-blue)] hover:text-white transition-colors duration-300 flex items-center gap-2">
+                <button className="bg-white text-[#111111] px-8 py-4 font-bold tracking-tight hover:bg-[#0055FF] hover:text-white transition-colors duration-300 flex items-center gap-2">
                   BROWSE LIVE FEED
                   <ArrowUpRight className="w-5 h-5" />
                 </button>
