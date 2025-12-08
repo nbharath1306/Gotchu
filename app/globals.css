@@ -45,46 +45,55 @@
   /* Custom Animations */
   --animate-float: float 6s ease-in-out infinite;
   --animate-pulse-slow: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-aurora: aurora 10s linear infinite;
   
   @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
   }
+
+  @keyframes aurora {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+  }
 }
 
 :root {
-  --radius: 0.75rem;
-  --background: 210 40% 98%; /* Slate 50 - slightly cooler white */
-  --foreground: 222.2 84% 4.9%;
+  --radius: 1rem;
+  
+  /* Calm Future Base - Cool, Airy, Crisp */
+  --background: 210 50% 98%; /* Slightly cooler white */
+  --foreground: 220 40% 10%; /* Softer, deep navy-black */
   
   --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
+  --card-foreground: 220 40% 10%;
   
   --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
+  --popover-foreground: 220 40% 10%;
   
-  /* Circle13 Teal - Deep, Rich, Trustworthy */
-  --primary: 173 58% 39%; 
+  /* Primary: Electric Teal - Vibrant yet Professional */
+  --primary: 176 70% 41%; /* Brighter, more cyan-leaning teal */
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary - Cool Slate */
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
+  /* Secondary: Cool Mist */
+  --secondary: 210 30% 96%;
+  --secondary-foreground: 220 40% 20%;
   
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
+  --muted: 210 30% 96%;
+  --muted-foreground: 215 20% 50%;
   
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
+  --accent: 210 30% 96%;
+  --accent-foreground: 220 40% 20%;
   
-  --destructive: 0 84.2% 60.2%;
+  --destructive: 350 80% 60%; /* Softer, more modern red */
   --destructive-foreground: 210 40% 98%;
   
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 173 58% 39%;
+  --border: 214 20% 90%;
+  --input: 214 20% 90%;
+  --ring: 176 70% 41%;
   
-  --chart-1: 173 58% 39%;
+  --chart-1: 176 70% 41%;
   --chart-2: 12 76% 61%;
   --chart-3: 197 37% 24%;
   --chart-4: 43 74% 66%;
@@ -92,25 +101,25 @@
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
+  --background: 222 47% 11%; /* Deep Void Blue */
   --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
+  --card: 222 47% 11%;
   --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
+  --popover: 222 47% 11%;
   --popover-foreground: 210 40% 98%;
-  --primary: 173 58% 39%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
+  --primary: 176 70% 50%; /* Luminous Teal for dark mode */
+  --primary-foreground: 222 47% 11%;
+  --secondary: 217 32% 17%;
   --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
+  --muted: 217 32% 17%;
+  --muted-foreground: 215 20% 65%;
+  --accent: 217 32% 17%;
   --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
+  --destructive: 350 62% 30%;
   --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 173 58% 39%;
+  --border: 217 32% 17%;
+  --input: 217 32% 17%;
+  --ring: 176 70% 50%;
 }
 
 @layer base {
@@ -122,24 +131,22 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   
-  /* Typography Upgrades */
   h1, h2, h3, h4, h5, h6 {
-    @apply tracking-tight font-bold text-slate-900;
+    @apply tracking-tight font-bold text-slate-900 dark:text-slate-50;
   }
   
   h1 { @apply text-4xl md:text-5xl lg:text-6xl; }
   h2 { @apply text-3xl md:text-4xl; }
   h3 { @apply text-2xl; }
   
-  /* Selection Color */
   ::selection {
-    @apply bg-teal-100 text-teal-900;
+    @apply bg-teal-100 text-teal-900 dark:bg-teal-900 dark:text-teal-100;
   }
 }
 
 @layer utilities {
   .bg-noise {
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.04'/%3E%3C/svg%3E");
   }
   
   .text-balance {
@@ -147,10 +154,14 @@
   }
   
   .glass {
-    @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-xl;
+    @apply bg-white/60 backdrop-blur-xl border border-white/40 shadow-xl dark:bg-slate-900/60 dark:border-slate-800/40;
   }
   
   .glass-card {
-    @apply bg-white/80 backdrop-blur-md border border-slate-200/50 shadow-sm hover:shadow-md transition-all duration-300;
+    @apply bg-white/70 backdrop-blur-lg border border-white/50 shadow-sm hover:shadow-md transition-all duration-300 dark:bg-slate-900/70 dark:border-slate-800/50;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-teal-600 via-cyan-500 to-indigo-600 dark:from-teal-400 dark:via-cyan-300 dark:to-indigo-400;
   }
 }

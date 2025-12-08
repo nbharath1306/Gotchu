@@ -28,7 +28,7 @@ export default function Home() {
             
             <h1 className="text-6xl md:text-8xl font-bold text-slate-900 tracking-tight leading-[0.95] mb-8">
               Lost it? <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-600 via-teal-500 to-indigo-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-500 via-cyan-500 to-indigo-500 animate-aurora bg-[length:200%_auto]">
                 We've gotchu.
               </span>
             </h1>

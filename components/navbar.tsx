@@ -44,7 +44,7 @@ export function Navbar() {
         >
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 group shrink-0">
-            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-teal-500 to-teal-700 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-teal-900/20 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
+            <div className="relative w-9 h-9 rounded-xl bg-gradient-to-br from-teal-400 to-cyan-600 text-white flex items-center justify-center font-bold text-lg shadow-lg shadow-teal-900/20 transition-transform duration-300 group-hover:scale-105 group-hover:rotate-3">
               G
               <div className="absolute inset-0 rounded-xl bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity" />
             </div>

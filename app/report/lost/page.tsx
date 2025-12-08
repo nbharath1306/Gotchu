@@ -127,7 +127,7 @@ export default function ReportLostPage() {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/80 backdrop-blur-xl rounded-[2rem] shadow-2xl shadow-slate-200/50 border border-white/20 overflow-hidden"
           >
-            <div className="bg-gradient-to-r from-rose-500 to-rose-600 p-8 text-white relative overflow-hidden">
+            <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 p-8 text-white relative overflow-hidden">
               <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
               <div className="relative z-10">
                 <div className="w-12 h-12 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center mb-4 shadow-inner border border-white/10">

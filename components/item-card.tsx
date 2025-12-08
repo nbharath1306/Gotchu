@@ -25,10 +25,10 @@ const CategoryIcon = ({ category }: { category: string }) => {
 
 const CategoryGradient = (category: string) => {
   switch (category) {
-    case "Electronics": return "from-blue-500/10 to-indigo-500/10 text-blue-600";
-    case "ID": return "from-emerald-500/10 to-teal-500/10 text-emerald-600";
-    case "Keys": return "from-amber-500/10 to-orange-500/10 text-amber-600";
-    default: return "from-slate-500/10 to-gray-500/10 text-slate-600";
+    case "Electronics": return "from-blue-500/10 via-cyan-500/10 to-indigo-500/10 text-blue-600";
+    case "ID": return "from-emerald-500/10 via-teal-500/10 to-cyan-500/10 text-emerald-600";
+    case "Keys": return "from-amber-500/10 via-orange-500/10 to-rose-500/10 text-amber-600";
+    default: return "from-slate-500/10 via-gray-500/10 to-zinc-500/10 text-slate-600";
   }
 };
 
