@@ -38,7 +38,11 @@ export default function ReportLost() {
       }
 
       setSuccess(true)
-      setTimeout(() => router.push("/feed"), 2000)
+      if (result.itemId) {
+        setTimeout(() => router.push(`/item/${result.itemId}`), 2000)
+      } else {
+        setTimeout(() => router.push("/feed"), 2000)
+      }
     } catch (err: any) {
       setError(err.message)
     } finally {

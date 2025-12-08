@@ -82,7 +82,7 @@ export async function createItem(data: {
     return { error: "Unauthorized" }
   }
 
-  const { error } = await supabase.from("items").insert({
+  const { data: newItem, error } = await supabase.from("items").insert({
     type: data.type,
     title: data.title,
     description: data.description,
@@ -92,11 +92,15 @@ export async function createItem(data: {
     user_id: user.sub,
     status: "OPEN"
   })
+  .select()
+  .single()
 
   if (error) {
     console.error("Supabase insert error:", error)
     return { error: `Failed to submit report: ${error.message}` }
   }
+
+  return { success: true, itemId: newItem.id }
 
   revalidatePath('/feed')
   return { success: true }
@@ -147,7 +151,7 @@ export async function submitReportAction(formData: FormData) {
     imageUrl = publicUrl
   }
 
-  const { error: insertError } = await supabase
+  const { data: newItem, error: insertError } = await supabase
     .from("items")
     .insert({
       title,
@@ -160,6 +164,8 @@ export async function submitReportAction(formData: FormData) {
       user_id: user.sub,
       status: "OPEN"
     })
+    .select()
+    .single()
 
   if (insertError) {
     console.error("Insert error:", insertError)
@@ -167,7 +173,7 @@ export async function submitReportAction(formData: FormData) {
   }
 
   revalidatePath('/feed')
-  return { success: true }
+  return { success: true, itemId: newItem.id }
 }
 
 export async function startChat(itemId: string) {

@@ -31,6 +31,22 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const session = await auth0.getSession()
   const user = session?.user
 
+  // Validate UUID format to prevent "invalid input syntax" errors
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!params.id || !uuidRegex.test(params.id)) {
+    return (
+      <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Invalid Item ID</h1>
+          <p className="text-[#666666] mb-4">The item ID provided is not valid.</p>
+          <Link href="/feed" className="text-blue-600 hover:underline">
+            Back to Feed
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   const { data: itemData, error: itemError } = await supabase
     .from('items')
     .select('*')
