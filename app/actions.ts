@@ -194,12 +194,17 @@ export async function startChat(itemId: string) {
     return { error: "You cannot chat with yourself" }
   }
 
+  if (!item.user_id || !user.sub) {
+    console.error("Missing user IDs:", { itemOwner: item.user_id, currentUser: user.sub })
+    return { error: "Invalid user data" }
+  }
+
   // 2. Check if chat already exists
   const { data: existingChat, error: chatError } = await supabase
     .from('chats')
     .select('id')
     .eq('item_id', itemId)
-    .or(`and(user_a.eq.${user.sub},user_b.eq.${item.user_id}),and(user_a.eq.${item.user_id},user_b.eq.${user.sub})`)
+    .or(`and(user_a.eq."${user.sub}",user_b.eq."${item.user_id}"),and(user_a.eq."${item.user_id}",user_b.eq."${user.sub}")`)
     .single()
 
   if (existingChat) {
