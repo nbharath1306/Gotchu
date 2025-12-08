@@ -23,7 +23,7 @@ const CategoryIcon = ({ category }: { category: string }) => {
   }
 };
 
-const CategoryGradient = ({ category }: { category: string }) => {
+const CategoryGradient = (category: string) => {
   switch (category) {
     case "Electronics": return "from-blue-500/10 to-indigo-500/10 text-blue-600";
     case "ID": return "from-emerald-500/10 to-teal-500/10 text-emerald-600";
