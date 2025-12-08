@@ -16,14 +16,14 @@ export default async function FeedPage() {
   if (error) {
     console.error("Error fetching items:", error);
     return (
-      <div className="min-h-screen bg-slate-50 pt-24 flex items-center justify-center">
+      <div className="min-h-screen bg-[var(--bg-paper)] pt-24 flex items-center justify-center">
         <div className="text-center max-w-md mx-auto px-6">
-          <div className="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-6 w-6 text-rose-600" />
+          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+            <AlertCircle className="h-6 w-6 text-red-600" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-900 mb-2">Unable to load feed</h2>
-          <p className="text-slate-500">
-            We encountered an issue while fetching the latest items. Please try refreshing the page.
+          <h2 className="text-xl font-display font-bold text-[var(--text-primary)] mb-2">SYSTEM ERROR</h2>
+          <p className="text-[var(--text-secondary)] font-mono text-sm">
+            UNABLE TO RETRIEVE DATABASE RECORDS. REFRESH REQUIRED.
           </p>
         </div>
       </div>

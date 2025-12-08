@@ -1,109 +1,164 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-import { Item } from "@/types";
-import { ItemCard } from "./item-card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Search, Package } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Footer } from "@/components/footer";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react"
+import { Item } from "@/types"
+import { ItemCard } from "./item-card"
+import { Search, Radio, Shield, Layers, SlidersHorizontal } from "lucide-react"
+import { motion, AnimatePresence } from "framer-motion"
 
 interface FeedClientProps {
-  items: Item[];
+  items: Item[]
 }
 
-const filters = [
-  { value: "all", label: "All Items" },
-  { value: "LOST", label: "Lost" },
-  { value: "FOUND", label: "Found" },
-];
+const typeFilters = [
+  { value: "all", label: "ALL ITEMS", icon: Layers },
+  { value: "LOST", label: "LOST", icon: Radio },
+  { value: "FOUND", label: "FOUND", icon: Shield },
+]
 
-export function FeedClient({ items: initialItems }: FeedClientProps) {
-  const [items, setItems] = useState(initialItems);
-  const [activeFilter, setActiveFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+const locationFilters = [
+  { value: "all", label: "ALL ZONES" },
+  { value: "Innovation_Labs", label: "INNOVATION LABS" },
+  { value: "Canteen", label: "CANTEEN" },
+  { value: "Bus_Bay", label: "BUS BAY" },
+  { value: "Library", label: "LIBRARY" },
+  { value: "Hostels", label: "HOSTELS" },
+]
+
+export function FeedClient({ items }: FeedClientProps) {
+  const [searchQuery, setSearchQuery] = useState("")
+  const [typeFilter, setTypeFilter] = useState("all")
+  const [locationFilter, setLocationFilter] = useState("all")
+  const [showFilters, setShowFilters] = useState(false)
 
   const filteredItems = items.filter((item) => {
-    const matchesFilter = activeFilter === "all" || item.type === activeFilter;
-    const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.location_zone.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesFilter && matchesSearch && item.status !== "RESOLVED";
-  });
+    const matchesSearch = 
+      item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.description?.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesType = typeFilter === "all" || item.type === typeFilter
+    const matchesLocation = locationFilter === "all" || item.location_zone === locationFilter
+    return matchesSearch && matchesType && matchesLocation
+  })
 
   return (
-    <div className="min-h-screen bg-slate-50 bg-dot-pattern flex flex-col">
-      <div className="flex-1 pt-24 pb-20 px-4 sm:px-6">
+    <div className="min-h-screen bg-[var(--bg-paper)]">
+      <div className="pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
-            <div>
-              <h1 className="text-3xl font-bold text-slate-900 mb-2 tracking-tight">Community Feed</h1>
-              <p className="text-slate-500 max-w-xl">
-                Real-time updates on lost and found items across campus.
-              </p>
-            </div>
-            
-            <div className="flex items-center gap-2 text-sm text-slate-600 bg-white px-3 py-1.5 rounded-full border border-slate-200 shadow-sm">
-              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              {filteredItems.length} active items
-            </div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-12"
+          >
+            <h1 className="text-4xl md:text-6xl font-display font-bold mb-4 tracking-tight text-[var(--text-primary)]">
+              LIVE FEED
+            </h1>
+            <p className="text-[var(--text-secondary)] max-w-2xl text-lg">
+              Real-time database of reported items.
+            </p>
+          </motion.div>
 
-          {/* Controls */}
-          <div className="sticky top-20 z-30 mb-8">
-            <div className="bg-white p-2 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row gap-2">
+          {/* Search & Filters */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="sticky top-20 z-30 mb-12 bg-[var(--bg-paper)]/95 backdrop-blur-sm py-4 border-b border-[var(--border-default)]"
+          >
+            <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                <Input
-                  placeholder="Search by item, location, or category..."
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-[var(--text-secondary)]" />
+                <input
+                  type="text"
+                  placeholder="Search database..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9 h-10 bg-slate-50 border-slate-200 focus:bg-white"
+                  className="input-swiss pl-12"
                 />
               </div>
-              <div className="flex bg-slate-100 p-1 rounded-lg shrink-0 overflow-x-auto">
-                {filters.map((filter) => (
+              
+              <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
+                {typeFilters.map((filter) => (
                   <button
                     key={filter.value}
-                    onClick={() => setActiveFilter(filter.value)}
-                    className={cn(
-                      "px-4 py-1.5 text-sm font-medium rounded-md transition-all duration-200 whitespace-nowrap",
-                      activeFilter === filter.value
-                        ? "bg-white text-slate-900 shadow-sm"
-                        : "text-slate-500 hover:text-slate-900 hover:bg-slate-200/50"
-                    )}
+                    onClick={() => setTypeFilter(filter.value)}
+                    className={`flex items-center gap-2 px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${
+                      typeFilter === filter.value
+                        ? "bg-black text-white border-black"
+                        : "bg-white text-[var(--text-secondary)] border-[var(--border-default)] hover:border-black hover:text-black"
+                    }`}
                   >
+                    <filter.icon className="h-3 w-3" />
                     {filter.label}
                   </button>
                 ))}
+                
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-2 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all ${
+                    showFilters 
+                      ? "bg-black text-white border-black" 
+                      : "bg-white text-[var(--text-secondary)] border-[var(--border-default)] hover:border-black hover:text-black"
+                  }`}
+                >
+                  <SlidersHorizontal className="h-3 w-3" />
+                </button>
               </div>
             </div>
-          </div>
 
-          {/* Items Grid */}
-          {filteredItems.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <AnimatePresence mode="popLayout">
-                {filteredItems.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
-              </AnimatePresence>
-            </div>
-          ) : (
-            <div className="text-center py-20">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Package className="h-8 w-8 text-slate-400" />
+            {/* Expanded Filters */}
+            <AnimatePresence>
+              {showFilters && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="pt-4">
+                    <div className="flex flex-wrap gap-2">
+                      {locationFilters.map((filter) => (
+                        <button
+                          key={filter.value}
+                          onClick={() => setLocationFilter(filter.value)}
+                          className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest border transition-all ${
+                            locationFilter === filter.value
+                              ? "bg-black text-white border-black"
+                              : "bg-white text-[var(--text-secondary)] border-[var(--border-default)] hover:border-black"
+                          }`}
+                        >
+                          {filter.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+
+          {/* Grid */}
+          {filteredItems.length === 0 ? (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-center py-20 border border-dashed border-[var(--border-default)]"
+            >
+              <div className="w-16 h-16 bg-[var(--bg-surface)] rounded-full flex items-center justify-center mx-auto mb-6 border border-[var(--border-default)]">
+                <Search className="h-6 w-6 text-[var(--text-secondary)]" />
               </div>
-              <h3 className="text-lg font-medium text-slate-900 mb-1">No items found</h3>
-              <p className="text-slate-500">Try adjusting your search or filters.</p>
+              <h3 className="text-lg font-bold text-[var(--text-primary)] mb-2 font-display">NO SIGNALS DETECTED</h3>
+              <p className="text-[var(--text-secondary)] font-mono text-sm">ADJUST SEARCH PARAMETERS</p>
+            </motion.div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredItems.map((item, index) => (
+                <ItemCard key={item.id} item={item} index={index} />
+              ))}
             </div>
           )}
         </div>
       </div>
-      <Footer />
     </div>
-  );
+  )
 }

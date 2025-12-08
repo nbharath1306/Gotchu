@@ -1,100 +1,223 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Zap, HeartHandshake } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Footer } from "@/components/footer";
+import Link from "next/link"
+import { motion } from "framer-motion"
+import { 
+  ArrowRight,
+  ArrowUpRight,
+  Search,
+  Radio,
+  Shield,
+  CheckCircle2,
+  Users,
+  Clock,
+  Trophy
+} from "lucide-react"
+
+// Stagger animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2
+    }
+  }
+}
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 }
+}
+
+// Stats Component
+function Stats() {
+  const stats = [
+    { value: "500+", label: "ITEMS RETURNED", icon: CheckCircle2 },
+    { value: "2.5K", label: "ACTIVE USERS", icon: Users },
+    { value: "<24h", label: "AVG RETURN TIME", icon: Clock },
+    { value: "98%", label: "SUCCESS RATE", icon: Trophy },
+  ]
+  
+  return (
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {stats.map((stat, i) => (
+        <motion.div
+          key={stat.label}
+          variants={itemVariants}
+          className="card-swiss p-6 md:p-8"
+        >
+          <div className="flex items-center gap-2 mb-4">
+            <stat.icon className="h-4 w-4 text-[var(--text-secondary)]" strokeWidth={2} />
+            <span className="label-caps">{stat.label}</span>
+          </div>
+          <div className="number-display text-4xl md:text-5xl text-[var(--text-primary)]">
+            {stat.value}
+          </div>
+        </motion.div>
+      ))}
+    </div>
+  )
+}
+
+// Feature Card
+function FeatureCard({ 
+  number,
+  title, 
+  description,
+}: { 
+  number: string
+  title: string
+  description: string
+}) {
+  return (
+    <motion.div
+      variants={itemVariants}
+      className="card-swiss p-8 group"
+    >
+      <span className="label-caps text-[var(--accent-alert)] mb-4 block">{number}</span>
+      <h3 className="text-xl font-display font-bold text-[var(--text-primary)] mb-3 tracking-tight">
+        {title}
+      </h3>
+      <p className="text-[var(--text-secondary)] leading-relaxed">
+        {description}
+      </p>
+    </motion.div>
+  )
+}
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-slate-50 bg-dot-pattern font-sans">
-      {/* Hero Section */}
-      <section className="relative pt-32 pb-20 px-6">
-        <div className="max-w-5xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+    <div className="min-h-screen bg-[var(--bg-paper)]">
+      {/* Top Bar */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-paper)]/80 backdrop-blur-xl border-b border-[var(--border-default)]">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <span className="font-display text-xl font-bold tracking-tight">GOTCHU</span>
+            <span className="pill-tag">BETA</span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <Link href="/feed" className="text-sm font-medium hover:text-[var(--accent-blue)] transition-colors">Live Feed</Link>
+          </div>
+        </div>
+      </header>
+
+      <main className="pt-32 pb-20 px-6">
+        <motion.div 
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="max-w-7xl mx-auto"
+        >
+          {/* Hero Section */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32">
+            <div className="lg:col-span-8">
+              <motion.div variants={itemVariants} className="mb-8">
+                <span className="pill-tag mb-4 inline-block">CAMPUS PROTOCOL V2</span>
+                <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-8 text-[var(--text-primary)]">
+                  LOST & FOUND<br />
+                  REIMAGINED.
+                </h1>
+                <p className="text-xl md:text-2xl text-[var(--text-secondary)] max-w-2xl leading-relaxed font-light">
+                  A decentralized recovery system for the modern campus. 
+                  Report items instantly. Track status in real-time.
+                </p>
+              </motion.div>
+
+              <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
+                <Link href="/report/lost">
+                  <button className="btn-primary w-full sm:w-auto group">
+                    REPORT LOST ITEM
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                  </button>
+                </Link>
+                <Link href="/report/found">
+                  <button className="btn-outline w-full sm:w-auto">
+                    I FOUND SOMETHING
+                  </button>
+                </Link>
+              </motion.div>
+            </div>
+
+            <div className="lg:col-span-4 flex flex-col justify-end">
+              <motion.div variants={itemVariants} className="card-swiss p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <span className="label-caps">SYSTEM STATUS</span>
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 bg-[var(--accent-success)] rounded-full animate-pulse"></span>
+                    <span className="text-xs font-mono">OPERATIONAL</span>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--border-default)]">
+                    <span className="text-sm font-medium">Active Reports</span>
+                    <span className="font-mono">124</span>
+                  </div>
+                  <div className="flex justify-between items-center py-3 border-b border-[var(--border-default)]">
+                    <span className="text-sm font-medium">Recovered Today</span>
+                    <span className="font-mono">12</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-2">
+                    <span className="text-sm font-medium">Avg. Response</span>
+                    <span className="font-mono">~12m</span>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </div>
+
+          {/* Features Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-32">
+            <FeatureCard 
+              number="01"
+              title="INSTANT LOGGING"
+              description="Submit reports in seconds with our streamlined interface. Categorize, describe, and upload."
+            />
+            <FeatureCard 
+              number="02"
+              title="SMART MATCHING"
+              description="Our system automatically cross-references lost reports with found items to suggest matches."
+            />
+            <FeatureCard 
+              number="03"
+              title="SECURE HANDOFF"
+              description="Verify ownership and coordinate safe returns through our secure messaging protocol."
+            />
+          </div>
+
+          {/* CTA Section */}
+          <motion.div 
+            variants={itemVariants}
+            className="bg-[var(--text-primary)] text-white p-12 md:p-24 rounded-none relative overflow-hidden"
           >
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm mb-8">
-              <span className="flex h-2 w-2 rounded-full bg-green-500" />
-              <span className="text-xs font-semibold text-slate-600 uppercase tracking-wide">Circle13 Product</span>
+            <div className="relative z-10 max-w-3xl">
+              <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight">
+                READY TO RECOVER?
+              </h2>
+              <p className="text-lg text-gray-400 mb-8 max-w-xl">
+                Join thousands of students using Gotchu to keep their belongings safe.
+              </p>
+              <Link href="/feed">
+                <button className="bg-white text-black px-8 py-4 font-bold tracking-tight hover:bg-[var(--accent-blue)] hover:text-white transition-colors duration-300 flex items-center gap-2">
+                  BROWSE LIVE FEED
+                  <ArrowUpRight className="w-5 h-5" />
+                </button>
+              </Link>
             </div>
             
-            <h1 className="text-5xl md:text-7xl font-bold text-slate-900 tracking-tight mb-6">
-              Lost it? <br />
-              <span className="text-slate-500">We've gotchu.</span>
-            </h1>
-            
-            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed mb-10">
-              The reliable way to recover lost items on campus. 
-              Connect with honest students and get back what matters.
-            </p>
-
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/feed">
-                <Button size="lg" className="h-12 px-8 text-base rounded-lg">
-                  Browse Found Items
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/report/lost">
-                <Button size="lg" variant="outline" className="h-12 px-8 text-base rounded-lg">
-                  I Lost Something
-                </Button>
-              </Link>
+            {/* Abstract Grid Decoration */}
+            <div className="absolute top-0 right-0 w-1/2 h-full opacity-10">
+              <div className="w-full h-full grid grid-cols-6 grid-rows-6">
+                {[...Array(36)].map((_, i) => (
+                  <div key={i} className="border border-white/20" />
+                ))}
+              </div>
             </div>
           </motion.div>
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-4">Why students trust Gotchu</h2>
-            <p className="text-slate-500 text-lg">Built for safety, speed, and peace of mind.</p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {/* Feature 1 */}
-            <div className="card-clean p-8">
-              <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-6 text-slate-900">
-                <ShieldCheck className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Verified Community</h3>
-              <p className="text-slate-500 leading-relaxed">
-                Every report and claim is tied to a verified student ID. No anonymous posts, no scams. Just a safe community.
-              </p>
-            </div>
-
-            {/* Feature 2 */}
-            <div className="card-clean p-8">
-              <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-6 text-slate-900">
-                <Zap className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Lightning Fast</h3>
-              <p className="text-slate-500 leading-relaxed">
-                Most items are recovered within 24 hours. Our matching system alerts you instantly when a match is found.
-              </p>
-            </div>
-
-            {/* Feature 3 */}
-            <div className="card-clean p-8">
-              <div className="w-12 h-12 bg-slate-100 rounded-lg flex items-center justify-center mb-6 text-slate-900">
-                <HeartHandshake className="h-6 w-6" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-3">Honesty First</h3>
-              <p className="text-slate-500 leading-relaxed">
-                We reward honest students who return items. Building a culture of trust on campus, one item at a time.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <Footer />
+        </motion.div>
+      </main>
     </div>
-  );
+  )
 }

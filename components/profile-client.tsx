@@ -1,151 +1,238 @@
 "use client";
 
-import { useState } from "react";
-import { Item } from "@/types";
-import { ItemCard } from "./item-card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Package, LogOut, Star, Shield, MapPin, Trophy } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { Footer } from "@/components/footer";
+import Image from "next/image";
+import { 
+  Mail, 
+  Trophy,
+  TrendingUp,
+  Package,
+  CheckCircle2,
+  Search,
+  Eye,
+  Clock,
+  MapPin,
+  ArrowRight,
+  LogOut
+} from "lucide-react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import { format } from "date-fns";
+
+interface ProfileUser {
+  name?: string;
+  email?: string;
+  picture?: string;
+}
+
+interface ProfileData {
+  karma: number;
+}
+
+interface Item {
+  id: string;
+  title: string;
+  type: "LOST" | "FOUND";
+  status: "OPEN" | "RESOLVED";
+  category: string;
+  location_zone: string;
+  created_at: string;
+}
 
 interface ProfileClientProps {
-  user: {
-    name?: string | null;
-    email?: string | null;
-    picture?: string | null;
-  };
-  profile: {
-    karma?: number;
-  } | null;
+  user: ProfileUser;
+  profile: ProfileData | null;
   items: Item[];
 }
 
-const tabs = [
-  { value: "all", label: "All Activity" },
-  { value: "LOST", label: "Lost Items" },
-  { value: "FOUND", label: "Found Items" },
-  { value: "resolved", label: "Resolved" },
-];
-
 export function ProfileClient({ user, profile, items }: ProfileClientProps) {
-  const [activeTab, setActiveTab] = useState("all");
+  const karma = profile?.karma || 0;
+  const karmaLevel = Math.floor(karma / 100) + 1;
+  const karmaProgress = karma % 100;
 
-  const filteredItems = items.filter((item) => {
-    if (activeTab === "all") return true;
-    if (activeTab === "resolved") return item.status === "RESOLVED";
-    return item.type === activeTab && item.status !== "RESOLVED";
-  });
-
-  const initials = user.name
-    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
-    : "U";
+  const itemsReported = items.filter(i => i.type === "LOST").length;
+  const itemsFound = items.filter(i => i.type === "FOUND").length;
+  const itemsResolved = items.filter(i => i.status === "RESOLVED").length;
 
   return (
-    <div className="min-h-screen bg-slate-50/50 flex flex-col">
-      <div className="flex-1 pt-32 pb-20 px-4 sm:px-6">
-        <div className="max-w-5xl mx-auto">
-          
-          {/* Profile Header Card */}
-          <motion.div 
+    <div className="min-h-screen bg-[var(--bg-paper)]">
+      <div className="pt-24 md:pt-28 pb-32 md:pb-20 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          {/* Profile Header */}
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white rounded-[2rem] p-8 shadow-xl shadow-slate-200/50 mb-12 relative overflow-hidden border border-slate-100"
+            className="card-swiss overflow-hidden mb-6 bg-white"
           >
-            <div className="absolute inset-0 bg-noise opacity-[0.03] pointer-events-none" />
-            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-teal-600 to-teal-800" />
+            {/* Banner */}
+            <div className="h-24 bg-black relative" />
             
-            <div className="relative flex flex-col md:flex-row items-start md:items-end gap-8 pt-16">
-              <div className="relative">
-                <Avatar className="h-32 w-32 border-[6px] border-white shadow-2xl">
-                  <AvatarImage src={user.picture || ""} alt={user.name || "User"} />
-                  <AvatarFallback className="bg-slate-100 text-slate-600 text-3xl font-bold">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="absolute bottom-2 right-2 bg-teal-500 text-white p-1.5 rounded-full border-4 border-white shadow-sm">
-                  <Shield className="h-4 w-4" />
+            {/* Profile Info */}
+            <div className="px-6 sm:px-8 pb-8 -mt-12 relative">
+              <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 sm:gap-6">
+                {/* Avatar */}
+                <div className="relative">
+                  {user.picture ? (
+                    <Image
+                      src={user.picture}
+                      alt={user.name || "Profile"}
+                      width={96}
+                      height={96}
+                      className="rounded-full border-4 border-white"
+                    />
+                  ) : (
+                    <div className="w-24 h-24 rounded-full bg-black flex items-center justify-center text-white text-3xl font-bold border-4 border-white">
+                      {user.name?.charAt(0) || "U"}
+                    </div>
+                  )}
+                  {karmaLevel >= 5 && (
+                    <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center border-2 border-white">
+                      <Trophy className="h-3.5 w-3.5 text-black" />
+                    </div>
+                  )}
                 </div>
-              </div>
-              
-              <div className="flex-1 min-w-0 pb-2">
-                <h1 className="text-3xl font-bold text-slate-900 truncate tracking-tight mb-1">{user.name}</h1>
-                <p className="text-slate-500 truncate mb-6 text-lg">{user.email}</p>
                 
-                <div className="flex flex-wrap gap-3">
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 text-amber-700 border border-amber-100 font-medium shadow-sm">
-                    <Trophy className="h-4 w-4 fill-amber-500 text-amber-500" />
-                    {profile?.karma || 0} Karma Points
-                  </div>
-                  <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-50 text-slate-600 border border-slate-200 font-medium">
-                    <Shield className="h-4 w-4" />
-                    Verified Student
-                  </div>
+                {/* Name & Email */}
+                <div className="text-center sm:text-left flex-1 pb-2">
+                  <h1 className="text-2xl font-display font-bold text-[var(--text-primary)] tracking-tight">{user.name}</h1>
+                  <p className="text-[var(--text-secondary)] flex items-center justify-center sm:justify-start gap-2 mt-1 text-sm font-mono">
+                    <Mail className="h-4 w-4" />
+                    {user.email}
+                  </p>
+                </div>
+
+                {/* Logout Button */}
+                <div className="pb-2">
+                  <a 
+                    href="/auth/logout"
+                    className="btn-primary px-4 py-2 text-xs flex items-center gap-2"
+                  >
+                    <LogOut className="h-3 w-3" />
+                    DISCONNECT
+                  </a>
                 </div>
               </div>
-
-              <a href="/api/auth/logout" className="absolute top-6 right-6 md:static md:mb-2">
-                <Button variant="outline" className="rounded-xl border-slate-200 text-slate-600 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 transition-all shadow-sm">
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Sign Out
-                </Button>
-              </a>
             </div>
           </motion.div>
 
-          {/* Content Tabs */}
-          <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8">
-            <h2 className="text-2xl font-bold text-slate-900">Your Activity</h2>
-            <div className="flex bg-white p-1.5 rounded-xl shadow-sm border border-slate-200 overflow-x-auto max-w-full">
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  onClick={() => setActiveTab(tab.value)}
-                  className={cn(
-                    "px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 whitespace-nowrap",
-                    activeTab === tab.value
-                      ? "bg-slate-100 text-slate-900 shadow-sm"
-                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                  )}
-                >
-                  {tab.label}
-                </button>
-              ))}
-            </div>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            {/* Karma Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="card-swiss p-6 bg-white"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-xs font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider">Karma Score</h3>
+                <TrendingUp className="h-4 w-4 text-green-600" />
+              </div>
+              <div className="flex items-end gap-2 mb-2">
+                <span className="text-4xl font-display font-bold text-[var(--text-primary)]">{karma}</span>
+                <span className="text-sm font-mono text-[var(--text-secondary)] mb-1.5">PTS</span>
+              </div>
+              <div className="w-full bg-[var(--bg-surface)] h-1.5 rounded-full overflow-hidden">
+                <div 
+                  className="bg-black h-full rounded-full" 
+                  style={{ width: `${karmaProgress}%` }}
+                />
+              </div>
+              <p className="text-[10px] font-mono text-[var(--text-secondary)] mt-2 text-right">
+                LEVEL {karmaLevel} • {100 - karmaProgress} PTS TO NEXT
+              </p>
+            </motion.div>
+
+            {/* Activity Stats */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="card-swiss p-6 bg-white md:col-span-2"
+            >
+              <h3 className="text-xs font-bold font-mono text-[var(--text-secondary)] uppercase tracking-wider mb-6">Activity Overview</h3>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-4 bg-[var(--bg-surface)] border border-[var(--border-default)]">
+                  <Package className="h-5 w-5 mx-auto mb-2 text-[var(--text-secondary)]" />
+                  <div className="text-2xl font-bold font-display">{itemsReported}</div>
+                  <div className="text-[10px] font-mono text-[var(--text-secondary)] uppercase">Reported</div>
+                </div>
+                <div className="text-center p-4 bg-[var(--bg-surface)] border border-[var(--border-default)]">
+                  <Search className="h-5 w-5 mx-auto mb-2 text-[var(--text-secondary)]" />
+                  <div className="text-2xl font-bold font-display">{itemsFound}</div>
+                  <div className="text-[10px] font-mono text-[var(--text-secondary)] uppercase">Found</div>
+                </div>
+                <div className="text-center p-4 bg-[var(--bg-surface)] border border-[var(--border-default)]">
+                  <CheckCircle2 className="h-5 w-5 mx-auto mb-2 text-green-600" />
+                  <div className="text-2xl font-bold font-display">{itemsResolved}</div>
+                  <div className="text-[10px] font-mono text-[var(--text-secondary)] uppercase">Resolved</div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
-          {/* Items Grid */}
-          <AnimatePresence mode="popLayout">
-            {filteredItems.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="text-center py-24 bg-white rounded-[2rem] border border-dashed border-slate-200"
-              >
-                <div className="w-16 h-16 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                  <Package className="h-8 w-8 text-slate-300" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-1">No activity yet</h3>
-                <p className="text-slate-500">
-                  Items you report or resolve will appear here.
-                </p>
-              </motion.div>
+          {/* Recent Activity List */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-lg font-display font-bold mb-4 flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              RECENT LOGS
+            </h2>
+            
+            {items.length === 0 ? (
+              <div className="card-swiss p-12 text-center bg-white border-dashed">
+                <p className="text-[var(--text-secondary)] font-mono text-sm">NO ACTIVITY RECORDED</p>
+                <Link href="/report/lost" className="mt-4 inline-block text-xs font-bold underline decoration-2 underline-offset-4 hover:text-[var(--text-secondary)]">
+                  FILE FIRST REPORT
+                </Link>
+              </div>
             ) : (
-              <motion.div 
-                layout
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
-              >
-                {filteredItems.map((item) => (
-                  <ItemCard key={item.id} item={item} />
+              <div className="space-y-3">
+                {items.map((item) => (
+                  <div 
+                    key={item.id}
+                    className="card-swiss p-4 bg-white hover:border-black transition-colors group"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-2 h-2 rounded-full ${
+                          item.type === 'LOST' ? 'bg-red-500' : 'bg-blue-500'
+                        }`} />
+                        
+                        <div>
+                          <h3 className="font-bold text-sm">{item.title}</h3>
+                          <div className="flex items-center gap-3 mt-1">
+                            <span className="text-[10px] font-mono text-[var(--text-secondary)] flex items-center gap-1">
+                              <MapPin className="h-3 w-3" />
+                              {item.location_zone.replace('_', ' ')}
+                            </span>
+                            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
+                              {format(new Date(item.created_at), 'MMM d, yyyy')}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <span className={`text-[10px] font-mono font-bold px-2 py-1 border ${
+                          item.status === 'RESOLVED'
+                            ? 'bg-green-50 text-green-700 border-green-200'
+                            : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] border-[var(--border-default)]'
+                        }`}>
+                          {item.status}
+                        </span>
+                        <ArrowRight className="h-4 w-4 text-[var(--text-secondary)] group-hover:text-black transition-colors" />
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </motion.div>
+              </div>
             )}
-          </AnimatePresence>
+          </motion.div>
         </div>
       </div>
-      <Footer />
     </div>
   );
 }

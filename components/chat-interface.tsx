@@ -2,10 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { createClient } from "@/lib/supabase"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Send } from "lucide-react"
+import { Send, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
 interface Message {
@@ -36,7 +33,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }
 
   useEffect(() => {
-    // Fetch initial messages
     const fetchMessages = async () => {
       const { data } = await supabase
         .from('messages')
@@ -49,7 +45,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
     fetchMessages()
 
-    // Subscribe to new messages
     const channel = supabase
       .channel(`chat:${chatId}`)
       .on('postgres_changes', { 
@@ -58,7 +53,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         table: 'messages',
         filter: `chat_id=eq.${chatId}`
       }, (payload) => {
-        setMessages((prev) => [...prev, payload.new as Message])
+        setMessages((current) => [...current, payload.new as Message])
       })
       .subscribe()
 
@@ -71,7 +66,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     scrollToBottom()
   }, [messages])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
+  const handleSend = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMessage.trim()) return
 
@@ -80,45 +75,38 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       .insert({
         chat_id: chatId,
         sender_id: currentUserId,
-        content: newMessage
+        content: newMessage.trim()
       })
 
     if (error) {
-      console.error("Error sending message:", error)
-    } else {
-      setNewMessage("")
+      console.error('Error sending message:', error)
+      return
     }
+
+    setNewMessage("")
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-3xl mx-auto border-x bg-white dark:bg-zinc-950">
-      {/* Header */}
-      <div className="p-4 border-b flex items-center gap-3 bg-zinc-50 dark:bg-zinc-900">
-        <Avatar>
-          <AvatarImage src={otherUser.avatar_url} />
-          <AvatarFallback>{otherUser.full_name?.[0] || 'U'}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h2 className="font-semibold">{otherUser.full_name || 'Anonymous User'}</h2>
-          <p className="text-xs text-muted-foreground">Re: {itemTitle}</p>
-        </div>
-      </div>
-
-      {/* Messages Area */}
+    <div className="flex flex-col h-full bg-white">
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => {
-          const isMe = msg.sender_id === currentUserId
+        {messages.map((message) => {
+          const isOwn = message.sender_id === currentUserId
           return (
-            <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[70%] rounded-lg p-3 ${
-                isMe 
-                  ? 'bg-violet-600 text-white rounded-br-none' 
-                  : 'bg-zinc-100 dark:bg-zinc-800 rounded-bl-none'
-              }`}>
-                <p className="text-sm">{msg.content}</p>
-                <span className="text-[10px] opacity-70 block mt-1">
-                  {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
-                </span>
+            <div
+              key={message.id}
+              className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
+            >
+              <div
+                className={`max-w-[80%] p-3 border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] ${
+                  isOwn
+                    ? "bg-[#111111] text-white"
+                    : "bg-white text-[#111111]"
+                }`}
+              >
+                <p className="text-sm font-medium">{message.content}</p>
+                <p className={`text-[10px] mt-1 font-mono opacity-70 ${isOwn ? "text-gray-300" : "text-gray-500"}`}>
+                  {formatDistanceToNow(new Date(message.created_at), { addSuffix: true })}
+                </p>
               </div>
             </div>
           )
@@ -126,18 +114,24 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input Area */}
-      <form onSubmit={handleSendMessage} className="p-4 border-t bg-zinc-50 dark:bg-zinc-900 flex gap-2">
-        <Input 
-          value={newMessage}
-          onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Type a message..."
-          className="flex-1"
-        />
-        <Button type="submit" size="icon" disabled={!newMessage.trim()}>
-          <Send className="h-4 w-4" />
-        </Button>
-      </form>
+      <div className="p-4 bg-[#F2F2F2] border-t-2 border-[#111111]">
+        <form onSubmit={handleSend} className="flex gap-2">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            placeholder="Type a message..."
+            className="flex-1 p-3 bg-white border-2 border-[#111111] focus:outline-none focus:ring-0 focus:border-[#FF4F4F] transition-colors font-mono text-sm"
+          />
+          <button
+            type="submit"
+            disabled={!newMessage.trim()}
+            className="p-3 bg-[#111111] text-white border-2 border-[#111111] hover:bg-[#FF4F4F] hover:border-[#FF4F4F] disabled:opacity-50 disabled:hover:bg-[#111111] disabled:hover:border-[#111111] transition-all shadow-[2px_2px_0px_0px_#666666] hover:shadow-none hover:translate-x-[1px] hover:translate-y-[1px]"
+          >
+            <Send className="h-5 w-5" />
+          </button>
+        </form>
+      </div>
     </div>
   )
 }

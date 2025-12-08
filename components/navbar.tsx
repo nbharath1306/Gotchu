@@ -1,122 +1,82 @@
-"use client";
+"use client"
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { AuthButton } from "./auth-button";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { motion } from "framer-motion"
+import { 
+  Radio,
+  Shield,
+  Search,
+  Home,
+  User
+} from "lucide-react"
+import { AuthButton } from "./auth-button"
 
-const navLinks = [
-  { href: "/feed", label: "Feed" },
-  { href: "/report/lost", label: "Lost" },
-  { href: "/report/found", label: "Found" },
-];
+const navItems = [
+  { href: "/", label: "Home", icon: Home },
+  { href: "/feed", label: "Browse", icon: Search },
+  { href: "/report/lost", label: "Lost", icon: Radio, accent: "alert" },
+  { href: "/report/found", label: "Found", icon: Shield, accent: "success" },
+  { href: "/profile", label: "Profile", icon: User },
+]
 
 export function Navbar() {
-  const pathname = usePathname();
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 10);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  const pathname = usePathname()
 
   return (
     <>
-      <header
-        className={cn(
-          "fixed top-0 left-0 right-0 z-50 transition-all duration-200 border-b",
-          isScrolled
-            ? "bg-white/95 backdrop-blur-sm border-slate-200 shadow-sm"
-            : "bg-white border-transparent"
-        )}
-      >
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="w-8 h-8 rounded-lg bg-slate-900 text-white flex items-center justify-center font-bold text-lg">
-              G
-            </div>
-            <span className="font-bold text-xl text-slate-900 tracking-tight">Gotchu</span>
-          </Link>
-
-          {/* Desktop Links */}
-          <nav className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-sm font-medium transition-colors hover:text-slate-900",
-                    isActive ? "text-slate-900 font-semibold" : "text-slate-500"
-                  )}
-                >
-                  {link.label}
-                </Link>
-              );
-            })}
-          </nav>
-
-          {/* Right Side */}
-          <div className="hidden md:flex items-center gap-4">
-            <AuthButton />
-          </div>
-
-          {/* Mobile Toggle */}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="md:hidden"
-            onClick={() => setMobileOpen(!mobileOpen)}
-          >
-            {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+      {/* Desktop Top Bar */}
+      <nav className="nav-topbar hidden md:flex fixed top-0 left-0 right-0 z-50 bg-[var(--bg-paper)]/90 backdrop-blur-md border-b border-[var(--border-default)] h-16 items-center px-6 justify-between">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-3">
+          <span className="font-display text-xl font-bold tracking-tight text-[var(--text-primary)]">GOTCHU</span>
+          <span className="pill-tag">BETA</span>
+        </Link>
+        
+        {/* Center Nav Items */}
+        <div className="flex items-center gap-1">
+          {navItems.slice(0, 4).map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link key={item.href} href={item.href}>
+                <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  isActive 
+                    ? "bg-[var(--text-primary)] text-white" 
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+                }`}>
+                  {item.label}
+                </div>
+              </Link>
+            )
+          })}
         </div>
-      </header>
 
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {mobileOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="fixed inset-x-0 top-16 z-40 bg-white border-b border-slate-200 p-4 md:hidden shadow-lg"
-          >
-            <nav className="flex flex-col gap-2">
-              {navLinks.map((link) => {
-                const isActive = pathname === link.href;
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "px-4 py-3 rounded-lg text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-slate-100 text-slate-900"
-                        : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                    )}
-                  >
-                    {link.label}
-                  </Link>
-                );
-              })}
-              <div className="pt-4 mt-2 border-t border-slate-100">
-                <AuthButton />
-              </div>
-            </nav>
-          </motion.div>
-        )}
-      </AnimatePresence>
+        {/* Right Side */}
+        <div className="flex items-center gap-4">
+          <AuthButton />
+        </div>
+      </nav>
+
+      {/* Mobile Bottom Bar */}
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[var(--bg-surface)] border-t border-[var(--border-default)] pb-safe">
+        <div className="flex justify-around items-center h-16 px-2">
+          {navItems.map((item) => {
+            const isActive = pathname === item.href
+            return (
+              <Link key={item.href} href={item.href} className="flex-1">
+                <div className="flex flex-col items-center justify-center gap-1 py-2">
+                  <div className={`p-1.5 rounded-full transition-colors ${
+                    isActive ? "bg-[var(--text-primary)] text-white" : "text-[var(--text-secondary)]"
+                  }`}>
+                    <item.icon className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <span className="text-[10px] font-medium text-[var(--text-secondary)]">{item.label}</span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      </nav>
     </>
-  );
+  )
 }

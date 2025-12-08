@@ -9,7 +9,7 @@ export default async function ProfilePage() {
   const session = await auth0.getSession()
   
   if (!session?.user) {
-    redirect('/auth/login')
+    redirect('/login')
   }
 
   const user = session.user
@@ -30,9 +30,9 @@ export default async function ProfilePage() {
   return (
     <ProfileClient 
       user={{
-        name: user.name,
-        email: user.email,
-        picture: user.picture,
+        name: user.name || user.nickname || user.email?.split('@')[0] || 'User',
+        email: user.email || '',
+        picture: user.picture || '',
       }}
       profile={userData ? { karma: userData.karma_points } : null}
       items={userItems || []}

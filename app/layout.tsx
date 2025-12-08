@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter_Tight, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Auth0Provider } from '@auth0/nextjs-auth0/client';
@@ -7,14 +7,17 @@ import { Navbar } from "@/components/navbar";
 import { auth0 } from "@/lib/auth0";
 import { syncUser } from "@/lib/sync-user";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const interTight = Inter_Tight({
+  variable: "--font-inter-tight",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const spaceMono = Space_Mono({
+  variable: "--font-space-mono",
+  weight: ["400", "700"],
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -38,7 +41,7 @@ export default async function RootLayout({
     <html lang="en">
       <Auth0Provider user={session?.user}>
         <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+          className={`${interTight.variable} ${spaceMono.variable} antialiased bg-[#F2F2F2] text-black selection:bg-black selection:text-white`}
         >
           <Navbar />
           {children}

@@ -71,7 +71,8 @@ export async function createItem(data: {
   description?: string,
   category: string,
   location_zone: string,
-  bounty_text?: string
+  bounty_text?: string,
+  user_id: string
 }) {
   const supabase = await createClient()
   const session = await auth0.getSession();
@@ -95,6 +96,72 @@ export async function createItem(data: {
   if (error) {
     console.error("Supabase insert error:", error)
     return { error: `Failed to submit report: ${error.message}` }
+  }
+
+  revalidatePath('/feed')
+  return { success: true }
+}
+
+export async function submitReportAction(formData: FormData) {
+  const supabase = await createClient()
+  const session = await auth0.getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return { error: "Unauthorized" }
+  }
+
+  const title = formData.get("title") as string
+  const description = formData.get("description") as string
+  const location = formData.get("location") as string
+  const date = formData.get("date") as string
+  const type = formData.get("type") as "LOST" | "FOUND"
+  const imageFile = formData.get("image") as File
+
+  let imageUrl = null
+  if (imageFile && imageFile.size > 0) {
+    const fileExt = imageFile.name.split(".").pop()
+    const fileName = `${Math.random()}.${fileExt}`
+    
+    // Convert File to ArrayBuffer for upload
+    const arrayBuffer = await imageFile.arrayBuffer()
+    const buffer = new Uint8Array(arrayBuffer)
+
+    const { error: uploadError } = await supabase.storage
+      .from("items")
+      .upload(fileName, buffer, {
+        contentType: imageFile.type,
+        upsert: false
+      })
+
+    if (uploadError) {
+      console.error("Upload error:", uploadError)
+      return { error: "Failed to upload image" }
+    }
+    
+    const { data: { publicUrl } } = supabase.storage
+      .from("items")
+      .getPublicUrl(fileName)
+      
+    imageUrl = publicUrl
+  }
+
+  const { error: insertError } = await supabase
+    .from("items")
+    .insert({
+      title,
+      description,
+      location_zone: location,
+      date_reported: date,
+      image_url: imageUrl,
+      type,
+      user_id: user.sub,
+      status: "OPEN"
+    })
+
+  if (insertError) {
+    console.error("Insert error:", insertError)
+    return { error: insertError.message }
   }
 
   revalidatePath('/feed')
