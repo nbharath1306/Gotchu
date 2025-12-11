@@ -32,17 +32,16 @@ export default function ReportFound() {
 
     try {
       const result = await submitReportAction(formData)
-      
       if (result.error) {
         throw new Error(result.error)
       }
-
-      setSuccess(true)
-      if (result.itemId) {
-        setTimeout(() => router.push(`/item/${result.itemId}`), 2000)
-      } else {
-        setTimeout(() => router.push("/feed"), 2000)
+      if (!result.itemId || typeof result.itemId !== "string" || result.itemId.trim() === "") {
+        setError("Failed to create item: No valid item ID returned from server.");
+        setLoading(false);
+        return;
       }
+      setSuccess(true)
+      setTimeout(() => router.push(`/item/${result.itemId}`), 2000)
     } catch (err: any) {
       setError(err.message)
     } finally {
