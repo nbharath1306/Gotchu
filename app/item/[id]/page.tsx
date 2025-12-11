@@ -47,7 +47,8 @@ export default async function ItemPage({ params }: ItemPageProps) {
   }
 
   // Try both UUID and TEXT lookup for compatibility
-  let itemData = null, itemError = null;
+    let itemData = null;
+    let itemError = null;
   if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id)) {
     // Try UUID lookup first
     const result = await supabase
@@ -78,11 +79,13 @@ export default async function ItemPage({ params }: ItemPageProps) {
     itemError = resultText.error;
   }
 
-  const { data: itemData, error: itemError } = await supabase
-    .from('items')
-    .select('*')
-    .eq('id', params.id)
-    .single()
+    const resultFinal = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    itemData = resultFinal.data;
+    itemError = resultFinal.error;
 
   if (itemError || !itemData) {
     console.error("Error fetching item:", itemError)
