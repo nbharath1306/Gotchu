@@ -46,6 +46,38 @@ export default async function ItemPage({ params }: ItemPageProps) {
     )
   }
 
+  // Try both UUID and TEXT lookup for compatibility
+  let itemData = null, itemError = null;
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(params.id)) {
+    // Try UUID lookup first
+    const result = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    itemData = result.data;
+    itemError = result.error;
+    if (!itemData) {
+      // Try as TEXT if not found
+      const resultText = await supabase
+        .from('items')
+        .select('*')
+        .eq('id', params.id)
+        .single();
+      itemData = resultText.data;
+      itemError = resultText.error;
+    }
+  } else {
+    // Try as TEXT
+    const resultText = await supabase
+      .from('items')
+      .select('*')
+      .eq('id', params.id)
+      .single();
+    itemData = resultText.data;
+    itemError = resultText.error;
+  }
+
   const { data: itemData, error: itemError } = await supabase
     .from('items')
     .select('*')
