@@ -31,9 +31,8 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const session = await auth0.getSession()
   const user = session?.user
 
-  // Validate UUID format to prevent "invalid input syntax" errors
-  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  if (!params.id || !uuidRegex.test(params.id)) {
+  // Accept any non-empty string as a valid item ID
+  if (!params.id || typeof params.id !== "string" || params.id.trim() === "") {
     return (
       <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
         <div className="text-center">
