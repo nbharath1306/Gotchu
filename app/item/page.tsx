@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { ContactButton } from "@/components/contact-button"
 import type { Item } from "@/types"
 import { useSearchParams } from "next/navigation"
