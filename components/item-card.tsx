@@ -26,7 +26,11 @@ const categoryEmojis: Record<string, string> = {
 export function ItemCard({ item, index = 0 }: ItemCardProps) {
   const isLost = item.type === "LOST"
   const isResolved = item.status === "RESOLVED"
-  
+  // Debug log for item.id
+  if (typeof window !== "undefined") {
+    // eslint-disable-next-line no-console
+    console.log("[ItemCard] Rendering item with id:", item.id, item);
+  }
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

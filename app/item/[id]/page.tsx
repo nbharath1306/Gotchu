@@ -31,8 +31,14 @@ export default async function ItemPage({ params }: ItemPageProps) {
   const session = await auth0.getSession()
   const user = session?.user
 
+  // Debug log for params.id
+  // eslint-disable-next-line no-console
+  console.log("[ItemPage] params.id:", params.id);
+
   // Accept any non-empty string as a valid item ID
   if (!params.id || typeof params.id !== "string" || params.id.trim() === "") {
+    // eslint-disable-next-line no-console
+    console.log("[ItemPage] Invalid params.id:", params.id);
     return (
       <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
         <div className="text-center">
