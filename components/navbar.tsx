@@ -8,13 +8,15 @@ import {
   Shield,
   Search,
   Home,
-  User
+  User,
+  MessageSquare
 } from "lucide-react"
 import { AuthButton } from "./auth-button"
 
 const navItems = [
   { href: "/", label: "Home", icon: Home },
   { href: "/feed", label: "Browse", icon: Search },
+  { href: "/chat", label: "Messages", icon: MessageSquare },
   { href: "/report/lost", label: "Lost", icon: Radio, accent: "alert" },
   { href: "/report/found", label: "Found", icon: Shield, accent: "success" },
   { href: "/profile", label: "Profile", icon: User },
@@ -37,15 +39,16 @@ export function Navbar() {
         
         {/* Center Nav Items */}
         <div className="flex items-center gap-1">
-          {navItems.slice(0, 4).map((item) => {
+          {navItems.slice(0, 5).map((item) => {
             const isActive = pathname === item.href
             return (
               <Link key={item.href} href={item.href}>
-                <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
                   isActive 
                     ? "bg-[#111111] text-white" 
                     : "text-[#666666] hover:text-[#111111] hover:bg-[#FFFFFF]"
                 }`}>
+                  <item.icon className="w-5 h-5" />
                   {item.label}
                 </div>
               </Link>
