@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import { nanoid } from "nanoid"
 import { createClient } from "@/lib/supabase"
 import { Send, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
@@ -76,6 +77,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     const { error } = await supabase
       .from('messages')
       .insert({
+        id: nanoid(),
         chat_id: chatId,
         sender_id: currentUserId,
         content: messageToSend

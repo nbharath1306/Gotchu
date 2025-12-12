@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase-server"
 import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
+import { nanoid } from "nanoid";
 
 export async function resolveItem(itemId: string) {
   const supabase = await createClient()
@@ -82,7 +83,9 @@ export async function createItem(data: {
     return { error: "Unauthorized" }
   }
 
+  const itemId = nanoid();
   const { data: newItem, error } = await supabase.from("items").insert({
+    id: itemId,
     type: data.type,
     title: data.title,
     description: data.description,
@@ -170,9 +173,11 @@ export async function submitReportAction(formData: FormData) {
     }
 
     console.log("Inserting item into database...");
+    const itemId = nanoid();
     const { data: newItem, error: insertError } = await supabase
       .from("items")
       .insert({
+        id: itemId,
         title,
         description,
         category,
@@ -253,10 +258,12 @@ export async function startChat(itemId: string) {
     return { chatId: existingChat.id }
   }
 
-  // 3. Create new chat
+  // 3. Create new chat with unique id
+  const chatId = nanoid();
   const { data: newChat, error: createError } = await supabase
     .from('chats')
     .insert({
+      id: chatId,
       item_id: itemId,
       user_a: user.sub,
       user_b: item.user_id
