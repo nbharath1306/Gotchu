@@ -19,6 +19,7 @@ export function ContactButton({ itemId }: ContactButtonProps) {
     try {
       const result = await startChat(itemId)
       console.log("[ContactButton] startChat result:", result)
+      toast("Chat API result: " + JSON.stringify(result))
       if (result.error) {
         toast.error(result.error)
         setIsLoading(false)
