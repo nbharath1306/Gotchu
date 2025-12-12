@@ -15,12 +15,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const supabase = await createClient();
-    // Check if chat already exists
+    // Check if chat already exists (both user_a/user_b combinations)
     const { data: existing, error: findError } = await supabase
       .from('chats')
       .select('id')
       .eq('item_id', item_id)
-      .or(`user_a.eq.${user.sub},user_b.eq.${user.sub}`)
+      .or(`and(user_a.eq."${user.sub}",user_b.eq."${item.user_id}"),and(user_a.eq."${item.user_id}",user_b.eq."${user.sub}")`)
       .maybeSingle();
     if (findError) {
       return NextResponse.json({ error: findError.message }, { status: 500 });
