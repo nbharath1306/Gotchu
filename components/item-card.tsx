@@ -37,7 +37,7 @@ export function ItemCard({ item, index = 0 }: ItemCardProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.03, ease: "easeOut" }}
     >
-      <Link href={`/item/${item.id}`}>
+      <Link href={`/item?id=${item.id}`}>
         <div className="card-swiss p-0 overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all duration-200">
           {item.image_url && (
             <div className="relative aspect-[4/3] overflow-hidden bg-[#F2F2F2]">
