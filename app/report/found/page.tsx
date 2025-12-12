@@ -1,6 +1,7 @@
 "use client"
 
 import { useState } from "react"
+import { toast } from "sonner"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter } from "next/navigation"
 import { Upload, AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react"
@@ -33,17 +34,22 @@ export default function ReportFound() {
     try {
       const result = await submitReportAction(formData)
       if (result.error) {
+        toast.error(result.error)
         throw new Error(result.error)
       }
       if (!result.itemId || typeof result.itemId !== "string" || result.itemId.trim() === "") {
-        setError("Failed to create item: No valid item ID returned from server.");
+        const msg = "Failed to create item: No valid item ID returned from server.";
+        setError(msg);
+        toast.error(msg)
         setLoading(false);
         return;
       }
       setSuccess(true)
+      toast.success("Report filed! Redirecting...")
       setTimeout(() => router.push(`/item/${result.itemId}`), 2000)
     } catch (err: any) {
       setError(err.message)
+      toast.error(err.message)
     } finally {
       setLoading(false)
     }
