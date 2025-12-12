@@ -196,9 +196,9 @@ export async function submitReportAction(formData: FormData) {
       return { error: "Database error: " + insertError.message }
     }
 
-    if (!newItem) {
-      console.error("Insert succeeded but no item returned");
-      return { error: "Failed to retrieve created item" }
+    if (!newItem || !newItem.id || typeof newItem.id !== "string" || newItem.id.trim() === "") {
+      console.error("Insert succeeded but invalid or missing item ID", { newItem });
+      return { error: "Failed to create item: No valid item ID returned from database." }
     }
 
     console.log("Item created successfully:", newItem.id);
