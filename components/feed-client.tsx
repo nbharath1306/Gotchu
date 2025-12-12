@@ -32,6 +32,8 @@ export function FeedClient({ items }: FeedClientProps) {
   const [showFilters, setShowFilters] = useState(false)
 
   const filteredItems = items.filter((item) => {
+    // Exclude items with empty, null, or undefined IDs
+    if (!item.id || typeof item.id !== "string" || item.id.trim() === "") return false;
     const matchesSearch = 
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase())
