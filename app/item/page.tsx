@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import type { Item } from "@/types"
 import { useSearchParams } from "next/navigation"
@@ -22,6 +23,7 @@ const categoryEmojis: Record<string, string> = {
 
 export default function ItemPageClient() {
   const params = useSearchParams()
+  const router = useRouter()
   const id = params.get("id")
   const [item, setItem] = useState<Item | null>(null)
   const [error, setError] = useState("")
@@ -62,6 +64,30 @@ export default function ItemPageClient() {
     </div>
   )
   if (!item) return null
+
+  const [contactLoading, setContactLoading] = useState(false)
+  const handleContact = async () => {
+    if (!id) return
+    setContactLoading(true)
+    try {
+      const res = await fetch("/api/start-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: id })
+      })
+      const data = await res.json()
+      if (!res.ok || data.error) {
+        toast.error(data.error || "Failed to start chat")
+        setContactLoading(false)
+        return
+      }
+      toast.success(data.created ? "Chat started!" : "Chat already exists.")
+      router.push(`/chat/${data.chatId}`)
+    } catch (e: any) {
+      toast.error(e.message || "Failed to start chat")
+      setContactLoading(false)
+    }
+  }
 
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-20 px-4 sm:px-6">
@@ -108,6 +134,13 @@ export default function ItemPageClient() {
                 <p>{item.description || "No description provided."}</p>
               </div>
               {/* No bounty_text in Item type, so skip reward section */}
+              <button
+                onClick={handleContact}
+                disabled={contactLoading}
+                className="btn-primary w-full py-3 mt-4 text-lg font-bold disabled:opacity-60"
+              >
+                {contactLoading ? "Starting chat..." : "Contact Owner"}
+              </button>
             </div>
           </div>
         </div>
