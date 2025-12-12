@@ -33,7 +33,6 @@ export default function ItemPageClient() {
     if (!id) {
       setError("No item ID provided in URL.")
       setLoading(false)
-      toast.error("No item ID provided in URL.")
       return
     }
     fetch(`/api/item?id=${id}`)
@@ -41,14 +40,12 @@ export default function ItemPageClient() {
       .then(data => {
         if (data.error) {
           setError(data.error)
-          toast.error(data.error)
         } else {
           setItem(data.item)
         }
       })
       .catch(() => {
         setError("Failed to fetch item.")
-        toast.error("Failed to fetch item.")
       })
       .finally(() => setLoading(false))
   }, [id])
