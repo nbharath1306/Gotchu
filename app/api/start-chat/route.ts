@@ -15,6 +15,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const supabase = await createClient();
+    // Fetch item to get owner
+    const { data: item, error: itemError } = await supabase
+      .from('items')
+      .select('user_id')
+      .eq('id', item_id)
+      .single();
+    if (itemError || !item) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
+    }
+    if (item.user_id === user.sub) {
+      return NextResponse.json({ error: 'Cannot start chat with yourself' }, { status: 400 });
+    }
     // Check if chat already exists (both user_a/user_b combinations)
     const { data: existing, error: findError } = await supabase
       .from('chats')
@@ -27,18 +39,6 @@ export async function POST(req: NextRequest) {
     }
     if (existing) {
       return NextResponse.json({ chatId: existing.id, created: false });
-    }
-    // Fetch item to get owner
-    const { data: item, error: itemError } = await supabase
-      .from('items')
-      .select('user_id')
-      .eq('id', item_id)
-      .single();
-    if (itemError || !item) {
-      return NextResponse.json({ error: 'Item not found' }, { status: 404 });
-    }
-    if (item.user_id === user.sub) {
-      return NextResponse.json({ error: 'Cannot start chat with yourself' }, { status: 400 });
     }
     // Create chat
     const { data, error } = await supabase
