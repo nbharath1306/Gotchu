@@ -1,12 +1,13 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import type { Item } from "@/types"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { MapPin, Clock, ArrowLeft, Shield, Radio, Package } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
-const categoryEmojis = {
+const categoryEmojis: Record<string, string> = {
   Electronics: "📱",
   ID: "🪪",
   Keys: "🔑",
@@ -21,7 +22,7 @@ const categoryEmojis = {
 export default function ItemPageClient() {
   const params = useSearchParams()
   const id = params.get("id")
-  const [item, setItem] = useState(null)
+  const [item, setItem] = useState<Item | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
 
@@ -97,12 +98,7 @@ export default function ItemPageClient() {
               <div className="prose prose-lg text-[#666666] mb-8">
                 <p>{item.description || "No description provided."}</p>
               </div>
-              {item.bounty_text && (
-                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-8">
-                  <p className="text-yellow-800 font-bold text-sm uppercase tracking-wide mb-1">Reward</p>
-                  <p className="text-yellow-900 font-medium">{item.bounty_text}</p>
-                </div>
-              )}
+              {/* No bounty_text in Item type, so skip reward section */}
             </div>
           </div>
         </div>
