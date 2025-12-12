@@ -37,13 +37,13 @@ export default async function ItemPage({ params }: ItemPageProps) {
 
   // Accept any non-empty string as a valid item ID
   if (!params.id || typeof params.id !== "string" || params.id.trim() === "") {
-    // eslint-disable-next-line no-console
-    console.log("[ItemPage] Invalid params.id:", params.id);
+    // Show the actual value of params.id for debugging
     return (
       <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold mb-4">Invalid Item ID</h1>
-          <p className="text-[#666666] mb-4">The item ID provided is not valid: "{params.id}"</p>
+          <p className="text-[#666666] mb-4">The item ID provided is not valid: <span style={{color: 'red', fontWeight: 'bold'}}>{JSON.stringify(params.id)}</span></p>
+          <p className="text-[#666666] mb-4">(Debug: typeof params.id = {typeof params.id})</p>
           <Link href="/feed" className="text-blue-600 hover:underline">
             Back to Feed
           </Link>
