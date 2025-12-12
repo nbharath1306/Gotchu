@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
-import { nanoid } from "nanoid"
 import { createClient } from "@/lib/supabase"
 import { Send, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
@@ -74,19 +73,19 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     const messageToSend = newMessage.trim()
     setNewMessage("") // Optimistic clear
 
-    const { error } = await supabase
-      .from('messages')
-      .insert({
-        id: nanoid(),
-        chat_id: chatId,
-        sender_id: currentUserId,
-        content: messageToSend
+    try {
+      const res = await fetch("/api/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, content: messageToSend })
       })
-
-    if (error) {
+      if (!res.ok) {
+        const data = await res.json()
+        throw new Error(data.error || "Failed to send message")
+      }
+    } catch (error: any) {
       console.error('Error sending message:', error)
       setNewMessage(messageToSend) // Restore on error
-      return
     }
   }
 
