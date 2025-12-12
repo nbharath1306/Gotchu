@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { startChat } from "@/app/actions"
 import { MessageSquare, Loader2 } from "lucide-react"
+import { toast } from "sonner"
 
 interface ContactButtonProps {
   itemId: string
@@ -17,18 +18,21 @@ export function ContactButton({ itemId }: ContactButtonProps) {
     setIsLoading(true)
     try {
       const result = await startChat(itemId)
-      
+      console.log("[ContactButton] startChat result:", result)
       if (result.error) {
-        alert(result.error) // Simple error handling for now
+        toast.error(result.error)
+        setIsLoading(false)
         return
       }
-
       if (result.chatId) {
+        toast.success("Chat ready! Redirecting...")
         router.push(`/chat/${result.chatId}`)
+      } else {
+        toast.error("No chat ID returned from server.")
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Failed to start chat:", error)
-      alert("Something went wrong. Please try again.")
+      toast.error(error?.message || "Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
     }
