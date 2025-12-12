@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react"
 import { createClient } from "@/lib/supabase"
+import { toast } from "sonner"
 import { Send, User } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
@@ -81,11 +82,15 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       })
       if (!res.ok) {
         const data = await res.json()
-        throw new Error(data.error || "Failed to send message")
+        toast.error(data.error || "Failed to send message")
+        setNewMessage(messageToSend)
+        return
       }
+      toast.success("Message sent!")
     } catch (error: any) {
       console.error('Error sending message:', error)
-      setNewMessage(messageToSend) // Restore on error
+      toast.error(error.message || "Failed to send message")
+      setNewMessage(messageToSend)
     }
   }
 
