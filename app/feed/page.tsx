@@ -1,12 +1,11 @@
-import { createSupabaseServer } from "@/lib/supabase-server";
+import { createClient } from "@/lib/supabase-server";
 import { FeedClient } from "@/components/feed-client";
 import { Item } from "@/types";
 import { AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-export default async function FeedPage() {
-  const supabase = createSupabaseServer();
+  const supabase = await createClient();
   
   const { data: items, error } = await supabase
     .from("items")
