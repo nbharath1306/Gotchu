@@ -17,7 +17,9 @@ export async function POST(req: NextRequest) {
       console.log('[start-chat] Unauthorized');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const supabase = await createClient();
+    // Pass Auth0 ID token to Supabase for RLS
+    const jwt = session?.idToken || session?.accessToken;
+    const supabase = await createClient(jwt);
     // Fetch item to get owner
     const { data: item, error: itemError } = await supabase
       .from('items')
