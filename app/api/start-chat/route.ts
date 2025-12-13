@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     }
     // Pass Auth0 ID token to Supabase for RLS
     const jwt = session?.idToken || session?.accessToken;
-    const supabase = await createClient(jwt);
+    const supabase = await createClient(jwt as string | undefined);
     // Fetch item to get owner
     const { data: item, error: itemError } = await supabase
       .from('items')
