@@ -21,7 +21,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
   // Pass Auth0 ID token to Supabase for RLS
   const jwt = session?.idToken || session?.accessToken
-  const supabase = await createClient(jwt)
+  const supabase = await createClient(jwt as string | undefined)
 
   // Fetch chat details to verify access and get other user info
   const { data: chat, error } = await supabase
