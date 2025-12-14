@@ -24,7 +24,7 @@ const categoryEmojis: Record<string, string> = {
 export default function ItemPageClient() {
   const params = useSearchParams()
   const router = useRouter()
-  const id = params.get("id")
+  const id = params?.get("id")
   const [item, setItem] = useState<Item | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
