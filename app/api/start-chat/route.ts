@@ -7,11 +7,13 @@ export async function POST(req: NextRequest) {
   try {
     const { item_id } = await req.json();
     console.log('[start-chat] Input item_id:', item_id);
+    console.log('[start-chat] Request headers:', Object.fromEntries(req.headers.entries()));
     if (!item_id || typeof item_id !== 'string') {
       console.log('[start-chat] Invalid input');
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
     const session = await auth0.getSession();
+    console.log('[start-chat] Session:', session);
     const user = session?.user;
     if (!user) {
       console.log('[start-chat] Unauthorized');
