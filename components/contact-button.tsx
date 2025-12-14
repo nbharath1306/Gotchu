@@ -21,7 +21,8 @@ export function ContactButton({ itemId }: ContactButtonProps) {
       const res = await fetch("/api/start-chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: itemId })
+        body: JSON.stringify({ item_id: itemId }),
+        credentials: "include"
       })
       const result = await res.json()
       console.log("[ContactButton] startChat result:", result)
