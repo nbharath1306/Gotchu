@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!item_id || typeof item_id !== 'string') {
       return res.status(400).json({ error: 'Invalid input' });
     }
-    const session = await auth0.getSession(req, res);
+    const session = await auth0.getSession(req);
     if (!session || !session.user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
