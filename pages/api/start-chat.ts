@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getSession } from '@auth0/nextjs-auth0';
+import { auth0 } from '@/lib/auth0';
 import { nanoid } from 'nanoid';
 import { createClient } from '@/lib/supabase-server';
 
@@ -12,7 +12,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (!item_id || typeof item_id !== 'string') {
       return res.status(400).json({ error: 'Invalid input' });
     }
-    const session = getSession(req, res);
+    const session = await auth0.getSession(req, res);
     if (!session || !session.user) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
