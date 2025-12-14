@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { startChat } from "@/app/actions"
+// import { startChat } from "@/app/actions"
 import { MessageSquare, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -17,7 +17,13 @@ export function ContactButton({ itemId }: ContactButtonProps) {
   const handleContact = async () => {
     setIsLoading(true)
     try {
-      const result = await startChat(itemId)
+      // Call the API route directly to ensure session/JWT is present
+      const res = await fetch("/api/start-chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ item_id: itemId })
+      })
+      const result = await res.json()
       console.log("[ContactButton] startChat result:", result)
       toast("Chat API result: " + JSON.stringify(result))
       if (result.error) {
