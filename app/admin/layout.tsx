@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
 // Hardcoded Admins for MVP Safety (Add your email here)
+// Hardcoded Admins for MVP Safety (Add your email here)
 const ADMIN_EMAILS = [
-    "bharath.n@example.com", // Replace or add user's email dynamically if possible, but hardcoding is safest for MVP
-    // The user didn't give me their email, so I will rely on the DB Role check primarily, 
-    // but I'll add a log for them to see.
+    "n.bharath3430@gmail.com",
+    "amazingakhil2006@gmail.com",
+    "bharath.n@example.com"
 ];
 
 export default async function AdminLayout({
