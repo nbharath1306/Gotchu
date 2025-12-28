@@ -330,7 +330,3 @@ export async function deleteItem(itemId: string) {
 
   return { success: true }
 }
-revalidatePath('/profile')
-
-return { success: true }
-}
