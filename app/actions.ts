@@ -289,7 +289,7 @@ export async function deleteItem(itemId: string) {
     supabase = await createClient(token as string | undefined);
   }
 
-  // 1. Verify Ownership
+  // 2. Verify Ownership OR Admin Status
   const { data: item, error: fetchError } = await supabase
     .from('items')
     .select('user_id')
@@ -300,9 +300,16 @@ export async function deleteItem(itemId: string) {
     return { error: "Item not found" }
   }
 
-  // 2. Authorization Check (Allow Admin role in future, effectively strictly owner for now)
-  // TODO: Check user.role === 'ADMIN' if we want admins to delete any item here too.
-  if (item.user_id !== user.sub) {
+  // Check Admin Role from DB
+  const { data: dbUser } = await supabase
+    .from('users')
+    .select('role')
+    .eq('id', user.sub)
+    .single();
+
+  const isAdmin = dbUser?.role === 'ADMIN' || ["bharath.n@example.com"].includes(user.email); // Keep hardcoded list synced for safety
+
+  if (item.user_id !== user.sub && !isAdmin) {
     return { error: "You can only delete your own items" }
   }
 
@@ -319,6 +326,11 @@ export async function deleteItem(itemId: string) {
 
   revalidatePath('/feed')
   revalidatePath('/profile')
+  revalidatePath('/admin') // Revalidate admin dashboard too
 
   return { success: true }
+}
+revalidatePath('/profile')
+
+return { success: true }
 }
