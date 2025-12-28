@@ -39,6 +39,12 @@ interface ProfileClientProps {
   items: Item[];
 }
 
+const pointsToColor = (points: number) => {
+  if (points >= 500) return "bg-amber-500";
+  if (points >= 100) return "bg-indigo-500";
+  return "bg-emerald-500";
+};
+
 export function ProfileClient({ user, profile, items }: ProfileClientProps) {
   const karma = profile?.karma || 0;
   const itemsReported = items.filter(i => i.type === "LOST").length;
