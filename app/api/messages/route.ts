@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
         // SECURITY: Verify user is participant
         const { data: chat, error: chatError } = await supabase
             .from('chats')
-            .select('user_a, user_b')
+            .select('user_a, user_b, status, closure_requested_by')
             .eq('id', chat_id)
             .single();
 
@@ -53,7 +53,11 @@ export async function GET(req: NextRequest) {
             return NextResponse.json({ error: msgError.message }, { status: 500 });
         }
 
-        return NextResponse.json({ messages });
+        return NextResponse.json({
+            messages,
+            chatStatus: chat.status,
+            closureRequestedBy: chat.closure_requested_by
+        });
     } catch (error: any) {
         console.error("Fetch messages error:", error);
         return NextResponse.json({ error: 'Server error' }, { status: 500 });
