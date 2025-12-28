@@ -7,6 +7,22 @@ import { MessageSquare, ArrowRight, Search } from "lucide-react";
 export const dynamic = 'force-dynamic'
 
 export default async function ChatListPage() {
+  const session = await auth0.getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-[#F2F2F2] flex items-center justify-center p-4">
+        <div className="text-center">
+          <h2 className="font-display font-bold text-xl mb-2">AUTHENTICATION REQUIRED</h2>
+          <Link href="/auth/login" className="btn-primary inline-block px-6 py-2">
+            LOGIN
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   // Use Admin Client to bypass RLS token issues
   const { createAdminClient } = await import("@/lib/supabase-server");
   const supabase = await createAdminClient();
@@ -115,8 +131,8 @@ export default async function ChatListPage() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className={`text-[10px] font-mono px-1.5 py-0.5 border ${item.type === 'LOST'
-                            ? 'bg-red-50 text-red-600 border-red-100'
-                            : 'bg-blue-50 text-blue-600 border-blue-100'
+                          ? 'bg-red-50 text-red-600 border-red-100'
+                          : 'bg-blue-50 text-blue-600 border-blue-100'
                           }`}>
                           {item.type}
                         </span>
