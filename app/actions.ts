@@ -1,9 +1,10 @@
 "use server"
 
-import { createClient } from "@/lib/supabase-server"
+import { createClient, createAdminClient } from "@/lib/supabase-server"
 import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
 import { nanoid } from "nanoid";
+import { ensureUserExists } from "@/lib/users";
 
 export async function resolveItem(itemId: string) {
   const supabase = await createClient()
@@ -66,8 +67,6 @@ export async function resolveItem(itemId: string) {
   return { success: true }
 }
 
-// ... (imports)
-import { ensureUserExists } from "@/lib/users"; // Add this import at top if possible, but tool limits.
 
 export async function createItem(data: {
   type: 'LOST' | 'FOUND',
@@ -124,23 +123,32 @@ export async function submitReportAction(formData: FormData) {
     }
 
     if (!token) {
-      // Fallback to searching session properties just in case
       token = session?.accessToken;
     }
 
     // Pass token to createClient
-    const supabase = await createClient(token as string | undefined)
-    console.log("Supabase client created with token");
+    let supabase = await createClient(token as string | undefined)
+    let usingAdmin = false;
 
     if (!token) {
-      console.warn("WARNING: No Auth0 ID/Access Token found. Supabase RLS may fail.");
+      console.warn("WARNING: No Auth0 ID/Access Token found. Attempting Admin Client fallback...");
+      const adminClient = await createAdminClient();
+      if (adminClient) {
+        supabase = adminClient;
+        usingAdmin = true;
+        console.log("Fallback: Using Admin Client for database operations.");
+      } else {
+        console.error("Critical: No Token AND No Admin Key available.");
+      }
+    } else {
+      console.log("Supabase client created with token");
     }
 
     // Sync user to DB
     const syncResult = await ensureUserExists(supabase, user);
     if (!syncResult.success) {
       console.error("Failed to sync user to database:", syncResult.error);
-      return { error: `User Sync Failed: ${syncResult.error}. (Token present: ${!!token})` };
+      return { error: `User Sync Failed: ${syncResult.error}. (Token present: ${!!token}, Admin: ${usingAdmin})` };
     }
 
     const title = formData.get("title") as string
