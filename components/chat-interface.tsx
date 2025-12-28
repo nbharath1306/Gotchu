@@ -239,8 +239,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                       {new Date(message.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true })}
                     </span>
                     {isOwn && (
-                      <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" /> {/* Blue ticks for read (fake for now) */}
-                            )}
+                      <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />
+                    )}
                   </div>
                 </div>
               </div>
