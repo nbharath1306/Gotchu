@@ -9,6 +9,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { submitReportAction } from "@/app/actions"
 import { ImageUpload } from "@/components/image-upload"
+import { CalendarInput } from "@/components/ui/calendar-input"
 
 export default function ReportFound() {
   const { user, isLoading } = useUser()
@@ -120,11 +121,11 @@ export default function ReportFound() {
                   <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                     Date Found
                   </label>
-                  <input
+                  <CalendarInput
                     name="date"
-                    type="date"
                     required
-                    className="input-swiss w-full"
+                    className="input-swiss w-full bg-white"
+                    placeholder="Select date found"
                   />
                 </div>
               </div>
