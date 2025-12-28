@@ -52,8 +52,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     // Initial fetch
     fetchMessages()
 
-    // Poll every 3 seconds
-    const interval = setInterval(fetchMessages, 3000)
+    // Poll every 1 second for "live" feel
+    const interval = setInterval(fetchMessages, 1000)
 
     return () => clearInterval(interval)
   }, [chatId])
@@ -112,8 +112,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             >
               <div
                 className={`max-w-[80%] p-3 border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] ${isOwn
-                    ? "bg-[#111111] text-white"
-                    : "bg-white text-[#111111]"
+                  ? "bg-[#111111] text-white"
+                  : "bg-white text-[#111111]"
                   }`}
               >
                 <p className="text-sm font-medium">{message.content}</p>
