@@ -85,6 +85,8 @@ create table public.chats (
   user_a text references public.users(id) not null,
   user_b text references public.users(id) not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  status text default 'OPEN' check (status in ('OPEN', 'CLOSED')),
+  closure_requested_by text references public.users(id),
   unique(item_id, user_a, user_b)
 );
 
