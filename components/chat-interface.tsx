@@ -90,11 +90,20 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     if (!isLoading) scrollToBottom()
   }, [messages, isLoading])
 
-  // Auto-resize textarea
+  // Auto-resize textarea and Cap height
   useEffect(() => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto'
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px'
+    const textarea = textareaRef.current
+    if (textarea) {
+      // Reset to auto to get the correct scrollHeight for shrinkage
+      textarea.style.height = 'auto'
+
+      // Cap the height at 160px (approx 6-7 lines)
+      const newHeight = Math.min(textarea.scrollHeight, 160)
+
+      textarea.style.height = `${newHeight}px`
+
+      // Show scrollbar only if we hit the limit
+      textarea.style.overflowY = textarea.scrollHeight > 160 ? 'auto' : 'hidden'
     }
   }, [newMessage])
 
