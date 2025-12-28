@@ -1,4 +1,4 @@
-import { getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase-server";
 
@@ -14,7 +14,7 @@ export default async function AdminLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const session = await getSession();
+    const session = await auth0.getSession();
     const user = session?.user;
 
     if (!user) {

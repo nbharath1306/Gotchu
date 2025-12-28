@@ -1,9 +1,9 @@
 import { createAdminClient, createClient } from "@/lib/supabase-server";
-import { getSession } from "@auth0/nextjs-auth0";
+import { auth0 } from "@/lib/auth0";
 import { Shield, Users, Package, MessageSquare } from "lucide-react";
 
 export default async function AdminDashboard() {
-    const session = await getSession();
+    const session = await auth0.getSession();
     const user = session?.user;
 
     // Use Admin Client to fetch global stats (bypass RLS)
