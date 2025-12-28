@@ -18,7 +18,10 @@ import {
   CornerDownLeft,
   X,
   FileText,
-  Download
+  Download,
+  Camera,
+  Image as ImageIcon,
+  File
 } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
@@ -61,9 +64,13 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
+  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false) // New state for attachment menu
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+
+  // Refs for different inputs
+  const imageInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // --- UTILS ---
@@ -126,6 +133,9 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Close menu immediately
+    setIsAttachMenuOpen(false);
+
     // Determine Type
     const isImage = file.type.startsWith('image/')
     const msgType = isImage ? 'IMAGE' : 'FILE'
@@ -168,7 +178,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          content: isImage ? '' : file.name, // For files, content is filename
+          content: isImage ? '' : file.name,
           message_type: msgType,
           media_url: url
         })
@@ -181,7 +191,9 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       setMessages(prev => prev.filter(m => m.id !== optimisticId)) // Rollback optimistic
     } finally {
       setIsUploading(false)
+      // Clear both inputs
       if (fileInputRef.current) fileInputRef.current.value = ''
+      if (imageInputRef.current) imageInputRef.current.value = ''
     }
   }
 
@@ -194,7 +206,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
     if (textareaRef.current) textareaRef.current.style.height = 'auto'
 
-    // Optimistic Update
     const optimisticId = "opt-" + Math.random()
     setMessages(prev => [...prev, {
       id: optimisticId,
@@ -243,11 +254,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             alt="Sent image"
             className="block max-w-[280px] w-full h-auto object-cover rounded-lg"
           />
-          {isGrouped && (
-            <div className={`absolute bottom-2 ${isOwn ? 'left-2' : 'right-2'} opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-white/80 font-medium tabular-nums shadow-sm bg-black/30 px-1.5 py-0.5 rounded-full backdrop-blur-md`}>
-              {format(new Date(msg.created_at), 'h:mm a')}
-            </div>
-          )}
         </div>
       )
     }
@@ -294,7 +300,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
         `}>
         {msg.content}
-
         {isGrouped && (
           <div className={`
                     absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
@@ -381,47 +386,19 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 const timeDiff = prevMsg ? new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() : 0
                 const isGrouped = isSameSender && timeDiff < 5 * 60 * 1000
                 const showDateSeparator = !prevMsg || new Date(msg.created_at).toDateString() !== new Date(prevMsg.created_at).toDateString()
-
                 return (
                   <div key={msg.id} className="flex flex-col animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards" style={{ animationDelay: `${i * 0.05}s` }}>
-                    {showDateSeparator && (
-                      <div className="flex items-center justify-center my-6">
-                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">{format(new Date(msg.created_at), 'MMMM d, yyyy')}</span>
-                      </div>
-                    )}
+                    {showDateSeparator && <div className="flex items-center justify-center my-6"><span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">{format(new Date(msg.created_at), 'MMMM d, yyyy')}</span></div>}
                     <div className={`flex gap-3 group/msg ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${isGrouped ? 'mt-0.5' : 'mt-4'}`}>
-                      <div className="shrink-0 w-8 flex flex-col items-center">
-                        {!isGrouped ? <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>{isOwn ? 'Me' : otherUser.full_name?.[0]}</div> : <div className="w-8 h-full"></div>}
-                      </div>
+                      <div className="shrink-0 w-8 flex flex-col items-center">{!isGrouped ? <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>{isOwn ? 'Me' : otherUser.full_name?.[0]}</div> : <div className="w-8 h-full"></div>}</div>
                       <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                        {!isGrouped && (
-                          <div className="flex items-center gap-2 mb-1 px-1">
-                            <span className="text-[11px] font-bold text-gray-900">{isOwn ? 'You' : otherUser.full_name}</span>
-                            <span className="text-[10px] text-gray-400 tabular-nums">{format(new Date(msg.created_at), 'h:mm a')}</span>
-                          </div>
-                        )}
+                        {!isGrouped && <div className="flex items-center gap-2 mb-1 px-1"><span className="text-[11px] font-bold text-gray-900">{isOwn ? 'You' : otherUser.full_name}</span><span className="text-[10px] text-gray-400 tabular-nums">{format(new Date(msg.created_at), 'h:mm a')}</span></div>}
                         {renderMessageContent(msg, isOwn, isGrouped)}
                       </div>
                     </div>
                   </div>
                 )
               })}
-            </div>
-          )}
-
-          {chatStatus === 'CLOSED' && (
-            <div className="flex items-center justify-center py-6"><div className="flex items-center gap-3 px-5 py-3 bg-gray-50 border border-gray-200 rounded-lg"><CheckCheck className="w-5 h-5 text-gray-400" /><div className="text-sm text-gray-500 font-medium">This session has been marked as resolved.</div></div></div>
-          )}
-
-          {closureRequestedBy && chatStatus === 'OPEN' && (
-            <div className="flex items-center justify-center py-4 animate-in fade-in slide-in-from-bottom-2">
-              <div className="w-full bg-amber-50 border border-amber-100 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-amber-600" />
-                  <div><h4 className="text-sm font-semibold text-amber-900">Resolution Requested</h4><p className="text-xs text-amber-700/80">{closureRequestedBy === currentUserId ? "You requested to resolve this. Waiting for confirmation." : `${otherUser.full_name} wants to mark this as resolved.`}</p></div>
-                </div>
-                {closureRequestedBy !== currentUserId && <button onClick={handleEndSession} className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg transition-colors shadow-sm">Confirm Resolution</button>}
-              </div>
             </div>
           )}
           <div ref={messagesEndRef} className="h-4" />
@@ -432,10 +409,56 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       {chatStatus === 'OPEN' ? (
         <div className="bg-white border-t border-gray-100 p-4 sm:px-8 sm:py-6 sticky bottom-0 z-20">
           <div className="max-w-3xl mx-auto">
+
+            {/* ATTACHMENT MENU (Animated Popover) */}
+            {isAttachMenuOpen && (
+              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200 z-30">
+                {/* Photo / Camera Option */}
+                <button
+                  onClick={() => imageInputRef.current?.click()}
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                    <Camera className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Photo & Video</p>
+                    <p className="text-[10px] text-gray-400">Camera or Gallery</p>
+                  </div>
+                </button>
+
+                {/* Document Option */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <FileText className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Document</p>
+                    <p className="text-[10px] text-gray-400">PDF, Docs, etc.</p>
+                  </div>
+                </button>
+              </div>
+            )}
+
             <div className={`group flex gap-2 bg-white border rounded-xl p-2 transition-all duration-200 ${newMessage.trim() ? 'border-gray-300 shadow-sm' : 'border-gray-200 hover:border-gray-300'} focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-50`}>
-              <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileSelect} disabled={isUploading} />
-              <button onClick={() => fileInputRef.current?.click()} disabled={isUploading} className={`p-2 rounded-lg transition-colors ${isUploading ? 'text-gray-300' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}><Paperclip className="w-5 h-5 stroke-[1.5]" /></button>
-              <textarea ref={textareaRef} value={newMessage} onChange={handleInput} onKeyDown={handleKeyDown} placeholder="Type request or message..." className="flex-1 bg-transparent border-none resize-none px-2 py-2 text-[14px] leading-relaxed placeholder-gray-400 focus:ring-0" style={{ minHeight: '44px', maxHeight: '160px' }} rows={1} />
+
+              {/* Hidden Inputs */}
+              <input type="file" ref={imageInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} disabled={isUploading} />
+              <input type="file" ref={fileInputRef} className="hidden" accept="*" onChange={handleFileSelect} disabled={isUploading} />
+
+              {/* Attach Trigger */}
+              <button
+                onClick={() => setIsAttachMenuOpen(!isAttachMenuOpen)}
+                disabled={isUploading}
+                className={`p-2 rounded-lg transition-colors ${isUploading ? 'text-gray-300' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'} ${isAttachMenuOpen ? 'bg-gray-100 text-gray-900' : ''}`}
+              >
+                {isAttachMenuOpen ? <X className="w-5 h-5 stroke-[1.5]" /> : <Paperclip className="w-5 h-5 stroke-[1.5]" />}
+              </button>
+
+              <textarea ref={textareaRef} value={newMessage} onChange={handleInput} onKeyDown={handleKeyDown} onFocus={() => setIsAttachMenuOpen(false)} placeholder="Type request or message..." className="flex-1 bg-transparent border-none resize-none px-2 py-2 text-[14px] leading-relaxed placeholder-gray-400 focus:ring-0" style={{ minHeight: '44px', maxHeight: '160px' }} rows={1} />
               <button onClick={() => handleSend()} disabled={!newMessage.trim() || isUploading} className={`p-2 rounded-lg transition-all duration-200 flex items-center justify-center ${newMessage.trim() ? 'bg-gray-900 text-white shadow-sm hover:bg-black' : 'bg-gray-100 text-gray-300 cursor-not-allowed'}`}><CornerDownLeft className="w-4 h-4" /></button>
             </div>
             <div className="flex justify-between items-center mt-2 px-1"><div className="text-[10px] text-gray-400 font-medium tracking-tight"><span className="hidden sm:inline">Tip: </span><span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-gray-500 font-mono text-[9px] mx-1">⌘ + Enter</span>to send</div></div>
