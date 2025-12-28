@@ -25,9 +25,11 @@ export async function POST(req: NextRequest) {
         const supabase = await createAdminClient();
         if (!supabase) return NextResponse.json({ error: 'Server Config Error' }, { status: 500 });
 
-        // Generate path: chat-uploads/USER_ID/RANDOM_FILENAME
+        // Generate path: chat-uploads/SANITIZED_USER_ID/RANDOM_FILENAME
         const fileExt = file.name.split('.').pop();
-        const filename = `${session.user.sub}/${nanoid()}.${fileExt}`;
+        // Sanitize User ID (replace | and other special chars with _)
+        const sanitizedUserId = session.user.sub.replace(/[^a-zA-Z0-9]/g, '_');
+        const filename = `${sanitizedUserId}/${nanoid()}.${fileExt}`;
 
         // Convert to Buffer
         const bytes = await file.arrayBuffer();
