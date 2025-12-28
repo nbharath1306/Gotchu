@@ -80,41 +80,18 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const itemData = Array.isArray(chat.item) ? chat.item[0] : chat.item
 
   return (
-    <div className="min-h-screen bg-[#F2F2F2] flex flex-col">
-      <header className="bg-white border-b-2 border-[#111111] sticky top-0 z-10">
-        <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link
-              href="/chat"
-              className="p-2 -ml-2 hover:bg-[#F2F2F2] rounded-none transition-colors"
-            >
-              <ArrowLeft className="h-5 w-5 text-[#111111]" />
-            </Link>
-            <div>
-              <h1 className="font-bold text-[#111111] uppercase tracking-tight">
-                {otherUserData?.full_name || 'Unknown User'}
-              </h1>
-              <p className="text-xs text-[#666666] font-mono">
-                {itemData?.title || 'Item Chat'}
-              </p>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <main className="flex-1 max-w-4xl mx-auto w-full p-4">
-        <div className="bg-white border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] h-[calc(100vh-8rem)] overflow-hidden">
-          <ChatInterface
-            chatId={chat.id}
-            currentUserId={user.sub}
-            otherUser={{
-              full_name: otherUserData?.full_name || 'Unknown User',
-              avatar_url: otherUserData?.avatar_url || ''
-            }}
-            itemTitle={itemData?.title || 'Item'}
-          />
-        </div>
-      </main>
+  return (
+    <div className="h-screen bg-[#F2F2F2] flex flex-col overflow-hidden">
+      <ChatInterface
+        chatId={chat.id}
+        currentUserId={user.sub}
+        otherUser={{
+          full_name: otherUserData?.full_name || 'Unknown User',
+          avatar_url: otherUserData?.avatar_url || ''
+        }}
+        itemTitle={itemData?.title || 'Item'}
+      />
     </div>
+  )
   )
 }
