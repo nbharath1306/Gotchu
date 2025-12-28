@@ -68,15 +68,30 @@ export async function POST(req: NextRequest) {
 
             // --- RESOLUTION PROTOCOL ---
 
-            // 1. Close Chat
-            const { error: closeError } = await supabase
+            // 3. HARD DELETE PROTOCOL (Save Memory)
+
+            // A. Delete All Messages first (Foreign Key constraint usually requires this, or Cascade)
+            const { error: msgDeleteError } = await supabase
+                .from('messages')
+                .delete()
+                .eq('chat_id', chat_id);
+
+            if (msgDeleteError) console.error("Message Cleanup Failed:", msgDeleteError);
+
+            // B. Delete the Chat itself
+            const { error: chatDeleteError } = await supabase
                 .from('chats')
-                .update({ status: 'CLOSED' })
+                .delete()
                 .eq('id', chat_id);
 
-            if (closeError) throw closeError;
+            if (chatDeleteError) {
+                // Fallback if delete fails: just Close it
+                console.error("Chat Delete Failed:", chatDeleteError);
+                await supabase.from('chats').update({ status: 'CLOSED' }).eq('id', chat_id);
+                return NextResponse.json({ status: 'CLOSED', message: 'Chat closed (Delete failed)' });
+            }
 
-            // 2. Resolve Item
+            // 4. RESOLVE ITEM
             if (chat.item_id) {
                 await supabase
                     .from('items')
@@ -84,33 +99,24 @@ export async function POST(req: NextRequest) {
                     .eq('id', chat.item_id);
             }
 
-            // 3. KARMA AWARDING
+            // 5. KARMA AWARDING
             // Logic: Who is the "Finder"?
-            // - If Item Type is LOST: The Reporter is the "Loser". The Other User is likely the "Finder".
-            // - If Item Type is FOUND: The Reporter is the "Finder".
-
             let finderId = null;
             if (chat.item) {
                 if (chat.item.type === 'FOUND') {
                     finderId = chat.item.reporter_id; // Reporter Found it
                 } else if (chat.item.type === 'LOST') {
                     // Reporter Lost it. The person chatting with them (who ISN'T the reporter) found it.
-                    // We need to find which user in the chat is NOT the reporter.
                     if (chat.user_a === chat.item.reporter_id) finderId = chat.user_b;
                     else finderId = chat.user_a;
                 }
             }
 
             if (finderId) {
-                // Call RPC to increment
-                const { error: karmaError } = await supabase.rpc('increment_karma', {
-                    user_ids: [finderId],
-                    amount: 10
-                });
-                if (karmaError) console.error("Karma Error:", karmaError);
+                await supabase.rpc('increment_karma', { user_ids: [finderId], amount: 10 });
             }
 
-            return NextResponse.json({ status: 'CLOSED', message: 'Chat closed and karma awarded' });
+            return NextResponse.json({ status: 'DELETED', message: 'Chat deleted and karma awarded' });
         }
 
         return NextResponse.json({ error: 'Invalid state' }, { status: 400 });

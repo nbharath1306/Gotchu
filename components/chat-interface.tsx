@@ -24,7 +24,9 @@ import {
   File
 } from "lucide-react"
 import { format } from "date-fns"
+import { format } from "date-fns"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import { useUser } from "@auth0/nextjs-auth0/client"
 
 // --- TYPES & CONSTANTS ---
@@ -57,6 +59,7 @@ const AVATAR_PLACEHOLDERS = [
 export default function ChatInterface({ chatId, currentUserId, otherUser, itemTitle }: ChatInterfaceProps) {
   // --- STATE ---
   const { user } = useUser()
+  const router = useRouter()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [chatStatus, setChatStatus] = useState("OPEN")
@@ -99,12 +102,19 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     const fetchMessages = async () => {
       try {
         const res = await fetch(`/api/messages?chat_id=${chatId}`)
+
+        // Handle Chat Deletion/Cleanup (Polling Check)
+        if (res.status === 404 || res.status === 403) {
+          // Chat is gone (Hard Deleted by other user)
+          toast.error("Session ended by older user")
+          router.push('/chat')
+          return
+        }
+
         if (res.ok) {
           const data = await res.json()
           if (data.messages) {
             setMessages(prev => {
-              // Only update if different (simple length check + ID check of last item for efficiency)
-              // Or full stringify if needed, but usually length + last ID is enough for append-only chat
               if (JSON.stringify(prev) !== JSON.stringify(data.messages)) {
                 return data.messages
               }
@@ -170,12 +180,14 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
       const data = await res.json()
 
-      if (data.status) setChatStatus(data.status)
       if (data.status === 'PENDING_CLOSURE') {
         setClosureRequestedBy(currentUserId)
         toast.success("Request sent. Waiting for confirmation.")
+      } else if (data.status === 'DELETED') {
+        toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
+        router.push('/chat')
       } else if (data.status === 'CLOSED') {
-        toast.success("Resolution confirmed! Karma awarded.")
+        // Fallback
         setChatStatus('CLOSED')
       }
 
