@@ -171,13 +171,9 @@ export default function ReportLost() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                  Evidence (Image)
-                </label>
-                <input type="hidden" name="image_url" value={imageUrl} />
-                <ImageUpload onUploadComplete={setImageUrl} />
-              </div>
+              {/* Image Upload Section */}
+              <input type="hidden" name="image_url" value={imageUrl} />
+              <ImageUpload onUploadComplete={setImageUrl} />
 
               <div className="pt-6 border-t border-[#E5E5E5]">
                 <button
