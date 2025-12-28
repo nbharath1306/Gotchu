@@ -80,7 +80,6 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const itemData = Array.isArray(chat.item) ? chat.item[0] : chat.item
 
   return (
-  return (
     <div className="h-screen bg-[#F2F2F2] flex flex-col overflow-hidden">
       <ChatInterface
         chatId={chat.id}
@@ -92,6 +91,5 @@ export default async function ChatPage({ params }: ChatPageProps) {
         itemTitle={itemData?.title || 'Item'}
       />
     </div>
-  )
   )
 }
