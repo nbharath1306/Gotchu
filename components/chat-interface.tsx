@@ -397,12 +397,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         </div>
 
         <div className="flex items-center gap-3">
-          {closureRequestedBy && chatStatus === 'OPEN' && (
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-amber-50 border border-amber-100 rounded-md">
-              <AlertCircle className="w-3.5 h-3.5 text-amber-600" />
-              <span className="text-xs font-medium text-amber-700">Resolution Pending</span>
-            </div>
-          )}
           <div className="relative">
             <button onClick={() => setIsActionsOpen(!isActionsOpen)} className={`w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500 transition-colors ${isActionsOpen ? 'bg-gray-100 text-gray-900' : ''}`}>
               <MoreHorizontal className="w-5 h-5 stroke-[1.5]" />
@@ -421,6 +415,32 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
           </div>
         </div>
       </header>
+
+      {/* --- STATUS BANNER (Mutual Consent) --- */}
+      {chatStatus === 'PENDING_CLOSURE' && (
+        <div className="bg-amber-50 border-b border-amber-100 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 animate-in slide-in-from-top-2">
+          <div className="flex items-center gap-2 text-amber-800">
+            <Clock className="w-4 h-4" />
+            <span className="text-xs font-bold font-mono uppercase tracking-wide">
+              {closureRequestedBy === currentUserId ? 'WAITING FOR CONFIRMATION' : 'RESOLUTION REQUESTED'}
+            </span>
+          </div>
+          {closureRequestedBy !== currentUserId && (
+            <button
+              onClick={handleEndSession}
+              className="w-full sm:w-auto px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-full shadow-sm transition-colors flex items-center justify-center gap-2"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              CONFIRM RESOLUTION
+            </button>
+          )}
+          {closureRequestedBy === currentUserId && (
+            <span className="text-[10px] text-amber-600 font-medium hidden sm:inline">
+              The other user must confirm to award Karma.
+            </span>
+          )}
+        </div>
+      )}
 
       {/* --- 2. THE STREAM --- */}
       <div
