@@ -80,7 +80,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
   const itemData = Array.isArray(chat.item) ? chat.item[0] : chat.item
 
   return (
-    <div className="h-screen bg-[#F2F2F2] flex flex-col overflow-hidden">
+    <div className="h-screen bg-[#F2F2F2] flex flex-col overflow-hidden pt-16 md:pt-16">
       <ChatInterface
         chatId={chat.id}
         currentUserId={user.sub}
