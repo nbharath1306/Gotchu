@@ -65,6 +65,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false) // New state for attachment menu
+  const [showScrollButton, setShowScrollButton] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -73,10 +74,19 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   const imageInputRef = useRef<HTMLInputElement>(null)
   const mediaInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   // --- UTILS ---
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+    setShowScrollButton(!isNearBottom)
+  }
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    setShowScrollButton(false)
   }
 
   // --- EFFECTS ---
@@ -314,21 +324,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     )
   }
 
-  // --- SCROLL LOGIC ---
-  const [showScrollButton, setShowScrollButton] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const handleScroll = () => {
-    if (!scrollContainerRef.current) return
-    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
-    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
-    setShowScrollButton(!isNearBottom)
-  }
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-    setShowScrollButton(false)
-  }
 
   // --- RENDER ---
   return (
