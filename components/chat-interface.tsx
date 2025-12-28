@@ -90,6 +90,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }
 
   // --- EFFECTS ---
+  // --- EFFECTS ---
   useEffect(() => {
     // Initial fetch & Polling
     const fetchMessages = async () => {
@@ -97,7 +98,16 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         const res = await fetch(`/api/messages?chat_id=${chatId}`)
         if (res.ok) {
           const data = await res.json()
-          if (data.messages) setMessages(data.messages)
+          if (data.messages) {
+            setMessages(prev => {
+              // Only update if different (simple length check + ID check of last item for efficiency)
+              // Or full stringify if needed, but usually length + last ID is enough for append-only chat
+              if (JSON.stringify(prev) !== JSON.stringify(data.messages)) {
+                return data.messages
+              }
+              return prev
+            })
+          }
           if (data.chatStatus) setChatStatus(data.chatStatus)
           setClosureRequestedBy(data.closureRequestedBy || null)
         }
@@ -106,13 +116,29 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     }
 
     fetchMessages()
-    const interval = setInterval(fetchMessages, 2000) // 2s polling for less jitter
+    const interval = setInterval(fetchMessages, 2000)
     return () => clearInterval(interval)
   }, [chatId])
 
+  // Smart Scroll Effect
   useEffect(() => {
-    if (!isLoading) scrollToBottom()
-  }, [messages, isLoading])
+    if (isLoading || messages.length === 0) return
+
+    const lastMsg = messages[messages.length - 1]
+    const isMine = lastMsg.sender_id === currentUserId
+
+    // 1. If I just sent a message, ALWAYS scroll to bottom
+    if (isMine) {
+      scrollToBottom()
+      return
+    }
+
+    // 2. If I am already at the bottom (button hidden), keep me at the bottom
+    if (!showScrollButton) {
+      scrollToBottom()
+    }
+    // 3. Otherwise (scrolled up reading history), DO NOT scroll.
+  }, [messages, isLoading, currentUserId]) // Removed showScrollButton dependency to avoid loops
 
   // --- HANDLERS ---
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
