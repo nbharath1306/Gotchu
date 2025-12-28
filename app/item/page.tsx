@@ -142,8 +142,8 @@ export default function ItemPageClient() {
                 <div className="flex flex-col gap-6 mt-6">
                   <ContactButton itemId={id} />
 
-                  {/* Owner Controls */}
-                  {user && user.sub === item.user_id && (
+                  {/* Owner Controls OR Admin Override */}
+                  {user && (user.sub === item.user_id || ["bharath.n@example.com", "n.bharath3430@gmail.com", "amazingakhil2006@gmail.com"].includes(user.email || "")) && (
                     <div className="pt-6 border-t border-[#E5E5E5]">
                       <h4 className="label-caps mb-3 text-red-600/70">DANGER ZONE</h4>
                       <button
