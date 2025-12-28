@@ -29,10 +29,10 @@ export default async function AdminLayout({
         .eq("id", user.sub)
         .single();
 
-    const isAdmin = dbUser?.role === 'ADMIN' || ADMIN_EMAILS.includes(user.email);
+    const isAdmin = dbUser?.role === 'ADMIN' || (!!user.email && ADMIN_EMAILS.includes(user.email));
 
     // Debugging access (remove in prod)
-    console.log(`[AdminCheck] User: ${user.email}, Role: ${dbUser?.role}, IsAdmin: ${isAdmin}`);
+    console.log(`[AdminCheck] User: ${user.email || 'unknown'}, Role: ${dbUser?.role}, IsAdmin: ${isAdmin}`);
 
     if (!isAdmin) {
         // Redirect unauthorized users to home
