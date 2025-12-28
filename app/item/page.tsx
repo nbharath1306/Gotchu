@@ -6,8 +6,11 @@ import { ContactButton } from "@/components/contact-button"
 import type { Item } from "@/types"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Clock, ArrowLeft, Shield, Radio, Package } from "lucide-react"
+import { MapPin, Clock, ArrowLeft, Shield, Radio, Package, Trash2 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
+import { useUser } from "@auth0/nextjs-auth0/client"
+import { deleteItem } from "@/app/actions"
+import { toast } from "sonner"
 
 const categoryEmojis: Record<string, string> = {
   Electronics: "📱",
@@ -22,12 +25,39 @@ const categoryEmojis: Record<string, string> = {
 }
 
 export default function ItemPageClient() {
+  const { user } = useUser()
   const params = useSearchParams()
   const router = useRouter()
   const id = params?.get("id")
   const [item, setItem] = useState<Item | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false)
+
+  const handleDelete = async () => {
+    if (!id) return;
+
+    // Custom confirm dialog (or native for MVP)
+    if (!window.confirm("Are you sure? This will permanently delete the item and all associated chats.")) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      const res = await deleteItem(id);
+      if (res.error) {
+        toast.error(res.error);
+      } else {
+        toast.success("Item deleted successfully");
+        router.push("/feed");
+      }
+    } catch (err) {
+      toast.error("An unexpected error occurred");
+      console.error(err);
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   useEffect(() => {
     if (!id) {
@@ -109,7 +139,27 @@ export default function ItemPageClient() {
                 <p>{item.description || "No description provided."}</p>
               </div>
               {/* No bounty_text in Item type, so skip reward section */}
-              {id && <ContactButton itemId={id} />}
+              {id && (
+                <div className="flex flex-col gap-3">
+                  <ContactButton itemId={id} />
+
+                  {/* Owner Controls */}
+                  {user && user.sub === item.user_id && (
+                    <button
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="btn-outline w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-500 hover:text-red-700 transition-colors flex items-center justify-center gap-2 py-4"
+                    >
+                      {isDeleting ? "REMOVING..." : (
+                        <>
+                          <Trash2 className="w-4 h-4" />
+                          REVOKE / DELETE ITEM
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

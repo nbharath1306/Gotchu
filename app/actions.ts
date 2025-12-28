@@ -266,4 +266,59 @@ export async function startChat(itemId: string, relatedItemId?: string) {
   }
 
   return { chatId: newChat.id }
+  return { chatId: newChat.id }
+}
+
+export async function deleteItem(itemId: string) {
+  const session = await auth0.getSession();
+  const user = session?.user;
+
+  if (!user) {
+    return { error: "Unauthorized" }
+  }
+
+  // Use Admin Client to ensure we can force delete (bypassing restrictive RLS if needed, though usually owner can delete)
+  // But strictly, we check ownership first.
+  let supabase;
+  const adminClient = await createAdminClient();
+  if (adminClient) {
+    supabase = adminClient;
+  } else {
+    // Fallback
+    let token = session?.idToken || session?.accessToken;
+    supabase = await createClient(token as string | undefined);
+  }
+
+  // 1. Verify Ownership
+  const { data: item, error: fetchError } = await supabase
+    .from('items')
+    .select('user_id')
+    .eq('id', itemId)
+    .single()
+
+  if (fetchError || !item) {
+    return { error: "Item not found" }
+  }
+
+  // 2. Authorization Check (Allow Admin role in future, effectively strictly owner for now)
+  // TODO: Check user.role === 'ADMIN' if we want admins to delete any item here too.
+  if (item.user_id !== user.sub) {
+    return { error: "You can only delete your own items" }
+  }
+
+  // 3. Delete
+  const { error: deleteError } = await supabase
+    .from('items')
+    .delete()
+    .eq('id', itemId)
+
+  if (deleteError) {
+    console.error("Delete item error:", deleteError)
+    return { error: "Failed to delete item" }
+  }
+
+  revalidatePath('/feed')
+  revalidatePath('/profile')
+
+  return { success: true }
 }
