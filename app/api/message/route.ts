@@ -6,10 +6,20 @@ import { createAdminClient } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
   try {
-    const { chat_id, content } = await req.json();
-    if (!chat_id || typeof chat_id !== 'string' || !content || typeof content !== 'string') {
-      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
+    const { chat_id, content, message_type = 'TEXT', media_url } = await req.json();
+
+    if (!chat_id || typeof chat_id !== 'string') {
+      return NextResponse.json({ error: 'Invalid chat_id' }, { status: 400 });
     }
+
+    // Must have either content OR media
+    const hasContent = content && typeof content === 'string' && content.trim().length > 0;
+    const hasMedia = media_url && typeof media_url === 'string';
+
+    if (!hasContent && !hasMedia) {
+      return NextResponse.json({ error: 'Message cannot be empty' }, { status: 400 });
+    }
+
     const session = await auth0.getSession();
     const user = session?.user;
     if (!user) {
@@ -45,7 +55,9 @@ export async function POST(req: NextRequest) {
       id: nanoid(),
       chat_id,
       sender_id: user.sub,
-      content
+      content: content || '',
+      message_type,
+      media_url
     });
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });

@@ -103,11 +103,12 @@ create policy "Authenticated users can create chats."
 
 
 -- Messages Table
-create table public.messages (
   id text primary key, -- UUID/NanoID (Text)
   chat_id text references public.chats(id) not null,
   sender_id text references public.users(id) not null,
-  content text not null,
+  content text, -- Nullable for image-only messages
+  message_type text default 'TEXT' check (message_type in ('TEXT', 'IMAGE')),
+  media_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
