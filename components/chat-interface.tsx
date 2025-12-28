@@ -135,16 +135,9 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       const res = await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, content: messageContent: content }) // Syntax correction
-          .replace("content: messageContent:", "content:") // Hack fix: I will write correct code below
-      })
-
-      // Proper Fetch Call (rewriting purely here correctly)
-      await fetch("/api/message", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chat_id: chatId, content: content })
       })
+      if (!res.ok) toast.error("Delivery failed")
     } catch (error) {
       toast.error("Delivery failed")
     }
