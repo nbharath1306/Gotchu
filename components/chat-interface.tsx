@@ -314,8 +314,25 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     )
   }
 
+  // --- SCROLL LOGIC ---
+  const [showScrollButton, setShowScrollButton] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
+
+  const handleScroll = () => {
+    if (!scrollContainerRef.current) return
+    const { scrollTop, scrollHeight, clientHeight } = scrollContainerRef.current
+    const isNearBottom = scrollHeight - scrollTop - clientHeight < 100
+    setShowScrollButton(!isNearBottom)
+  }
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+    setShowScrollButton(false)
+  }
+
+  // --- RENDER ---
   return (
-    <div className="flex flex-col h-full bg-[#FAFAFA] text-[#111111] font-sans overflow-hidden">
+    <div className="flex flex-col h-[100dvh] bg-[#FAFAFA] text-[#111111] font-sans overflow-hidden">
 
       {/* --- 1. COMMAND BAR --- */}
       <header className="h-[60px] bg-white border-b border-gray-100 flex items-center justify-between px-5 shrink-0 z-20">
@@ -364,8 +381,12 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       </header>
 
       {/* --- 2. THE STREAM --- */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 bg-[#FAFAFA]">
-        <div className="max-w-3xl mx-auto space-y-8">
+      <div
+        className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 bg-[#FAFAFA] relative scroll-smooth"
+        ref={scrollContainerRef}
+        onScroll={handleScroll}
+      >
+        <div className="max-w-3xl mx-auto space-y-8 min-h-full">
           {!isLoading && messages.length === 0 && (
             <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
               <div className="w-16 h-16 bg-white border border-gray-100 rounded-3xl mx-auto flex items-center justify-center mb-4 shadow-sm"><ShieldCheck className="w-8 h-8 text-indigo-500 stroke-[1.5]" /></div>
@@ -407,19 +428,29 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         </div>
       </div>
 
+      {/* --- SCROLL TO BOTTOM BUTTON --- */}
+      {showScrollButton && (
+        <button
+          onClick={scrollToBottom}
+          className="absolute bottom-24 right-6 w-10 h-10 bg-white border border-gray-200 shadow-xl rounded-full flex items-center justify-center text-gray-600 hover:text-black hover:scale-110 transition-all z-30 animate-in fade-in zoom-in duration-200"
+        >
+          <CornerDownLeft className="w-5 h-5 stroke-[2] rotate-[-90deg]" />
+        </button>
+      )}
+
       {/* --- 3. COMPOSER --- */}
       {chatStatus === 'OPEN' ? (
-        <div className="bg-white border-t border-gray-100 p-4 sm:px-8 sm:py-6 sticky bottom-0 z-20">
+        <div className="bg-white border-t border-gray-100 p-4 sm:px-8 sm:py-6 shrink-0 z-20 pb-safe">
           <div className="max-w-3xl mx-auto">
 
             {/* ATTACHMENT MENU (Animated Popover) */}
             {isAttachMenuOpen && (
-              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 min-w-[200px] animate-in fade-in slide-in-from-bottom-4 duration-200 z-30">
+              <div className="absolute bottom-20 left-4 sm:left-8 flex flex-col gap-2 min-w-[200px] animate-in fade-in slide-in-from-bottom-4 duration-200 shadow-2xl rounded-2xl border border-gray-100 bg-white p-1 z-50">
 
                 {/* 1. Camera (Capture) */}
                 <button
                   onClick={() => imageInputRef.current?.click()}
-                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 first:rounded-t-xl border-b-0 last:border-b shadow-md text-left transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 rounded-xl text-left transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
                     <Camera className="w-4 h-4" />
@@ -433,7 +464,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 {/* 2. Gallery (Media Limit) */}
                 <button
                   onClick={() => mediaInputRef.current?.click()}
-                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-t-0 border-gray-100 border-b-0 shadow-md text-left transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 rounded-xl text-left transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
                     <ImageIcon className="w-4 h-4" />
@@ -447,7 +478,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 {/* 3. Document (Files) */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 last:rounded-b-xl shadow-md border-t-0 text-left transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 rounded-xl text-left transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                     <FileText className="w-4 h-4" />
@@ -462,15 +493,12 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
             <div className={`group flex gap-2 bg-white border rounded-xl p-2 transition-all duration-200 ${newMessage.trim() ? 'border-gray-300 shadow-sm' : 'border-gray-200 hover:border-gray-300'} focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-50`}>
 
-              {/* Hidden Inputs for 3 Logic Paths */}
-
-              {/* 1. Camera: Forces immediate capture */}
+              {/* Hidden Inputs */}
+              {/* Camera Input: Forces Camera Launch */}
               <input type="file" ref={imageInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileSelect} disabled={isUploading} />
-
-              {/* 2. Media: Opens Gallery */}
+              {/* Media Input: Gallery */}
               <input type="file" ref={mediaInputRef} className="hidden" accept="image/*,video/*" onChange={handleFileSelect} disabled={isUploading} />
-
-              {/* 3. Files: Generic Picker */}
+              {/* File Input: General Picker */}
               <input type="file" ref={fileInputRef} className="hidden" accept="*" onChange={handleFileSelect} disabled={isUploading} />
 
               {/* Attach Trigger */}
