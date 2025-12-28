@@ -71,6 +71,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false)
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false) // Lock for actions
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -168,7 +169,10 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }
 
   const handleEndSession = async () => {
-    setIsConfirmModalOpen(false) // Close modal if open
+    if (isProcessing) return
+    setIsProcessing(true)
+
+    // Keep modal open while processing to show loading state
 
     try {
       const res = await fetch('/api/chat/close', {
@@ -177,22 +181,33 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         body: JSON.stringify({ chat_id: chatId })
       });
 
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.message || errData.error || "Failed to update status")
+      }
+
       const data = await res.json()
 
       if (data.status === 'PENDING_CLOSURE') {
         setClosureRequestedBy(currentUserId)
         toast.success("Request sent. Waiting for confirmation.")
+        setChatStatus('PENDING_CLOSURE')
+        setIsConfirmModalOpen(false) // Close only on success
       } else if (data.status === 'DELETED') {
         toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
         router.push('/chat')
       } else if (data.status === 'CLOSED') {
-        // Fallback
         setChatStatus('CLOSED')
+        setIsConfirmModalOpen(false)
       }
 
       setIsActionsOpen(false);
-    } catch (e) {
-      toast.error("Failed to update status");
+    } catch (e: any) {
+      console.error(e)
+      toast.error(e.message || "Failed to process request");
+      setIsConfirmModalOpen(false) // Close on error to reset
+    } finally {
+      setIsProcessing(false)
     }
   }
 
@@ -665,9 +680,10 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 </button>
                 <button
                   onClick={handleEndSession}
-                  className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
+                  disabled={isProcessing}
+                  className={`flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 ${isProcessing ? 'opacity-70 cursor-not-allowed' : ''}`}
                 >
-                  Confirm
+                  {isProcessing ? 'Processing...' : 'Confirm'}
                 </button>
               </div>
             </div>
