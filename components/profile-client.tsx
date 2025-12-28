@@ -129,96 +129,92 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
                 </div>
               </div>
             </div>
+
+            <div className="flex flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0 absolute top-8 right-8 lg:static lg:mt-0">
+              <a href="/auth/logout" className="btn-outline py-2 text-xs w-full sm:w-auto text-center border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300">
+                SIGN OUT
+              </a>
+            </div>
           </motion.div>
 
-          <div className="flex flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0">
-            <button className="btn-outline py-2 text-xs w-full sm:w-auto">
-              EDIT PROFILE
-            </button>
-            <a href="/auth/logout" className="btn-primary py-2 text-xs w-full sm:w-auto text-center bg-red-600 hover:bg-red-700 border-red-600">
-              SIGN OUT
-            </a>
-          </div>
-        </motion.div>
+          {/* Stats Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="card-swiss bg-white p-8 flex flex-col justify-center"
+          >
+            <h3 className="label-caps mb-6">LIFETIME STATS</h3>
+            <div className="grid grid-cols-2 gap-y-8 gap-x-4">
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsReported}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Radio className="w-3 h-3" /> LOST
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsFound}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Shield className="w-3 h-3" /> FOUND
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{itemsResolved}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3" /> RESOLVED
+                </div>
+              </div>
+              <div>
+                <div className="text-3xl font-bold text-[#111111] mb-1">{karma}</div>
+                <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
+                  <Trophy className="w-3 h-3" /> KARMA
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
 
-        {/* Stats Card */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="card-swiss bg-white p-8 flex flex-col justify-center"
-        >
-          <h3 className="label-caps mb-6">LIFETIME STATS</h3>
-          <div className="grid grid-cols-2 gap-y-8 gap-x-4">
-            <div>
-              <div className="text-3xl font-bold text-[#111111] mb-1">{itemsReported}</div>
-              <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
-                <Radio className="w-3 h-3" /> LOST
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#111111] mb-1">{itemsFound}</div>
-              <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
-                <Shield className="w-3 h-3" /> FOUND
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#111111] mb-1">{itemsResolved}</div>
-              <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" /> RESOLVED
-              </div>
-            </div>
-            <div>
-              <div className="text-3xl font-bold text-[#111111] mb-1">{karma}</div>
-              <div className="text-xs font-mono text-[#666666] flex items-center gap-1">
-                <Trophy className="w-3 h-3" /> KARMA
-              </div>
-            </div>
+        {/* Content Tabs */}
+        <Tabs defaultValue="all" className="w-full">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-display font-bold text-[#111111]">ACTIVITY HISTORY</h2>
+            <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto hidden sm:inline-flex">
+              <TabsTrigger value="all" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">ALL ITEMS</TabsTrigger>
+              <TabsTrigger value="lost" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">LOST</TabsTrigger>
+              <TabsTrigger value="found" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">FOUND</TabsTrigger>
+              <TabsTrigger value="resolved" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">RESOLVED</TabsTrigger>
+            </TabsList>
           </div>
-        </motion.div>
+
+          {/* Mobile Tabs */}
+          <div className="sm:hidden mb-6 overflow-x-auto pb-2">
+            <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto inline-flex w-full">
+              <TabsTrigger value="all" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">ALL</TabsTrigger>
+              <TabsTrigger value="lost" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">LOST</TabsTrigger>
+              <TabsTrigger value="found" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">FOUND</TabsTrigger>
+              <TabsTrigger value="resolved" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">DONE</TabsTrigger>
+            </TabsList>
+          </div>
+
+          <TabsContent value="all">
+            <ItemsGrid items={items} />
+          </TabsContent>
+
+          <TabsContent value="lost">
+            <ItemsGrid items={items.filter(i => i.type === "LOST")} />
+          </TabsContent>
+
+          <TabsContent value="found">
+            <ItemsGrid items={items.filter(i => i.type === "FOUND")} />
+          </TabsContent>
+
+          <TabsContent value="resolved">
+            <ItemsGrid items={items.filter(i => i.status === "RESOLVED")} />
+          </TabsContent>
+        </Tabs>
+
       </div>
-
-      {/* Content Tabs */}
-      <Tabs defaultValue="all" className="w-full">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-display font-bold text-[#111111]">ACTIVITY HISTORY</h2>
-          <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto hidden sm:inline-flex">
-            <TabsTrigger value="all" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">ALL ITEMS</TabsTrigger>
-            <TabsTrigger value="lost" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">LOST</TabsTrigger>
-            <TabsTrigger value="found" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">FOUND</TabsTrigger>
-            <TabsTrigger value="resolved" className="text-xs font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm px-4 py-2">RESOLVED</TabsTrigger>
-          </TabsList>
-        </div>
-
-        {/* Mobile Tabs (Select or Scroll) - Simplified for now, just hiding the list on mobile is bad UX, let's show it */}
-        <div className="sm:hidden mb-6 overflow-x-auto pb-2">
-          <TabsList className="bg-white border border-[#E5E5E5] p-1 h-auto inline-flex w-full">
-            <TabsTrigger value="all" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">ALL</TabsTrigger>
-            <TabsTrigger value="lost" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">LOST</TabsTrigger>
-            <TabsTrigger value="found" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">FOUND</TabsTrigger>
-            <TabsTrigger value="resolved" className="flex-1 text-[10px] font-mono data-[state=active]:bg-[#111111] data-[state=active]:text-white rounded-sm py-2">DONE</TabsTrigger>
-          </TabsList>
-        </div>
-
-        <TabsContent value="all">
-          <ItemsGrid items={items} />
-        </TabsContent>
-
-        <TabsContent value="lost">
-          <ItemsGrid items={items.filter(i => i.type === "LOST")} />
-        </TabsContent>
-
-        <TabsContent value="found">
-          <ItemsGrid items={items.filter(i => i.type === "FOUND")} />
-        </TabsContent>
-
-        <TabsContent value="resolved">
-          <ItemsGrid items={items.filter(i => i.status === "RESOLVED")} />
-        </TabsContent>
-      </Tabs>
-
     </div>
-    </div >
   );
 }
 
