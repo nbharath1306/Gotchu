@@ -231,7 +231,7 @@ export async function startChat(itemId: string) {
   }
 
   if (item.user_id === user.sub) {
-    return { error: "You cannot chat with yourself" }
+    return { error: `You cannot chat with yourself. (ItemOwner: ${item.user_id}, You: ${user.sub})` }
   }
 
   // 2. Check if chat already exists

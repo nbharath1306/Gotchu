@@ -107,7 +107,12 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
               </div>
 
               {/* Action Buttons */}
-              {id && currentUserSub && (
+              {/* Action Buttons */}
+              {!currentUserSub ? (
+                <Link href="/api/auth/login" className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg text-center opacity-75 hover:opacity-100">
+                  LOG IN TO CONTACT OWNER
+                </Link>
+              ) : (
                 item.user_id === currentUserSub ? (
                   <div className="flex flex-col gap-3">
                     <Link
@@ -116,7 +121,6 @@ export default async function ItemDetailPage({ params }: { params: Promise<{ id:
                     >
                       VIEW POTENTIAL MATCHES
                     </Link>
-                    {/* Could add a 'Mark Resolved' button here too if we wanted */}
                   </div>
                 ) : (
                   <ContactButton itemId={id} />
