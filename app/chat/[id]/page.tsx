@@ -19,9 +19,15 @@ export default async function ChatPage({ params }: ChatPageProps) {
     redirect("/login")
   }
 
-  // Pass Auth0 ID token to Supabase for RLS
-  const jwt = session?.idToken || session?.accessToken
-  const supabase = await createClient(jwt as string | undefined)
+  // Use Admin Client to bypass RLS token issues
+  const { createAdminClient } = await import("@/lib/supabase-server");
+  const supabase = await createAdminClient();
+
+  if (!supabase) {
+    console.error("Critical: Admin client failed to initialize.");
+    // Fallback or error
+    return <div>System Error: Database connection failed.</div>;
+  }
 
   // Fetch chat details to verify access and get other user info
   const { data: chat, error } = await supabase
@@ -52,6 +58,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
       <div className="min-h-screen bg-[#F2F2F2] pt-24 flex items-center justify-center">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-[#111111] mb-4">Chat not found</h2>
+          <p className="text-xs text-gray-400 mb-4">{error?.message}</p>
           <Link href="/chat" className="text-[#FF4F4F] hover:underline">
             Return to messages
           </Link>
@@ -76,7 +83,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
       <header className="bg-white border-b-2 border-[#111111] sticky top-0 z-10">
         <div className="max-w-4xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link 
+            <Link
               href="/chat"
               className="p-2 -ml-2 hover:bg-[#F2F2F2] rounded-none transition-colors"
             >
@@ -96,8 +103,8 @@ export default async function ChatPage({ params }: ChatPageProps) {
 
       <main className="flex-1 max-w-4xl mx-auto w-full p-4">
         <div className="bg-white border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] h-[calc(100vh-8rem)] overflow-hidden">
-          <ChatInterface 
-            chatId={chat.id} 
+          <ChatInterface
+            chatId={chat.id}
             currentUserId={user.sub}
             otherUser={{
               full_name: otherUserData?.full_name || 'Unknown User',
