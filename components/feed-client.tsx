@@ -39,7 +39,8 @@ export function FeedClient({ items }: FeedClientProps) {
       item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesType = typeFilter === "all" || item.type === typeFilter
     const matchesLocation = locationFilter === "all" || item.location_zone === locationFilter
-    return matchesSearch && matchesType && matchesLocation
+    const isActive = item.status === 'OPEN'
+    return matchesSearch && matchesType && matchesLocation && isActive
   })
 
   return (
@@ -85,8 +86,8 @@ export function FeedClient({ items }: FeedClientProps) {
                     key={filter.value}
                     onClick={() => setTypeFilter(filter.value)}
                     className={`flex items-center gap-2 px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${typeFilter === filter.value
-                        ? "bg-black text-white border-black"
-                        : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
+                      ? "bg-black text-white border-black"
+                      : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
                       }`}
                   >
                     <filter.icon className="h-3 w-3" />
@@ -97,8 +98,8 @@ export function FeedClient({ items }: FeedClientProps) {
                 <button
                   onClick={() => setShowFilters(!showFilters)}
                   className={`flex items-center gap-2 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all ${showFilters
-                      ? "bg-black text-white border-black"
-                      : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
+                    ? "bg-black text-white border-black"
+                    : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
                     }`}
                 >
                   <SlidersHorizontal className="h-3 w-3" />
@@ -122,8 +123,8 @@ export function FeedClient({ items }: FeedClientProps) {
                           key={filter.value}
                           onClick={() => setLocationFilter(filter.value)}
                           className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest border transition-all ${locationFilter === filter.value
-                              ? "bg-black text-white border-black"
-                              : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black"
+                            ? "bg-black text-white border-black"
+                            : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black"
                             }`}
                         >
                           {filter.label}
