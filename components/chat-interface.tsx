@@ -71,6 +71,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
   // Refs for different inputs
   const imageInputRef = useRef<HTMLInputElement>(null)
+  const mediaInputRef = useRef<HTMLInputElement>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // --- UTILS ---
@@ -194,6 +195,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       // Clear both inputs
       if (fileInputRef.current) fileInputRef.current.value = ''
       if (imageInputRef.current) imageInputRef.current.value = ''
+      if (mediaInputRef.current) mediaInputRef.current.value = ''
     }
   }
 
@@ -412,32 +414,47 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
             {/* ATTACHMENT MENU (Animated Popover) */}
             {isAttachMenuOpen && (
-              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
-                {/* Camera Option */}
+              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 min-w-[200px] animate-in fade-in slide-in-from-bottom-4 duration-200 z-30">
+
+                {/* 1. Camera (Capture) */}
                 <button
                   onClick={() => imageInputRef.current?.click()}
-                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 first:rounded-t-xl border-b-0 last:border-b shadow-md text-left transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                  <div className="w-8 h-8 rounded-full bg-rose-100 flex items-center justify-center text-rose-600">
                     <Camera className="w-4 h-4" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-gray-900">Camera</p>
-                    <p className="text-[10px] text-gray-400">Take photo or upload image</p>
+                    <p className="text-[10px] text-gray-400">Take a photo</p>
                   </div>
                 </button>
 
-                {/* File Option */}
+                {/* 2. Gallery (Media Limit) */}
                 <button
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
+                  onClick={() => mediaInputRef.current?.click()}
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-t-0 border-gray-100 border-b-0 shadow-md text-left transition-colors"
                 >
                   <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600">
+                    <ImageIcon className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">Photos & Videos</p>
+                    <p className="text-[10px] text-gray-400">From Gallery</p>
+                  </div>
+                </button>
+
+                {/* 3. Document (Files) */}
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 last:rounded-b-xl shadow-md border-t-0 text-left transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                     <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">File</p>
-                    <p className="text-[10px] text-gray-400">Select any file</p>
+                    <p className="text-sm font-semibold text-gray-900">Document</p>
+                    <p className="text-[10px] text-gray-400">Send a file</p>
                   </div>
                 </button>
               </div>
@@ -445,10 +462,15 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
             <div className={`group flex gap-2 bg-white border rounded-xl p-2 transition-all duration-200 ${newMessage.trim() ? 'border-gray-300 shadow-sm' : 'border-gray-200 hover:border-gray-300'} focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-50`}>
 
-              {/* Hidden Inputs */}
-              {/* Camera Input: Forces Camera Launch */}
+              {/* Hidden Inputs for 3 Logic Paths */}
+
+              {/* 1. Camera: Forces immediate capture */}
               <input type="file" ref={imageInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileSelect} disabled={isUploading} />
-              {/* File Input: General Picker */}
+
+              {/* 2. Media: Opens Gallery */}
+              <input type="file" ref={mediaInputRef} className="hidden" accept="image/*,video/*" onChange={handleFileSelect} disabled={isUploading} />
+
+              {/* 3. Files: Generic Picker */}
               <input type="file" ref={fileInputRef} className="hidden" accept="*" onChange={handleFileSelect} disabled={isUploading} />
 
               {/* Attach Trigger */}
