@@ -26,25 +26,44 @@ export async function POST(req: NextRequest) {
         if (!supabase) return NextResponse.json({ error: 'Server Config Error' }, { status: 500 });
 
         // Generate path: chat-uploads/USER_ID/RANDOM_FILENAME
-        const filename = `${session.user.sub}/${nanoid()}-${file.name.replace(/[^a-zA-Z0-9.-]/g, '')}`;
+        const fileExt = file.name.split('.').pop();
+        const filename = `${session.user.sub}/${nanoid()}.${fileExt}`;
 
-        // We need to convert File to ArrayBuffer for Supabase Admin upload
+        // Convert to Buffer
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Upload to 'chat-images' bucket
-        // Note: User must ensure this bucket exists and is public!
+        // Attempt Upload
         const { data, error } = await supabase
             .storage
             .from('chat-images')
             .upload(filename, buffer, {
-                contentType: file.type,
+                contentType: file.type || 'application/octet-stream',
                 upsert: false
             });
 
         if (error) {
-            console.error("Storage upload error:", error);
-            return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+            console.error("[UPLOAD ERROR] Supabase Storage Error:", JSON.stringify(error, null, 2));
+
+            // Handle "Bucket not found" by trying to create it (Admin Only)
+            if (error.message.includes("The resource was not found") || error.message.includes("Bucket not found")) {
+                console.log("[UPLOAD] Attempting to create missing bucket 'chat-images'...");
+                await supabase.storage.createBucket('chat-images', { public: true });
+
+                // Retry Upload
+                const retry = await supabase.storage.from('chat-images').upload(filename, buffer, {
+                    contentType: file.type || 'application/octet-stream',
+                    upsert: false
+                });
+
+                if (retry.error) {
+                    console.error("[UPLOAD RETRY ERROR]", retry.error);
+                    return NextResponse.json({ error: `Upload Retry Failed: ${retry.error.message}` }, { status: 500 });
+                }
+                // Success on retry
+            } else {
+                return NextResponse.json({ error: `Storage Error: ${error.message}` }, { status: 500 });
+            }
         }
 
         // Get Public URL
@@ -53,10 +72,12 @@ export async function POST(req: NextRequest) {
             .from('chat-images')
             .getPublicUrl(filename);
 
+        console.log("[UPLOAD SUCCESS] Public URL:", publicUrl);
+
         return NextResponse.json({ url: publicUrl });
 
-    } catch (e) {
-        console.error("Upload handler error:", e);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    } catch (e: any) {
+        console.error("[CRITICAL UPLOAD ERROR]:", e);
+        return NextResponse.json({ error: `Server Error: ${e.message}` }, { status: 500 });
     }
 }
