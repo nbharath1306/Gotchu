@@ -34,7 +34,7 @@ export function FeedClient({ items }: FeedClientProps) {
   const filteredItems = items.filter((item) => {
     // Exclude items with empty, null, or undefined IDs
     if (!item.id || typeof item.id !== "string" || item.id.trim() === "") return false;
-    const matchesSearch = 
+    const matchesSearch =
       item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       item.description?.toLowerCase().includes(searchQuery.toLowerCase())
     const matchesType = typeFilter === "all" || item.type === typeFilter
@@ -61,11 +61,11 @@ export function FeedClient({ items }: FeedClientProps) {
           </motion.div>
 
           {/* Search & Filters */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="sticky top-20 z-30 mb-12 bg-[#F2F2F2]/95 backdrop-blur-sm py-4 border-b border-[#E5E5E5]"
+            className="sticky top-0 md:top-20 z-40 mb-12 bg-[#F2F2F2] py-4 border-b border-[#E5E5E5]"
           >
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -78,30 +78,28 @@ export function FeedClient({ items }: FeedClientProps) {
                   className="input-swiss !pl-12"
                 />
               </div>
-              
+
               <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 no-scrollbar">
                 {typeFilters.map((filter) => (
                   <button
                     key={filter.value}
                     onClick={() => setTypeFilter(filter.value)}
-                    className={`flex items-center gap-2 px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${
-                      typeFilter === filter.value
+                    className={`flex items-center gap-2 px-6 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all whitespace-nowrap ${typeFilter === filter.value
                         ? "bg-black text-white border-black"
                         : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
-                    }`}
+                      }`}
                   >
                     <filter.icon className="h-3 w-3" />
                     {filter.label}
                   </button>
                 ))}
-                
+
                 <button
                   onClick={() => setShowFilters(!showFilters)}
-                  className={`flex items-center gap-2 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all ${
-                    showFilters 
-                      ? "bg-black text-white border-black" 
+                  className={`flex items-center gap-2 px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider border transition-all ${showFilters
+                      ? "bg-black text-white border-black"
                       : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black hover:text-black"
-                  }`}
+                    }`}
                 >
                   <SlidersHorizontal className="h-3 w-3" />
                 </button>
@@ -123,11 +121,10 @@ export function FeedClient({ items }: FeedClientProps) {
                         <button
                           key={filter.value}
                           onClick={() => setLocationFilter(filter.value)}
-                          className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest border transition-all ${
-                            locationFilter === filter.value
+                          className={`px-4 py-2 text-[10px] font-mono uppercase tracking-widest border transition-all ${locationFilter === filter.value
                               ? "bg-black text-white border-black"
                               : "bg-white text-[#666666] border-[#E5E5E5] hover:border-black"
-                          }`}
+                            }`}
                         >
                           {filter.label}
                         </button>
@@ -141,7 +138,7 @@ export function FeedClient({ items }: FeedClientProps) {
 
           {/* Grid */}
           {filteredItems.length === 0 ? (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="text-center py-20 border border-dashed border-[#E5E5E5]"
