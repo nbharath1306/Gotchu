@@ -412,8 +412,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
             {/* ATTACHMENT MENU (Animated Popover) */}
             {isAttachMenuOpen && (
-              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200 z-30">
-                {/* Photo / Camera Option */}
+              <div className="absolute bottom-24 left-4 sm:left-8 flex flex-col gap-2 animate-in fade-in slide-in-from-bottom-4 duration-200">
+                {/* Camera Option */}
                 <button
                   onClick={() => imageInputRef.current?.click()}
                   className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
@@ -422,12 +422,12 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                     <Camera className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Photo & Video</p>
-                    <p className="text-[10px] text-gray-400">Camera or Gallery</p>
+                    <p className="text-sm font-semibold text-gray-900">Camera</p>
+                    <p className="text-[10px] text-gray-400">Take photo or upload image</p>
                   </div>
                 </button>
 
-                {/* Document Option */}
+                {/* File Option */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   className="flex items-center gap-3 px-4 py-3 bg-white hover:bg-gray-50 border border-gray-100 shadow-xl shadow-gray-200/50 rounded-xl text-left transition-colors"
@@ -436,8 +436,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                     <FileText className="w-4 h-4" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">Document</p>
-                    <p className="text-[10px] text-gray-400">PDF, Docs, etc.</p>
+                    <p className="text-sm font-semibold text-gray-900">File</p>
+                    <p className="text-[10px] text-gray-400">Select any file</p>
                   </div>
                 </button>
               </div>
