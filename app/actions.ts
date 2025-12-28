@@ -112,7 +112,21 @@ export async function submitReportAction(formData: FormData) {
     console.log("User authenticated:", user.sub);
 
     // Get ID Token or Access Token to pass to Supabase for RLS
-    const token = session?.idToken || session?.accessToken;
+    let token = session?.idToken;
+
+    if (!token) {
+      try {
+        const tokenResponse = await auth0.getAccessToken();
+        token = tokenResponse?.token;
+      } catch (tokenError) {
+        console.log("Failed to retrieve access token via getAccessToken():", tokenError);
+      }
+    }
+
+    if (!token) {
+      // Fallback to searching session properties just in case
+      token = session?.accessToken;
+    }
 
     // Pass token to createClient
     const supabase = await createClient(token as string | undefined)
