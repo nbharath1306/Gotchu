@@ -33,35 +33,30 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
 
+  // Polling logic
   useEffect(() => {
     const fetchMessages = async () => {
-      const { data } = await supabase
-        .from('messages')
-        .select('*')
-        .eq('chat_id', chatId)
-        .order('created_at', { ascending: true })
-      
-      if (data) setMessages(data)
+      try {
+        const res = await fetch(`/api/messages?chat_id=${chatId}`)
+        if (res.ok) {
+          const data = await res.json()
+          if (data.messages) {
+            setMessages(data.messages)
+          }
+        }
+      } catch (err) {
+        console.error("Polling error", err)
+      }
     }
 
+    // Initial fetch
     fetchMessages()
 
-    const channel = supabase
-      .channel(`chat:${chatId}`)
-      .on('postgres_changes', { 
-        event: 'INSERT', 
-        schema: 'public', 
-        table: 'messages',
-        filter: `chat_id=eq.${chatId}`
-      }, (payload) => {
-        setMessages((current) => [...current, payload.new as Message])
-      })
-      .subscribe()
+    // Poll every 3 seconds
+    const interval = setInterval(fetchMessages, 3000)
 
-    return () => {
-      supabase.removeChannel(channel)
-    }
-  }, [chatId, supabase])
+    return () => clearInterval(interval)
+  }, [chatId])
 
   useEffect(() => {
     scrollToBottom()
@@ -71,26 +66,37 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     e.preventDefault()
     if (!newMessage.trim()) return
 
-    const messageToSend = newMessage.trim()
-    setNewMessage("") // Optimistic clear
+    const messageContent = newMessage.trim()
+    setNewMessage("") // Clear input immediately
+
+    // Optimistic Update
+    const optimisticMsg: Message = {
+      id: "optimistic-" + Math.random(),
+      content: messageContent,
+      sender_id: currentUserId,
+      created_at: new Date().toISOString()
+    }
+    setMessages(prev => [...prev, optimisticMsg])
+    // Scroll immediately
+    setTimeout(scrollToBottom, 50)
 
     try {
       const res = await fetch("/api/message", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, content: messageToSend })
+        body: JSON.stringify({ chat_id: chatId, content: messageContent })
       })
       if (!res.ok) {
         const data = await res.json()
         toast.error(data.error || "Failed to send message")
-        setNewMessage(messageToSend)
+        // Remove optimistic message on failure? Or just let it be and let user retry? 
+        // For simplicity, we leave it but maybe show error.
         return
       }
-      toast.success("Message sent!")
+      // Success - let polling sync the ID later.
     } catch (error: any) {
       console.error('Error sending message:', error)
       toast.error(error.message || "Failed to send message")
-      setNewMessage(messageToSend)
     }
   }
 
@@ -105,11 +111,10 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
               className={`flex ${isOwn ? "justify-end" : "justify-start"}`}
             >
               <div
-                className={`max-w-[80%] p-3 border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] ${
-                  isOwn
+                className={`max-w-[80%] p-3 border-2 border-[#111111] shadow-[4px_4px_0px_0px_#111111] ${isOwn
                     ? "bg-[#111111] text-white"
                     : "bg-white text-[#111111]"
-                }`}
+                  }`}
               >
                 <p className="text-sm font-medium">{message.content}</p>
                 <p className={`text-[10px] mt-1 font-mono opacity-70 ${isOwn ? "text-gray-300" : "text-gray-500"}`}>
