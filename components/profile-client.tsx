@@ -40,6 +40,11 @@ interface ProfileClientProps {
 }
 
 export function ProfileClient({ user, profile, items }: ProfileClientProps) {
+  const karma = profile?.karma || 0;
+  const itemsReported = items.filter(i => i.type === "LOST").length;
+  const itemsFound = items.filter(i => i.type === "FOUND").length;
+  const itemsResolved = items.filter(i => i.status === "RESOLVED").length;
+
   const getBadge = (points: number) => {
     if (points >= 500) return { label: "LEGEND", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Trophy, next: null, nextThreshold: null };
     if (points >= 100) return { label: "GUARDIAN", color: "bg-indigo-100 text-indigo-700 border-indigo-200", icon: Shield, next: "Legend", nextThreshold: 500 };
