@@ -397,8 +397,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         </div>
 
         <div className="flex items-center gap-2">
-          {/* DEBUG: Log status for visibility check */}
-          {console.log("ChatStatus:", chatStatus, "ClosureBy:", closureRequestedBy)}
 
           {/* Resolve Action - Force Visible for Debugging if not CLOSED */}
           {chatStatus !== 'CLOSED' && !closureRequestedBy && (
