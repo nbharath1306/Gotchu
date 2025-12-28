@@ -55,7 +55,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
-  const [isTyping, setIsTyping] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -239,45 +238,80 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
           </div>
 
           {/* Messages Grouped */}
-          <div className="space-y-6">
+          <div className="space-y-1">
             {messages.map((msg, i) => {
               const isOwn = msg.sender_id === currentUserId
+              const prevMsg = messages[i - 1]
+
+              // Smart Grouping Logic
+              const isSameSender = prevMsg && prevMsg.sender_id === msg.sender_id
+              const timeDiff = prevMsg ? new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() : 0
+              const isGrouped = isSameSender && timeDiff < 5 * 60 * 1000 // 5 minutes
+
+              // Date Separator Logic
+              const showDateSeparator = !prevMsg || new Date(msg.created_at).toDateString() !== new Date(prevMsg.created_at).toDateString()
+
               return (
-                <div key={msg.id} className={`flex gap-4 ${isOwn ? 'flex-row-reverse' : 'flex-row'}`}>
-                  {/* Avatar */}
-                  <div className="shrink-0 pt-1">
-                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium ${isOwn ? 'bg-gray-900 text-white' : 'bg-gray-200 text-gray-600'}`}>
-                      {isOwn ? 'Me' : otherUser.full_name?.[0]}
-                    </div>
-                  </div>
+                <div key={msg.id} className="flex flex-col">
 
-                  {/* Content Block */}
-                  <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[75%]`}>
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-xs font-semibold text-gray-900">
-                        {isOwn ? 'You' : otherUser.full_name}
-                      </span>
-                      <span className="text-[10px] text-gray-400 tabular-nums">
-                        {format(new Date(msg.created_at), 'h:mm a')}
+                  {/* Date Divider */}
+                  {showDateSeparator && (
+                    <div className="flex items-center justify-center my-6">
+                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                        {format(new Date(msg.created_at), 'MMMM d, yyyy')}
                       </span>
                     </div>
+                  )}
 
-                    <div className={`
-                                        px-4 py-3 rounded-2xl text-[14px] leading-relaxed
-                                        ${isOwn
-                        ? 'bg-gray-50 text-gray-900 border border-gray-100 rounded-tr-sm'
-                        : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-tl-sm'
-                      }
-                                    `}>
-                      {msg.content}
+                  <div className={`flex gap-3 group/msg ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${isGrouped ? 'mt-0.5' : 'mt-4'}`}>
+                    {/* Avatar Gutter */}
+                    <div className="shrink-0 w-8 flex flex-col items-center">
+                      {!isGrouped ? (
+                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>
+                          {isOwn ? 'Me' : otherUser.full_name?.[0]}
+                        </div>
+                      ) : (
+                        <div className="w-8 h-full"></div> // Spacer
+                      )}
                     </div>
 
-                    {isOwn && (
-                      <div className="mt-1 flex items-center gap-1 text-[10px] text-gray-300">
-                        <span className="font-medium">Sent</span>
-                        <Check className="w-3 h-3" />
+                    {/* Content Block */}
+                    <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                      {/* Name Header (Only for first in group) */}
+                      {!isGrouped && (
+                        <div className="flex items-center gap-2 mb-1 px-1">
+                          <span className="text-[11px] font-bold text-gray-900">
+                            {isOwn ? 'You' : otherUser.full_name}
+                          </span>
+                          <span className="text-[10px] text-gray-400 tabular-nums">
+                            {format(new Date(msg.created_at), 'h:mm a')}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* The Bubble */}
+                      <div className={`
+                                            relative px-4 py-2 text-[14px] leading-relaxed transition-all
+                                            ${isOwn
+                          ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
+                          : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
+                        }
+                                            ${isGrouped && isOwn ? 'rounded-tr-2xl mr-0' : ''}
+                                            ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
+                                        `}>
+                        {msg.content}
+
+                        {/* Timestamp on Hover (for grouped messages) */}
+                        {isGrouped && (
+                          <div className={`
+                                                    absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
+                                                    ${isOwn ? '-left-12 text-right w-10' : '-right-12 text-left w-10'}
+                                                `}>
+                            {format(new Date(msg.created_at), 'h:mm a')}
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
                   </div>
                 </div>
               )
