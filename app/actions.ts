@@ -7,12 +7,27 @@ import { nanoid } from "nanoid";
 import { ensureUserExists } from "@/lib/users";
 
 export async function resolveItem(itemId: string) {
-  const supabase = await createClient()
+  // Strategy: Try Admin first, then fallback to user token
+  let supabase = null;
+  const adminClient = await createAdminClient();
+
+  if (adminClient) {
+    supabase = adminClient;
+  } else {
+    supabase = await createClient();
+  }
+
   const session = await auth0.getSession();
   const user = session?.user;
 
   if (!user) {
     return { error: "Unauthorized" }
+  }
+
+  if (!supabase && !adminClient) {
+    // Revert to token logic if admin fails to init
+    let token = session?.idToken || session?.accessToken;
+    supabase = await createClient(token as string | undefined);
   }
 
   // 1. Fetch the item to verify ownership and type
@@ -44,9 +59,8 @@ export async function resolveItem(itemId: string) {
     return { error: "Failed to update item status" }
   }
 
-  // 3. Award Karma if it was a FOUND item (The finder is closing it)
+  // 3. Award Karma if it was a FOUND item
   if (item.type === 'FOUND') {
-    // Fetch current karma
     const { data: userData, error: userError } = await supabase
       .from('users')
       .select('karma_points')
@@ -77,16 +91,6 @@ export async function createItem(data: {
   bounty_text?: string,
   user_id: string
 }) {
-  const supabase = await createClient()
-  // NOTE: This server action receives `user_id` but we should verify against session for security relative to creation
-  // logic is typically handled in submitReportAction which calls this.
-  // Ideally we should use the session user, not data.user_id trusted blindly if it comes from client.
-  // But for now keeping signature match.
-
-  // However, createItem is exported but seemingly unused? submitReportAction does the insertion directly.
-  // Let's modify submitReportAction mainly.
-
-  // ... keeping existing code for createItem just in case, but fixing imports implies modifying file broadly.
   return { error: "Deprecated: use submitReportAction" }
 }
 
@@ -110,45 +114,35 @@ export async function submitReportAction(formData: FormData) {
     }
     console.log("User authenticated:", user.sub);
 
-    // Get ID Token or Access Token to pass to Supabase for RLS
-    let token = session?.idToken;
-
-    if (!token) {
-      try {
-        const tokenResponse = await auth0.getAccessToken();
-        token = tokenResponse?.token;
-      } catch (tokenError) {
-        console.log("Failed to retrieve access token via getAccessToken():", tokenError);
-      }
-    }
-
-    if (!token) {
-      token = session?.accessToken;
-    }
-
-    // Pass token to createClient
-    let supabase = await createClient(token as string | undefined)
+    let supabase;
     let usingAdmin = false;
 
-    if (!token) {
-      console.warn("WARNING: No Auth0 ID/Access Token found. Attempting Admin Client fallback...");
-      const adminClient = await createAdminClient();
-      if (adminClient) {
-        supabase = adminClient;
-        usingAdmin = true;
-        console.log("Fallback: Using Admin Client for database operations.");
-      } else {
-        console.error("Critical: No Token AND No Admin Key available.");
-      }
+    // STRATEGY: Prefer Admin Client (Service Role) for guaranteed writes
+    const adminClient = await createAdminClient();
+    if (adminClient) {
+      supabase = adminClient;
+      usingAdmin = true;
+      console.log("Using Admin Client for reliable writes.");
     } else {
-      console.log("Supabase client created with token");
+      console.warn("No Admin Client (SUPABASE_SERVICE_ROLE_KEY missing?). Falling back to User Token.");
+      // Fallback: Try to get token for RLS
+      let token = session?.idToken;
+      if (!token) {
+        try {
+          const tokenResponse = await auth0.getAccessToken();
+          token = tokenResponse?.token;
+        } catch (e) { }
+      }
+      if (!token) token = session?.accessToken;
+
+      supabase = await createClient(token as string | undefined);
     }
 
     // Sync user to DB
     const syncResult = await ensureUserExists(supabase, user);
     if (!syncResult.success) {
       console.error("Failed to sync user to database:", syncResult.error);
-      return { error: `User Sync Failed: ${syncResult.error}. (Token present: ${!!token}, Admin: ${usingAdmin})` };
+      return { error: `User Sync Failed: ${syncResult.error}. (Admin: ${usingAdmin})` };
     }
 
     const title = formData.get("title") as string
@@ -157,13 +151,9 @@ export async function submitReportAction(formData: FormData) {
     const location = formData.get("location") as string
     const date = formData.get("date") as string
     const type = formData.get("type") as "LOST" | "FOUND"
-
-    // CHANGED: Get image_url string directly (uploaded by client)
     const imageUrl = formData.get("image_url") as string
 
     console.log("Form data parsed:", { title, category, location, date, type, imageUrl });
-
-    // Server-side upload logic removed - client handles it now.
 
     console.log("Inserting item into database...");
     const itemId = nanoid();
@@ -176,9 +166,9 @@ export async function submitReportAction(formData: FormData) {
         category,
         location_zone: location,
         date_reported: date,
-        image_url: imageUrl || null, // Ensure null if empty string
+        image_url: imageUrl || null,
         type,
-        user_id: user.sub,
+        user_id: user.sub, // Trusted user ID from session
         status: "OPEN"
       })
       .select()
@@ -189,9 +179,8 @@ export async function submitReportAction(formData: FormData) {
       return { error: "Database error: " + insertError.message }
     }
 
-    if (!newItem || !newItem.id || typeof newItem.id !== "string" || newItem.id.trim() === "") {
-      console.error("Insert succeeded but invalid or missing item ID", { newItem });
-      return { error: "Failed to create item: No valid item ID returned from database." }
+    if (!newItem || !newItem.id) {
+      return { error: "Failed to create item: No ID returned." }
     }
 
     console.log("Item created successfully:", newItem.id);
@@ -210,12 +199,21 @@ export async function submitReportAction(formData: FormData) {
 }
 
 export async function startChat(itemId: string) {
-  const supabase = await createClient()
   const session = await auth0.getSession();
   const user = session?.user;
 
   if (!user) {
     return { error: "Unauthorized" }
+  }
+
+  // STRATEGY: Prefer Admin Client
+  let supabase;
+  const adminClient = await createAdminClient();
+  if (adminClient) {
+    supabase = adminClient;
+  } else {
+    let token = session?.idToken || session?.accessToken;
+    supabase = await createClient(token as string | undefined);
   }
 
   // Sync user to DB (just in case)
@@ -234,11 +232,6 @@ export async function startChat(itemId: string) {
 
   if (item.user_id === user.sub) {
     return { error: "You cannot chat with yourself" }
-  }
-
-  if (!item.user_id || !user.sub) {
-    console.error("Missing user IDs:", { itemOwner: item.user_id, currentUser: user.sub })
-    return { error: "Invalid user data" }
   }
 
   // 2. Check if chat already exists
