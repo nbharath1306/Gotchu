@@ -314,7 +314,7 @@ export async function deleteItem(itemId: string) {
 
   if (deleteError) {
     console.error("Delete item error:", deleteError)
-    return { error: "Failed to delete item" }
+    return { error: `Delete failed: ${deleteError.message} (${deleteError.code})` }
   }
 
   revalidatePath('/feed')
