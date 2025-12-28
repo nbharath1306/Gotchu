@@ -397,26 +397,30 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Resolve Action - Always Visible */}
-          {chatStatus === 'OPEN' && !closureRequestedBy && (
-            <button
-              onClick={handleEndSession}
-              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-900 hover:bg-black text-white rounded-lg transition-colors text-xs font-semibold shadow-sm"
-              title="End Conversation & Resolve Item"
-            >
-              <CheckCheck className="w-3.5 h-3.5" />
-              <span className="hidden lg:inline">Mark Resolved</span>
-            </button>
-          )}
+          {/* DEBUG: Log status for visibility check */}
+          {console.log("ChatStatus:", chatStatus, "ClosureBy:", closureRequestedBy)}
 
-          {/* Mobile Icon Only Version */}
-          {chatStatus === 'OPEN' && !closureRequestedBy && (
-            <button
-              onClick={handleEndSession}
-              className="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white shadow-sm"
-            >
-              <CheckCheck className="w-4 h-4" />
-            </button>
+          {/* Resolve Action - Force Visible for Debugging if not CLOSED */}
+          {chatStatus !== 'CLOSED' && !closureRequestedBy && (
+            <>
+              {/* Desktop Button */}
+              <button
+                onClick={handleEndSession}
+                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full transition-colors text-xs font-bold shadow-sm"
+                title="End Conversation & Resolve Item"
+              >
+                <CheckCheck className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline">Mark Resolved</span>
+              </button>
+
+              {/* Mobile Button */}
+              <button
+                onClick={handleEndSession}
+                className="sm:hidden w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+              >
+                <CheckCheck className="w-4 h-4" />
+              </button>
+            </>
           )}
 
           <div className="relative">
