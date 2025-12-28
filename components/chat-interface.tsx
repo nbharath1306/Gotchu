@@ -396,7 +396,29 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          {/* Resolve Action - Always Visible */}
+          {chatStatus === 'OPEN' && !closureRequestedBy && (
+            <button
+              onClick={handleEndSession}
+              className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-gray-900 hover:bg-black text-white rounded-lg transition-colors text-xs font-semibold shadow-sm"
+              title="End Conversation & Resolve Item"
+            >
+              <CheckCheck className="w-3.5 h-3.5" />
+              <span className="hidden lg:inline">Mark Resolved</span>
+            </button>
+          )}
+
+          {/* Mobile Icon Only Version */}
+          {chatStatus === 'OPEN' && !closureRequestedBy && (
+            <button
+              onClick={handleEndSession}
+              className="sm:hidden w-8 h-8 flex items-center justify-center rounded-lg bg-gray-900 text-white shadow-sm"
+            >
+              <CheckCheck className="w-4 h-4" />
+            </button>
+          )}
+
           <div className="relative">
             <button onClick={() => setIsActionsOpen(!isActionsOpen)} className={`w-8 h-8 flex items-center justify-center rounded-md hover:bg-gray-100 text-gray-500 transition-colors ${isActionsOpen ? 'bg-gray-100 text-gray-900' : ''}`}>
               <MoreHorizontal className="w-5 h-5 stroke-[1.5]" />
@@ -405,11 +427,6 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
               <div className="absolute right-0 top-10 w-56 bg-white border border-gray-100 shadow-xl shadow-gray-200/50 rounded-lg py-1 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
                 <div className="px-3 py-2 border-b border-gray-50"><p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Chat Controls</p></div>
                 <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2"><AlertCircle className="w-4 h-4 stroke-[1.5]" /> Report User</button>
-                {chatStatus === 'OPEN' && (
-                  <button onClick={handleEndSession} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center gap-2">
-                    <Shield className="w-4 h-4 stroke-[1.5]" /> {closureRequestedBy ? "Confirm Resolution" : "Mark as Resolved"}
-                  </button>
-                )}
               </div>
             )}
           </div>
