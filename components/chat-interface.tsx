@@ -90,24 +90,19 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     if (!isLoading) scrollToBottom()
   }, [messages, isLoading])
 
-  // Auto-resize textarea and Cap height
-  useEffect(() => {
-    const textarea = textareaRef.current
-    if (textarea) {
-      // Reset to auto to get the correct scrollHeight for shrinkage
-      textarea.style.height = 'auto'
-
-      // Cap the height at 160px (approx 6-7 lines)
-      const newHeight = Math.min(textarea.scrollHeight, 160)
-
-      textarea.style.height = `${newHeight}px`
-
-      // Show scrollbar only if we hit the limit
-      textarea.style.overflowY = textarea.scrollHeight > 160 ? 'auto' : 'hidden'
-    }
-  }, [newMessage])
-
   // --- HANDLERS ---
+  const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setNewMessage(e.target.value)
+
+    const target = e.target;
+    // Reset height to auto to correctly calculate new scrollHeight (shrink behavior)
+    target.style.height = 'auto';
+    // Calculate optimized height, capped at 160px
+    const newHeight = Math.min(target.scrollHeight, 160);
+    target.style.height = `${newHeight}px`;
+    target.style.overflowY = target.scrollHeight > 160 ? 'auto' : 'hidden';
+  }
+
   const handleEndSession = async () => {
     if (!confirm("Confirm resolution? This will archive the chat.")) return
     try {
@@ -129,7 +124,11 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
     const content = newMessage.trim()
     setNewMessage("")
-    if (textareaRef.current) textareaRef.current.style.height = 'auto'
+
+    // Reset Height safely
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+    }
 
     // Optimistic Update
     const optimisticId = "opt-" + Math.random()
@@ -325,7 +324,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
                         {/* The Bubble */}
                         <div className={`
-                                                relative px-4 py-2 text-[14px] leading-relaxed transition-all
+                                                relative px-4 py-2 text-[14px] leading-relaxed transition-all break-words whitespace-pre-wrap break-all
                                                 ${isOwn
                             ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
                             : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
@@ -415,10 +414,11 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
               <textarea
                 ref={textareaRef}
                 value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                onChange={handleInput}
                 onKeyDown={handleKeyDown}
                 placeholder="Type request or message..."
-                className="flex-1 bg-transparent border-none resize-none px-2 py-2 text-[14px] leading-relaxed placeholder-gray-400 focus:ring-0 max-h-[200px]"
+                className="flex-1 bg-transparent border-none resize-none px-2 py-2 text-[14px] leading-relaxed placeholder-gray-400 focus:ring-0"
+                style={{ minHeight: '44px', maxHeight: '160px' }}
                 rows={1}
               />
 
