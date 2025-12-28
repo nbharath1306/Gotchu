@@ -66,7 +66,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
-  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false) // New state for attachment menu
+  const [isAttachMenuOpen, setIsAttachMenuOpen] = useState(false)
+  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false)
   const [showScrollButton, setShowScrollButton] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -143,6 +144,10 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }, [messages, isLoading, currentUserId]) // Removed showScrollButton dependency to avoid loops
 
   // --- HANDLERS ---
+  const handleEndSessionPress = () => {
+    setIsConfirmModalOpen(true)
+  }
+
   const handleInput = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setNewMessage(e.target.value)
 
@@ -154,13 +159,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }
 
   const handleEndSession = async () => {
-    // Optimistic UI Update handled by fetchMessages polling, but we can force one
-    let confirmMsg = "Mark this item as resolved? This will request confirmation from the other user."
-    if (closureRequestedBy && closureRequestedBy !== currentUserId) {
-      confirmMsg = "Confirm resolution? This will archive the chat and award Karma points."
-    }
-
-    if (!confirm(confirmMsg)) return
+    setIsConfirmModalOpen(false) // Close modal if open
 
     try {
       const res = await fetch('/api/chat/close', {
@@ -398,23 +397,25 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
         <div className="flex items-center gap-2 shrink-0">
 
-          {/* Resolve Action - Force Visible if not CLOSED */}
+          {/* Resolve Action - Premium Upgraded Button */}
           {chatStatus !== 'CLOSED' && (
             <>
-              {/* Desktop Button */}
+              {/* Desktop Button - Premium Pill */}
               <button
-                onClick={handleEndSession}
-                className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full transition-colors text-xs font-bold shadow-sm"
+                onClick={handleEndSessionPress}
+                className="hidden sm:flex items-center gap-2 pl-3 pr-4 py-1.5 bg-[#111111] hover:bg-black text-white rounded-full transition-all duration-300 shadow-lg shadow-emerald-500/10 border border-emerald-500/20 group hover:scale-[1.02]"
                 title="End Conversation & Resolve Item"
               >
-                <CheckCheck className="w-3.5 h-3.5" />
-                <span className="hidden lg:inline">Mark Resolved</span>
+                <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Check className="w-2.5 h-2.5 text-white stroke-[3]" />
+                </div>
+                <span className="hidden lg:inline text-xs font-semibold tracking-wide">{closureRequestedBy && closureRequestedBy !== currentUserId ? "Confirm & Close" : "Mark Resolved"}</span>
               </button>
 
-              {/* Mobile Button */}
+              {/* Mobile Button - Floating Action Style */}
               <button
-                onClick={handleEndSession}
-                className="sm:hidden w-8 h-8 flex items-center justify-center rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+                onClick={handleEndSessionPress}
+                className="sm:hidden w-8 h-8 flex items-center justify-center rounded-full bg-[#111111] hover:bg-black text-emerald-400 shadow-md border border-emerald-500/20"
               >
                 <CheckCheck className="w-4 h-4" />
               </button>
@@ -435,28 +436,32 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         </div>
       </header>
 
-      {/* --- STATUS BANNER (Mutual Consent) --- */}
+      {/* --- STATUS BANNER (Premium) --- */}
       {chatStatus === 'PENDING_CLOSURE' && (
-        <div className="bg-amber-50 border-b border-amber-100 p-3 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 animate-in slide-in-from-top-2">
-          <div className="flex items-center gap-2 text-amber-800">
-            <Clock className="w-4 h-4" />
-            <span className="text-xs font-bold font-mono uppercase tracking-wide">
-              {closureRequestedBy === currentUserId ? 'WAITING FOR CONFIRMATION' : 'RESOLUTION REQUESTED'}
-            </span>
+        <div className="bg-gradient-to-r from-amber-50 to-orange-50/50 border-b border-amber-100/50 p-4 flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0 animate-in slide-in-from-top-2 relative overflow-hidden">
+          <div className="absolute top-0 left-0 w-1 h-full bg-amber-400" />
+          <div className="flex items-center gap-3 z-10">
+            <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 shrink-0">
+              <Clock className="w-4 h-4" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 leading-none mb-1">
+                {closureRequestedBy === currentUserId ? 'Waiting for confirmation' : 'Resolution Requested'}
+              </h3>
+              <p className="text-xs text-amber-700/80 font-medium">
+                {closureRequestedBy === currentUserId
+                  ? 'The other user must confirm to award Karma.'
+                  : 'Please confirm if the item has been exchanged.'}
+              </p>
+            </div>
           </div>
           {closureRequestedBy !== currentUserId && (
             <button
-              onClick={handleEndSession}
-              className="w-full sm:w-auto px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-full shadow-sm transition-colors flex items-center justify-center gap-2"
+              onClick={handleEndSessionPress}
+              className="w-full sm:w-auto px-5 py-2 bg-white border border-amber-200 text-amber-700 hover:bg-amber-50 rounded-lg text-xs font-bold shadow-sm transition-all flex items-center justify-center gap-2 z-10"
             >
-              <CheckCheck className="w-3.5 h-3.5" />
-              CONFIRM RESOLUTION
+              Review & Confirm
             </button>
-          )}
-          {closureRequestedBy === currentUserId && (
-            <span className="text-[10px] text-amber-600 font-medium hidden sm:inline">
-              The other user must confirm to award Karma.
-            </span>
           )}
         </div>
       )}
@@ -620,9 +625,48 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             <div className="flex justify-between items-center mt-2 px-1"><div className="text-[10px] text-gray-400 font-medium tracking-tight"><span className="hidden sm:inline">Tip: </span><span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-gray-500 font-mono text-[9px] mx-1">⌘ + Enter</span>to send</div></div>
           </div>
         </div>
-      ) : (
-        <div className="bg-gray-50 border-t border-gray-100 p-6 text-center"><p className="text-sm font-medium text-gray-500">This conversation has been archived.</p></div>
-      )}
+        </div>
+  ) : (
+    <div className="bg-gray-50 border-t border-gray-100 p-6 text-center"><p className="text-sm font-medium text-gray-500">This conversation has been archived.</p></div>
+  )
+}
+
+{/* --- MODAL --- */ }
+{
+  isConfirmModalOpen && (
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-black/5">
+        <div className="p-6 text-center">
+          <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+            <ShieldCheck className="w-6 h-6 text-emerald-600" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900 mb-2">
+            {closureRequestedBy && closureRequestedBy !== currentUserId ? "Confirm Resolution?" : "Mark as Resolved?"}
+          </h3>
+          <p className="text-sm text-gray-500 leading-relaxed mb-6">
+            {closureRequestedBy && closureRequestedBy !== currentUserId
+              ? "This will award +10 Karma points to the finder. This action cannot be undone."
+              : "Are you sure this item has been resolved? We will ask the other user to confirm."}
+          </p>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsConfirmModalOpen(false)}
+              className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleEndSession}
+              className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
+            >
+              Confirm
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
+  )
+}
+    </div >
   )
 }
