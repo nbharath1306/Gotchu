@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-// ... imports
-import { createAdminClient, createClient } from '@/lib/supabase-server';
-
-// ...
+import { auth0 } from '@/lib/auth0';
+import { ensureUserExists } from '@/lib/users';
+import { createAdminClient } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
   try {
