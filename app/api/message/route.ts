@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { createClient } from '@/lib/supabase-server';
 import { auth0 } from '@/lib/auth0';
+import { ensureUserExists } from '@/lib/users';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,6 +16,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const supabase = await createClient();
+
+    // Sync user just in case
+    await ensureUserExists(supabase, user);
+
     const { error } = await supabase.from('messages').insert({
       id: nanoid(),
       chat_id,
