@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
-import { createClient } from '@/lib/supabase-server';
-import { auth0 } from '@/lib/auth0';
-import { ensureUserExists } from '@/lib/users';
+// ... imports
+import { createAdminClient, createClient } from '@/lib/supabase-server';
+
+// ...
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,10 +16,31 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const supabase = await createClient();
+
+    // Use Admin Client for reliable writes (bypassing Auth0 token RLS issues)
+    const supabase = await createAdminClient();
+
+    if (!supabase) {
+      return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+    }
 
     // Sync user just in case
     await ensureUserExists(supabase, user);
+
+    // SECURITY CHECK: Verify user is part of the chat
+    const { data: chat, error: chatError } = await supabase
+      .from('chats')
+      .select('user_a, user_b')
+      .eq('id', chat_id)
+      .single();
+
+    if (chatError || !chat) {
+      return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
+    }
+
+    if (chat.user_a !== user.sub && chat.user_b !== user.sub) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
 
     const { error } = await supabase.from('messages').insert({
       id: nanoid(),
@@ -31,6 +53,7 @@ export async function POST(req: NextRequest) {
     }
     return NextResponse.json({ success: true });
   } catch (e) {
+    console.error("Message send error:", e);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });
   }
 }
