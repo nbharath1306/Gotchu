@@ -17,7 +17,7 @@ export default function ReportLost() {
   const router = useRouter()
 
   if (isLoading) return <div className="min-h-screen bg-[#F2F2F2]" />
-  
+
   if (!user) {
     router.push("/auth/login")
     return null
@@ -45,8 +45,8 @@ export default function ReportLost() {
         return;
       }
       setSuccess(true)
-      toast.success("Report filed! Redirecting...")
-      setTimeout(() => router.push(`/item/${result.itemId}`), 2000)
+      toast.success("Report filed! Redirecting to matches...")
+      setTimeout(() => router.push(`/item/${result.itemId}/matches`), 2000)
     } catch (err: any) {
       setError(err.message)
       toast.error(err.message)
@@ -58,7 +58,7 @@ export default function ReportLost() {
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-12 px-4">
       <div className="max-w-2xl mx-auto">
-        <Link 
+        <Link
           href="/"
           className="inline-flex items-center text-sm font-mono text-[#666666] hover:text-black mb-8 transition-colors"
         >

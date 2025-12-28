@@ -1,4 +1,5 @@
 import { ContactButton } from "@/components/contact-button"
+import { auth0 } from "@/lib/auth0"
 import type { Item } from "@/types"
 import Link from "next/link"
 import { MapPin, Clock, ArrowLeft, Package } from "lucide-react"
@@ -86,7 +87,18 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
                 <p>{item.description || "No description provided."}</p>
               </div>
               {/* No bounty_text in Item type, so skip reward section */}
-              {id && <ContactButton itemId={id} />}
+              {id && (
+                item.user_id === (await (await auth0.getSession())?.user.sub) ? (
+                  <Link
+                    href={`/item/${id}/matches`}
+                    className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg text-center"
+                  >
+                    VIEW POTENTIAL MATCHES
+                  </Link>
+                ) : (
+                  <ContactButton itemId={id} />
+                )
+              )}
             </div>
           </div>
         </div>
