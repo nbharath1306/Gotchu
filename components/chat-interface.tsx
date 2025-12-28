@@ -25,6 +25,7 @@ import {
 } from "lucide-react"
 import { format } from "date-fns"
 import Link from "next/link"
+import { useUser } from "@auth0/nextjs-auth0/client"
 
 // --- TYPES & CONSTANTS ---
 interface Message {
@@ -55,6 +56,7 @@ const AVATAR_PLACEHOLDERS = [
 
 export default function ChatInterface({ chatId, currentUserId, otherUser, itemTitle }: ChatInterfaceProps) {
   // --- STATE ---
+  const { user } = useUser()
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState("")
   const [chatStatus, setChatStatus] = useState("OPEN")
@@ -435,7 +437,30 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                   <div key={msg.id} className="flex flex-col animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards" style={{ animationDelay: `${i * 0.05}s` }}>
                     {showDateSeparator && <div className="flex items-center justify-center my-6"><span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">{format(new Date(msg.created_at), 'MMMM d, yyyy')}</span></div>}
                     <div className={`flex gap-3 group/msg ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${isGrouped ? 'mt-0.5' : 'mt-4'}`}>
-                      <div className="shrink-0 w-8 flex flex-col items-center">{!isGrouped ? <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>{isOwn ? 'Me' : otherUser.full_name?.[0]}</div> : <div className="w-8 h-full"></div>}</div>
+                      <div className="shrink-0 w-8 flex flex-col items-center">
+                        {!isGrouped ? (
+                          <div className="w-8 h-8 rounded-full overflow-hidden shadow-sm border border-gray-100 bg-white">
+                            {/* Logic: If Own -> user.picture; If Other -> otherUser.avatar_url; Else -> Initials */}
+                            {isOwn ? (
+                              user?.picture ? (
+                                <img src={user.picture} alt="Me" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full bg-black text-white flex items-center justify-center text-[10px] font-bold">ME</div>
+                              )
+                            ) : (
+                              otherUser.avatar_url ? (
+                                <img src={otherUser.avatar_url} alt={otherUser.full_name} className="w-full h-full object-cover" />
+                              ) : (
+                                <div className={`w-full h-full flex items-center justify-center text-[10px] font-bold ${getRandomColor(otherUser.full_name || 'U')}`}>
+                                  {otherUser.full_name?.[0]}
+                                </div>
+                              )
+                            )}
+                          </div>
+                        ) : (
+                          <div className="w-8 h-full"></div>
+                        )}
+                      </div>
                       <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[80%]`}>
                         {!isGrouped && <div className="flex items-center gap-2 mb-1 px-1"><span className="text-[11px] font-bold text-gray-900">{isOwn ? 'You' : otherUser.full_name}</span><span className="text-[10px] text-gray-400 tabular-nums">{format(new Date(msg.created_at), 'h:mm a')}</span></div>}
                         {renderMessageContent(msg, isOwn, isGrouped)}
