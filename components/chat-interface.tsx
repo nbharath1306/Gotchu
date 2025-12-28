@@ -377,26 +377,26 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     <div className="flex flex-col h-[100dvh] bg-[#FAFAFA] text-[#111111] font-sans overflow-hidden">
 
       {/* --- 1. COMMAND BAR --- */}
-      <header className="h-[60px] bg-white border-b border-gray-100 flex items-center justify-between px-5 shrink-0 z-20">
-        <div className="flex items-center gap-4">
-          <Link href="/chat" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-colors">
+      <header className="h-[60px] bg-white border-b border-gray-100 flex items-center justify-between px-4 sm:px-5 shrink-0 z-20 gap-2">
+        <div className="flex items-center gap-3 min-w-0">
+          <Link href="/chat" className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-gray-50 text-gray-400 hover:text-gray-900 transition-colors shrink-0">
             <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
           </Link>
-          <div className="flex items-center gap-3">
-            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold tracking-tight ${otherUser.avatar_url ? 'bg-gray-100' : getRandomColor(otherUser.full_name || 'U')}`}>
+          <div className="flex items-center gap-3 min-w-0">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-semibold tracking-tight shrink-0 ${otherUser.avatar_url ? 'bg-gray-100' : getRandomColor(otherUser.full_name || 'U')}`}>
               {otherUser.avatar_url ? <img src={otherUser.avatar_url} className="w-full h-full rounded-lg object-cover" alt="" /> : otherUser.full_name?.[0]}
             </div>
-            <div>
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold tracking-tight text-gray-900">{otherUser.full_name}</h2>
-                {chatStatus === 'OPEN' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>}
+                <h2 className="text-sm font-semibold tracking-tight text-gray-900 truncate">{otherUser.full_name}</h2>
+                {chatStatus === 'OPEN' && <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 ring-2 ring-white shrink-0"></span>}
               </div>
-              <p className="text-[11px] font-medium text-gray-400 tracking-wide uppercase">{itemTitle}</p>
+              <p className="text-[10px] uppercase font-bold text-gray-400 tracking-wide truncate">{itemTitle}</p>
             </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
 
           {/* Resolve Action - Force Visible if not CLOSED */}
           {chatStatus !== 'CLOSED' && (
