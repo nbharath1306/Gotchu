@@ -446,7 +446,9 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             <div className={`group flex gap-2 bg-white border rounded-xl p-2 transition-all duration-200 ${newMessage.trim() ? 'border-gray-300 shadow-sm' : 'border-gray-200 hover:border-gray-300'} focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-50`}>
 
               {/* Hidden Inputs */}
-              <input type="file" ref={imageInputRef} className="hidden" accept="image/*" onChange={handleFileSelect} disabled={isUploading} />
+              {/* Camera Input: Forces Camera Launch */}
+              <input type="file" ref={imageInputRef} className="hidden" accept="image/*" capture="environment" onChange={handleFileSelect} disabled={isUploading} />
+              {/* File Input: General Picker */}
               <input type="file" ref={fileInputRef} className="hidden" accept="*" onChange={handleFileSelect} disabled={isUploading} />
 
               {/* Attach Trigger */}
