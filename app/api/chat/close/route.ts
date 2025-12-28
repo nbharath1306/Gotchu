@@ -91,12 +91,20 @@ export async function POST(req: NextRequest) {
                 return NextResponse.json({ status: 'CLOSED', message: 'Chat closed (Delete failed)' });
             }
 
-            // 4. RESOLVE ITEM
+            // 4. RESOLVE PRIMARY ITEM
             if (chat.item_id) {
                 await supabase
                     .from('items')
                     .update({ status: 'RESOLVED' })
                     .eq('id', chat.item_id);
+            }
+
+            // 4b. RESOLVE RELATED ITEM (The Match)
+            if (chat.related_item_id) {
+                await supabase
+                    .from('items')
+                    .update({ status: 'RESOLVED' })
+                    .eq('id', chat.related_item_id);
             }
 
             // 5. KARMA AWARDING

@@ -198,7 +198,7 @@ export async function submitReportAction(formData: FormData) {
   }
 }
 
-export async function startChat(itemId: string) {
+export async function startChat(itemId: string, relatedItemId?: string) {
   const session = await auth0.getSession();
   const user = session?.user;
 
@@ -246,13 +246,14 @@ export async function startChat(itemId: string) {
     return { chatId: existingChat.id }
   }
 
-  // 3. Create new chat with unique id
+  // 3. Create new chat with unique id AND related item
   const chatId = nanoid();
   const { data: newChat, error: createError } = await supabase
     .from('chats')
     .insert({
       id: chatId,
       item_id: itemId,
+      related_item_id: relatedItemId || null, // Link the other item!
       user_a: user.sub,
       user_b: item.user_id
     })

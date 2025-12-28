@@ -8,16 +8,17 @@ import { toast } from "sonner"
 
 interface ContactButtonProps {
   itemId: string
+  relatedItemId?: string
 }
 
-export function ContactButton({ itemId }: ContactButtonProps) {
+export function ContactButton({ itemId, relatedItemId }: ContactButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleContact = async () => {
     setIsLoading(true)
     try {
-      const result = await startChat(itemId)
+      const result = await startChat(itemId, relatedItemId)
       console.log("[ContactButton] startChat result:", result)
 
       if (result.error) {

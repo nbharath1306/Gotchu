@@ -142,7 +142,7 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
                                             VIEW DETAILS
                                         </Link>
                                         <div className="w-full">
-                                            <ContactButton itemId={match.id} />
+                                            <ContactButton itemId={match.id} relatedItemId={projectId} />
                                         </div>
                                     </div>
                                 </div>
