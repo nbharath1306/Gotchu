@@ -33,20 +33,20 @@ export default function ItemPageClient() {
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false)
 
-  const handleDelete = async () => {
-    if (!id) return;
+  const handleDelete = () => {
+    setIsRevokeModalOpen(true)
+  }
 
-    // Custom confirm dialog (or native for MVP)
-    if (!window.confirm("Are you sure? This will permanently delete the item and all associated chats.")) {
-      return;
-    }
-
+  const confirmDelete = async () => {
     setIsDeleting(true);
     try {
+      if (!id) return;
       const res = await deleteItem(id);
       if (res.error) {
         toast.error(res.error);
+        setIsDeleting(false); // Only reset if failed. If success, we redirect.
       } else {
         toast.success("Item deleted successfully");
         router.push("/feed");
@@ -54,7 +54,6 @@ export default function ItemPageClient() {
     } catch (err) {
       toast.error("An unexpected error occurred");
       console.error(err);
-    } finally {
       setIsDeleting(false);
     }
   }
@@ -169,6 +168,40 @@ export default function ItemPageClient() {
           </div>
         </div>
       </div>
+
+      {/* --- REVOKE CONFIRMATION MODAL --- */}
+      {isRevokeModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-black/5">
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Trash2 className="w-6 h-6 text-red-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Revoke this Item?
+              </h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                This will permanently delete the item and <strong>all associated chats</strong>. This action cannot be undone.
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsRevokeModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={isDeleting}
+                  className={`flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-red-500/20 flex items-center justify-center gap-2 ${isDeleting ? 'opacity-70 cursor-not-allowed' : ''}`}
+                >
+                  {isDeleting ? 'Revoking...' : 'Yes, Revoke'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
