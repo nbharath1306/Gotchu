@@ -4,16 +4,18 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter } from "next/navigation"
-import { Upload, AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { submitReportAction } from "@/app/actions"
+import { ImageUpload } from "@/components/image-upload"
 
 export default function ReportLost() {
   const { user, isLoading } = useUser()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
+  const [imageUrl, setImageUrl] = useState("")
   const router = useRouter()
 
   if (isLoading) return <div className="min-h-screen bg-[#F2F2F2]" />
@@ -80,7 +82,7 @@ export default function ReportLost() {
               FILE A REPORT
             </h1>
             <p className="text-[#666666] mt-2">
-              Submit details for a lost item. Please provide accurate information.
+              Help us find your item by providing accurate details below.
             </p>
           </div>
 
@@ -97,7 +99,7 @@ export default function ReportLost() {
                 <CheckCircle2 className="w-8 h-8 text-green-600" />
               </div>
               <h3 className="text-xl font-bold mb-2">REPORT FILED</h3>
-              <p className="text-[#666666] font-mono text-sm">REDIRECTING TO DATABASE...</p>
+              <p className="text-[#666666] font-mono text-sm">REDIRECTING TO MATCHES...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -109,7 +111,7 @@ export default function ReportLost() {
                   <input
                     name="title"
                     required
-                    placeholder="e.g. MacBook Pro 14"
+                    placeholder="e.g. Black Backpack"
                     className="input-swiss w-full"
                   />
                 </div>
@@ -142,7 +144,7 @@ export default function ReportLost() {
 
               <div className="space-y-2">
                 <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                  Location Zone
+                  Last Seen Zone
                 </label>
                 <select name="location" required className="input-swiss w-full">
                   <option value="">SELECT ZONE</option>
@@ -163,7 +165,7 @@ export default function ReportLost() {
                   name="description"
                   required
                   rows={4}
-                  placeholder="Provide distinguishing features, serial numbers, or specific details..."
+                  placeholder="Provide distinguishing features, condition, or specific details..."
                   className="input-swiss w-full resize-none"
                 />
               </div>
@@ -172,20 +174,8 @@ export default function ReportLost() {
                 <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
                   Evidence (Image)
                 </label>
-                <div className="relative">
-                  <input
-                    type="file"
-                    name="image"
-                    accept="image/*"
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                  />
-                  <div className="border border-dashed border-[#E5E5E5] p-8 text-center hover:bg-[#FFFFFF] transition-colors">
-                    <Upload className="w-6 h-6 mx-auto mb-2 text-[#666666]" />
-                    <span className="text-sm font-mono text-[#666666]">
-                      CLICK TO UPLOAD IMAGE
-                    </span>
-                  </div>
-                </div>
+                <input type="hidden" name="image_url" value={imageUrl} />
+                <ImageUpload onUploadComplete={setImageUrl} />
               </div>
 
               <div className="pt-6 border-t border-[#E5E5E5]">
