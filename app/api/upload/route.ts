@@ -17,9 +17,9 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
         }
 
-        // Validate file type
-        if (!file.type.startsWith('image/')) {
-            return NextResponse.json({ error: 'Only images are allowed' }, { status: 400 });
+        // Validation: Enforce max size (e.g. 50MB) but allow all types
+        if (file.size > 50 * 1024 * 1024) {
+            return NextResponse.json({ error: 'File too large (Max 50MB)' }, { status: 400 });
         }
 
         const supabase = await createAdminClient();
