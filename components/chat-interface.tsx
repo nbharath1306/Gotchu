@@ -625,48 +625,44 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             <div className="flex justify-between items-center mt-2 px-1"><div className="text-[10px] text-gray-400 font-medium tracking-tight"><span className="hidden sm:inline">Tip: </span><span className="px-1.5 py-0.5 bg-gray-100 rounded border border-gray-200 text-gray-500 font-mono text-[9px] mx-1">⌘ + Enter</span>to send</div></div>
           </div>
         </div>
-        </div>
-  ) : (
-    <div className="bg-gray-50 border-t border-gray-100 p-6 text-center"><p className="text-sm font-medium text-gray-500">This conversation has been archived.</p></div>
-  )
-}
+      ) : (
+        <div className="bg-gray-50 border-t border-gray-100 p-6 text-center"><p className="text-sm font-medium text-gray-500">This conversation has been archived.</p></div>
+      )}
 
-{/* --- MODAL --- */ }
-{
-  isConfirmModalOpen && (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-black/5">
-        <div className="p-6 text-center">
-          <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <ShieldCheck className="w-6 h-6 text-emerald-600" />
-          </div>
-          <h3 className="text-lg font-bold text-gray-900 mb-2">
-            {closureRequestedBy && closureRequestedBy !== currentUserId ? "Confirm Resolution?" : "Mark as Resolved?"}
-          </h3>
-          <p className="text-sm text-gray-500 leading-relaxed mb-6">
-            {closureRequestedBy && closureRequestedBy !== currentUserId
-              ? "This will award +10 Karma points to the finder. This action cannot be undone."
-              : "Are you sure this item has been resolved? We will ask the other user to confirm."}
-          </p>
-          <div className="flex gap-3">
-            <button
-              onClick={() => setIsConfirmModalOpen(false)}
-              className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={handleEndSession}
-              className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
-            >
-              Confirm
-            </button>
+      {/* --- MODAL --- */}
+      {isConfirmModalOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden animate-in zoom-in-95 duration-200 ring-1 ring-black/5">
+            <div className="p-6 text-center">
+              <div className="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                <ShieldCheck className="w-6 h-6 text-emerald-600" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                {closureRequestedBy && closureRequestedBy !== currentUserId ? "Confirm Resolution?" : "Mark as Resolved?"}
+              </h3>
+              <p className="text-sm text-gray-500 leading-relaxed mb-6">
+                {closureRequestedBy && closureRequestedBy !== currentUserId
+                  ? "This will award +10 Karma points to the finder. This action cannot be undone."
+                  : "Are you sure this item has been resolved? We will ask the other user to confirm."}
+              </p>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setIsConfirmModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 text-gray-700 text-sm font-semibold rounded-xl transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleEndSession}
+                  className="flex-1 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold rounded-xl transition-colors shadow-lg shadow-emerald-500/20"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
-  )
-}
-    </div >
   )
 }
