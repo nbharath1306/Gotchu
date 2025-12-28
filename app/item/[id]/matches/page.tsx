@@ -6,7 +6,7 @@ import { redirect, notFound } from "next/navigation"
 import { ContactButton } from "@/components/contact-button"
 import { formatDistanceToNow } from "date-fns"
 
-export default async function MatchesPage({ params }: { params: { id: string } }) {
+export default async function MatchesPage({ params }: { params: Promise<{ id: string }> }) {
     const session = await auth0.getSession()
     const user = session?.user
 
@@ -14,7 +14,9 @@ export default async function MatchesPage({ params }: { params: { id: string } }
         redirect("/auth/login")
     }
 
-    const projectId = params.id
+    const { id: projectId } = await params;
+    console.log("MatchesPage loaded for ID:", projectId);
+
     const supabase = await createClient()
 
     // 1. Fetch the reported item
@@ -24,7 +26,12 @@ export default async function MatchesPage({ params }: { params: { id: string } }
         .eq('id', projectId)
         .single()
 
+    if (itemError) {
+        console.error("MatchesPage item fetch error:", itemError);
+    }
+
     if (itemError || !currentItem) {
+        console.error("MatchesPage item not found or error. Item ID was:", projectId);
         notFound()
     }
 

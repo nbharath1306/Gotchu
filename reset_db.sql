@@ -1,6 +1,5 @@
 -- DANGER: DATA LOSS AHEAD
--- This script drops all tables and recreates them for Auth0 compatibility.
-
+-- This script drops all tables and recreates them for Auth0 compatibility and App Logic alignment.
 -- 1. DROP EXISTING TABLES
 drop table if exists public.messages;
 drop table if exists public.chats;
@@ -18,7 +17,7 @@ create extension if not exists "uuid-ossp";
 
 -- 3. CREATE TABLES
 
--- Users Table (Auth0 Compatible: ID is TEXT)
+-- Users Table
 create table public.users (
   id text primary key, -- Auth0 ID (e.g., "auth0|123456")
   email text not null,
@@ -49,7 +48,7 @@ create type item_zone as enum ('Innovation_Labs', 'Canteen', 'Bus_Bay', 'Library
 create type item_status as enum ('OPEN', 'RESOLVED');
 
 create table public.items (
-  id uuid default uuid_generate_v4() primary key,
+  id text primary key, -- NanoID (Text)
   type item_type not null,
   title text not null,
   category item_category not null,
@@ -58,6 +57,7 @@ create table public.items (
   description text,
   bounty_text text,
   image_url text,
+  date_reported text, -- Stores date string 'YYYY-MM-DD'
   user_id text references public.users(id) not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
@@ -80,8 +80,8 @@ create policy "Users can update their own items."
 
 -- Chats Table
 create table public.chats (
-  id uuid default uuid_generate_v4() primary key,
-  item_id uuid references public.items(id) not null,
+  id text primary key, -- NanoID (Text)
+  item_id text references public.items(id) not null,
   user_a text references public.users(id) not null,
   user_b text references public.users(id) not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -102,8 +102,8 @@ create policy "Authenticated users can create chats."
 
 -- Messages Table
 create table public.messages (
-  id uuid default uuid_generate_v4() primary key,
-  chat_id uuid references public.chats(id) not null,
+  id text primary key, -- UUID/NanoID (Text)
+  chat_id text references public.chats(id) not null,
   sender_id text references public.users(id) not null,
   content text not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
