@@ -42,6 +42,14 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
     )
   }
 
+  // Debug owner check
+  const session = await auth0.getSession();
+  const currentUserSub = session?.user?.sub;
+
+  if (currentUserSub) {
+    console.log(`[ItemPage] Owner Check: Item.user_id (${item.user_id}) === User.sub (${currentUserSub}) ? ${item.user_id === currentUserSub}`);
+  }
+
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
@@ -86,15 +94,19 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
               <div className="prose prose-lg text-[#666666] mb-8">
                 <p>{item.description || "No description provided."}</p>
               </div>
-              {/* No bounty_text in Item type, so skip reward section */}
-              {id && (
-                item.user_id === (await (await auth0.getSession())?.user.sub) ? (
-                  <Link
-                    href={`/item/${id}/matches`}
-                    className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg text-center"
-                  >
-                    VIEW POTENTIAL MATCHES
-                  </Link>
+
+              {/* Action Buttons */}
+              {id && currentUserSub && (
+                item.user_id === currentUserSub ? (
+                  <div className="flex flex-col gap-3">
+                    <Link
+                      href={`/item/${id}/matches`}
+                      className="btn-primary w-full flex items-center justify-center gap-2 py-4 text-lg text-center"
+                    >
+                      VIEW POTENTIAL MATCHES
+                    </Link>
+                    {/* Could add a 'Mark Resolved' button here too if we wanted */}
+                  </div>
                 ) : (
                   <ContactButton itemId={id} />
                 )

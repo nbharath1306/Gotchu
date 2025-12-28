@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-// import { startChat } from "@/app/actions"
+import { startChat } from "@/app/actions"
 import { MessageSquare, Loader2 } from "lucide-react"
 import { toast } from "sonner"
 
@@ -17,30 +17,20 @@ export function ContactButton({ itemId }: ContactButtonProps) {
   const handleContact = async () => {
     setIsLoading(true)
     try {
-      // Call the API route directly to ensure session/JWT is present
-      const res = await fetch("/api/start-chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ item_id: itemId }),
-        credentials: "include"
-      })
-      const result = await res.json()
+      const result = await startChat(itemId)
       console.log("[ContactButton] startChat result:", result)
-      toast("Chat API result: " + JSON.stringify(result))
+
       if (result.error) {
         toast.error(result.error)
-        setIsLoading(false)
-        return
-      }
-      if (result.chatId) {
-        toast.success("Chat ready! Redirecting...")
+        // If "You cannot chat with yourself" (meaning you ARE the owner but UI didn't catch it), redirect to dashboard?
+        // But for now just show error.
+      } else if (result.chatId) {
+        toast.success("Starting chat...")
         router.push(`/chat/${result.chatId}`)
-      } else {
-        toast.error("No chat ID returned from server.")
       }
     } catch (error: any) {
       console.error("Failed to start chat:", error)
-      toast.error(error?.message || "Something went wrong. Please try again.")
+      toast.error("Something went wrong. Please try again.")
     } finally {
       setIsLoading(false)
     }
