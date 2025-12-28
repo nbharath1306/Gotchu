@@ -140,23 +140,28 @@ export default function ItemPageClient() {
               </div>
               {/* No bounty_text in Item type, so skip reward section */}
               {id && (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-6 mt-6">
                   <ContactButton itemId={id} />
 
                   {/* Owner Controls */}
                   {user && user.sub === item.user_id && (
-                    <button
-                      onClick={handleDelete}
-                      disabled={isDeleting}
-                      className="btn-outline w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-500 hover:text-red-700 transition-colors flex items-center justify-center gap-2 py-4"
-                    >
-                      {isDeleting ? "REMOVING..." : (
-                        <>
-                          <Trash2 className="w-4 h-4" />
-                          REVOKE / DELETE ITEM
-                        </>
-                      )}
-                    </button>
+                    <div className="pt-6 border-t border-[#E5E5E5]">
+                      <h4 className="label-caps mb-3 text-red-600/70">DANGER ZONE</h4>
+                      <button
+                        onClick={handleDelete}
+                        disabled={isDeleting}
+                        className="w-full group relative overflow-hidden bg-white border border-red-200 hover:border-red-600 transition-all duration-300 py-4 px-6 flex items-center justify-center gap-3"
+                      >
+                        <div className={`absolute inset-0 bg-red-600 transform origin-left transition-transform duration-300 ${isDeleting ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                        <Trash2 className={`w-4 h-4 z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-500 group-hover:text-white'}`} />
+                        <span className={`font-mono text-xs font-bold tracking-widest z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-600 group-hover:text-white'}`}>
+                          {isDeleting ? "REVOKING..." : "REVOKE ITEM"}
+                        </span>
+                      </button>
+                      <p className="text-[10px] text-[#999999] mt-2 text-center font-mono">
+                        This action cannot be undone. All chats will be deleted.
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
