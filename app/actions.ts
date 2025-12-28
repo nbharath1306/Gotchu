@@ -95,9 +95,6 @@ export async function createItem(data: {
 export async function submitReportAction(formData: FormData) {
   console.log("submitReportAction started");
   try {
-    const supabase = await createClient()
-    console.log("Supabase client created");
-
     let session;
     try {
       session = await auth0.getSession();
@@ -114,6 +111,13 @@ export async function submitReportAction(formData: FormData) {
     }
     console.log("User authenticated:", user.sub);
 
+    // Get ID Token or Access Token to pass to Supabase for RLS
+    const token = session?.idToken || session?.accessToken;
+
+    // Pass token to createClient
+    const supabase = await createClient(token as string | undefined)
+    console.log("Supabase client created with token");
+
     // Sync user to DB
     const userSynced = await ensureUserExists(supabase, user);
     if (!userSynced) {
@@ -127,43 +131,13 @@ export async function submitReportAction(formData: FormData) {
     const location = formData.get("location") as string
     const date = formData.get("date") as string
     const type = formData.get("type") as "LOST" | "FOUND"
-    const imageFile = formData.get("image") as File
 
-    console.log("Form data parsed:", { title, category, location, date, type });
+    // CHANGED: Get image_url string directly (uploaded by client)
+    const imageUrl = formData.get("image_url") as string
 
-    let imageUrl = null
-    if (imageFile && imageFile.size > 0) {
-      console.log("Processing image upload...");
-      try {
-        const fileExt = imageFile.name.split(".").pop()
-        const fileName = `${Math.random()}.${fileExt}`
+    console.log("Form data parsed:", { title, category, location, date, type, imageUrl });
 
-        const arrayBuffer = await imageFile.arrayBuffer()
-        const buffer = new Uint8Array(arrayBuffer)
-
-        const { error: uploadError } = await supabase.storage
-          .from("items")
-          .upload(fileName, buffer, {
-            contentType: imageFile.type,
-            upsert: false
-          })
-
-        if (uploadError) {
-          console.error("Upload error:", uploadError)
-          return { error: "Failed to upload image: " + uploadError.message }
-        }
-
-        const { data: { publicUrl } } = supabase.storage
-          .from("items")
-          .getPublicUrl(fileName)
-
-        imageUrl = publicUrl
-        console.log("Image uploaded successfully:", imageUrl);
-      } catch (uploadEx) {
-        console.error("Exception during image upload:", uploadEx);
-        return { error: "Image upload crashed" };
-      }
-    }
+    // Server-side upload logic removed - client handles it now.
 
     console.log("Inserting item into database...");
     const itemId = nanoid();
@@ -176,7 +150,7 @@ export async function submitReportAction(formData: FormData) {
         category,
         location_zone: location,
         date_reported: date,
-        image_url: imageUrl,
+        image_url: imageUrl || null, // Ensure null if empty string
         type,
         user_id: user.sub,
         status: "OPEN"
@@ -200,7 +174,6 @@ export async function submitReportAction(formData: FormData) {
       revalidatePath('/feed')
     } catch (revalidateError) {
       console.error("revalidatePath error:", revalidateError);
-      // Ignore revalidation error, it's not critical for the user response
     }
 
     return { success: true, itemId: newItem.id }
