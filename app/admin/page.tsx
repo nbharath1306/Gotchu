@@ -1,6 +1,8 @@
 import { createAdminClient, createClient } from "@/lib/supabase-server";
 import { auth0 } from "@/lib/auth0";
 import { Shield, Users, Package, MessageSquare } from "lucide-react";
+import { AdminItemTable } from "@/components/admin-item-table";
+import { AdminUserTable } from "@/components/admin-user-table";
 
 export default async function AdminDashboard() {
     const session = await auth0.getSession();
@@ -24,6 +26,15 @@ export default async function AdminDashboard() {
         supabase.from("chats").select("*", { count: "exact", head: true }),
     ]);
 
+    // Fetch Items & Users
+    const [itemsRes, usersRes] = await Promise.all([
+        supabase.from("items").select("*").order('created_at', { ascending: false }).limit(100),
+        supabase.from("users").select("*").order('created_at', { ascending: false }).limit(100)
+    ]);
+
+    const items = itemsRes.data || [];
+    const users = usersRes.data || [];
+
     return (
         <div className="p-8 max-w-7xl mx-auto pt-24">
             <div className="flex items-center justify-between mb-8">
@@ -45,19 +56,18 @@ export default async function AdminDashboard() {
                 <StatsCard icon={MessageSquare} label="Chats" value={totalChats || 0} />
             </div>
 
-            {/* Action Sections Placeholder */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div className="card-swiss bg-white p-6 min-h-[400px]">
-                    <h3 className="label-caps mb-4">ITEM MODERATION</h3>
-                    <div className="flex items-center justify-center h-full text-[#999999] text-sm">
-                        Item Table Loading...
-                    </div>
+            {/* Item Moderation and User Management Grid */}
+            <div className="grid grid-cols-1 gap-12 mb-12">
+                {/* Item Table */}
+                <div className="card-swiss bg-white p-6">
+                    <h3 className="label-caps mb-6">ITEM DATABASE</h3>
+                    <AdminItemTable initialItems={items} />
                 </div>
-                <div className="card-swiss bg-white p-6 min-h-[400px]">
-                    <h3 className="label-caps mb-4">USER MANAGEMENT</h3>
-                    <div className="flex items-center justify-center h-full text-[#999999] text-sm">
-                        User List Loading...
-                    </div>
+
+                {/* User Table */}
+                <div className="card-swiss bg-white p-6">
+                    <h3 className="label-caps mb-6">USER REGISTRY</h3>
+                    <AdminUserTable initialUsers={users} />
                 </div>
             </div>
         </div>
