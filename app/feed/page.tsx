@@ -11,6 +11,7 @@ export default async function FeedPage() {
   const { data: items, error } = await supabase
     .from("items")
     .select("*")
+    .eq("status", "OPEN") // Hide resolved items
     .order("created_at", { ascending: false });
 
   if (error) {
