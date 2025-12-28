@@ -52,6 +52,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   const [newMessage, setNewMessage] = useState("")
   const [chatStatus, setChatStatus] = useState("OPEN")
   const [closureRequestedBy, setClosureRequestedBy] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
@@ -77,6 +78,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
           setClosureRequestedBy(data.closureRequestedBy || null)
         }
       } catch (err) { console.error("Sync error", err) }
+      setIsLoading(false)
     }
 
     fetchMessages()
@@ -85,8 +87,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }, [chatId])
 
   useEffect(() => {
-    scrollToBottom()
-  }, [messages])
+    if (!isLoading) scrollToBottom()
+  }, [messages, isLoading])
 
   // Auto-resize textarea
   useEffect(() => {
@@ -226,97 +228,121 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       </header>
 
       {/* --- 2. THE STREAM (Content) --- */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+      <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 bg-[#FAFAFA]">
         <div className="max-w-3xl mx-auto space-y-8">
 
           {/* Zero State / Intro */}
-          <div className="text-center py-8">
-            <div className="w-12 h-12 bg-gray-100 rounded-2xl mx-auto flex items-center justify-center mb-3">
-              <ShieldCheck className="w-6 h-6 text-gray-400 stroke-[1.5]" />
+          {!isLoading && messages.length === 0 && (
+            <div className="text-center py-20 animate-in fade-in zoom-in duration-500">
+              <div className="w-16 h-16 bg-white border border-gray-100 rounded-3xl mx-auto flex items-center justify-center mb-4 shadow-sm">
+                <ShieldCheck className="w-8 h-8 text-indigo-500 stroke-[1.5]" />
+              </div>
+              <h3 className="text-gray-900 font-semibold mb-1">Secure Channel</h3>
+              <p className="text-xs text-gray-400 font-medium">Messages are end-to-end encrypted.</p>
             </div>
-            <p className="text-xs text-gray-400 font-medium">This conversation is secure.</p>
-          </div>
+          )}
 
-          {/* Messages Grouped */}
-          <div className="space-y-1">
-            {messages.map((msg, i) => {
-              const isOwn = msg.sender_id === currentUserId
-              const prevMsg = messages[i - 1]
+          {isLoading ? (
+            // Skeleton Loader
+            <div className="space-y-8 animate-pulse">
+              <div className="flex gap-4">
+                <div className="w-8 h-8 bg-gray-200 rounded-lg shrink-0" />
+                <div className="space-y-2 max-w-[60%]">
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                  <div className="h-12 bg-gray-200 rounded-2xl w-full" />
+                </div>
+              </div>
+              <div className="flex gap-4 flex-row-reverse">
+                <div className="w-8 h-8 bg-gray-200 rounded-lg shrink-0" />
+                <div className="space-y-2 max-w-[60%] flex flex-col items-end">
+                  <div className="h-4 bg-gray-200 rounded w-16" />
+                  <div className="h-8 bg-gray-200 rounded-2xl w-48" />
+                  <div className="h-16 bg-gray-200 rounded-2xl w-64" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            // Messages Grouped
+            <div className="space-y-1">
+              {messages.map((msg, i) => {
+                const isOwn = msg.sender_id === currentUserId
+                const prevMsg = messages[i - 1]
 
-              // Smart Grouping Logic
-              const isSameSender = prevMsg && prevMsg.sender_id === msg.sender_id
-              const timeDiff = prevMsg ? new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() : 0
-              const isGrouped = isSameSender && timeDiff < 5 * 60 * 1000 // 5 minutes
+                // Smart Grouping Logic
+                const isSameSender = prevMsg && prevMsg.sender_id === msg.sender_id
+                const timeDiff = prevMsg ? new Date(msg.created_at).getTime() - new Date(prevMsg.created_at).getTime() : 0
+                const isGrouped = isSameSender && timeDiff < 5 * 60 * 1000 // 5 minutes
 
-              // Date Separator Logic
-              const showDateSeparator = !prevMsg || new Date(msg.created_at).toDateString() !== new Date(prevMsg.created_at).toDateString()
+                // Date Separator Logic
+                const showDateSeparator = !prevMsg || new Date(msg.created_at).toDateString() !== new Date(prevMsg.created_at).toDateString()
 
-              return (
-                <div key={msg.id} className="flex flex-col">
+                return (
+                  <div key={msg.id} className="flex flex-col animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards" style={{ animationDelay: `${i * 0.05}s` }}>
 
-                  {/* Date Divider */}
-                  {showDateSeparator && (
-                    <div className="flex items-center justify-center my-6">
-                      <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
-                        {format(new Date(msg.created_at), 'MMMM d, yyyy')}
-                      </span>
-                    </div>
-                  )}
+                    {/* Date Divider */}
+                    {showDateSeparator && (
+                      <div className="flex items-center justify-center my-6">
+                        <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                          {format(new Date(msg.created_at), 'MMMM d, yyyy')}
+                        </span>
+                      </div>
+                    )}
 
-                  <div className={`flex gap-3 group/msg ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${isGrouped ? 'mt-0.5' : 'mt-4'}`}>
-                    {/* Avatar Gutter */}
-                    <div className="shrink-0 w-8 flex flex-col items-center">
-                      {!isGrouped ? (
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>
-                          {isOwn ? 'Me' : otherUser.full_name?.[0]}
-                        </div>
-                      ) : (
-                        <div className="w-8 h-full"></div> // Spacer
-                      )}
-                    </div>
+                    <div className={`flex gap-3 group/msg ${isOwn ? 'flex-row-reverse' : 'flex-row'} ${isGrouped ? 'mt-0.5' : 'mt-4'}`}>
+                      {/* Avatar Gutter */}
+                      <div className="shrink-0 w-8 flex flex-col items-center">
+                        {!isGrouped ? (
+                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-medium shadow-sm border border-black/5 ${isOwn ? 'bg-gray-900 text-white' : 'bg-white text-gray-700'}`}>
+                            {isOwn ? 'Me' : otherUser.full_name?.[0]}
+                          </div>
+                        ) : (
+                          <div className="w-8 h-full"></div> // Spacer
+                        )}
+                      </div>
 
-                    {/* Content Block */}
-                    <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[80%]`}>
-                      {/* Name Header (Only for first in group) */}
-                      {!isGrouped && (
-                        <div className="flex items-center gap-2 mb-1 px-1">
-                          <span className="text-[11px] font-bold text-gray-900">
-                            {isOwn ? 'You' : otherUser.full_name}
-                          </span>
-                          <span className="text-[10px] text-gray-400 tabular-nums">
-                            {format(new Date(msg.created_at), 'h:mm a')}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* The Bubble */}
-                      <div className={`
-                                            relative px-4 py-2 text-[14px] leading-relaxed transition-all
-                                            ${isOwn
-                          ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
-                          : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
-                        }
-                                            ${isGrouped && isOwn ? 'rounded-tr-2xl mr-0' : ''}
-                                            ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
-                                        `}>
-                        {msg.content}
-
-                        {/* Timestamp on Hover (for grouped messages) */}
-                        {isGrouped && (
-                          <div className={`
-                                                    absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
-                                                    ${isOwn ? '-left-12 text-right w-10' : '-right-12 text-left w-10'}
-                                                `}>
-                            {format(new Date(msg.created_at), 'h:mm a')}
+                      {/* Content Block */}
+                      <div className={`flex flex-col ${isOwn ? 'items-end' : 'items-start'} max-w-[80%]`}>
+                        {/* Name Header (Only for first in group) */}
+                        {!isGrouped && (
+                          <div className="flex items-center gap-2 mb-1 px-1">
+                            <span className="text-[11px] font-bold text-gray-900">
+                              {isOwn ? 'You' : otherUser.full_name}
+                            </span>
+                            <span className="text-[10px] text-gray-400 tabular-nums">
+                              {format(new Date(msg.created_at), 'h:mm a')}
+                            </span>
                           </div>
                         )}
+
+                        {/* The Bubble */}
+                        <div className={`
+                                                relative px-4 py-2 text-[14px] leading-relaxed transition-all
+                                                ${isOwn
+                            ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
+                            : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
+                          }
+                                                ${isGrouped && isOwn ? 'rounded-tr-2xl mr-0' : ''}
+                                                ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
+                                            `}>
+                          {msg.content}
+
+                          {/* Timestamp on Hover (for grouped messages) */}
+                          {isGrouped && (
+                            <div className={`
+                                                        absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
+                                                        ${isOwn ? '-left-12 text-right w-10' : '-right-12 text-left w-10'}
+                                                    `}>
+                              {format(new Date(msg.created_at), 'h:mm a')}
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
-          </div>
+                )
+              })}
+            </div>
+          )}
 
           {/* Archive Status Banner in Feed (First Class Citizen) */}
           {chatStatus === 'CLOSED' && (
