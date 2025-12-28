@@ -398,8 +398,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
         <div className="flex items-center gap-2">
 
-          {/* Resolve Action - Force Visible for Debugging if not CLOSED */}
-          {chatStatus !== 'CLOSED' && !closureRequestedBy && (
+          {/* Resolve Action - Force Visible if not CLOSED */}
+          {chatStatus !== 'CLOSED' && (
             <>
               {/* Desktop Button */}
               <button
