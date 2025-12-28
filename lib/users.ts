@@ -8,7 +8,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 export async function ensureUserExists(supabase: SupabaseClient, user: any) {
     if (!user || !user.sub) {
         console.error("ensureUserExists: No user or user.sub provided", user);
-        return false;
+        return { success: false, error: "Missing user data" };
     }
 
     // 1. Check if user exists (Optimization: could use upsert directly if we trust the data)
@@ -24,8 +24,8 @@ export async function ensureUserExists(supabase: SupabaseClient, user: any) {
 
     if (error) {
         console.error("ensureUserExists: Failed to upsert user", error);
-        return false;
+        return { success: false, error: error.message || JSON.stringify(error) };
     }
 
-    return true;
+    return { success: true };
 }

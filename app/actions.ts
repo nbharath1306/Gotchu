@@ -118,11 +118,15 @@ export async function submitReportAction(formData: FormData) {
     const supabase = await createClient(token as string | undefined)
     console.log("Supabase client created with token");
 
+    if (!token) {
+      console.warn("WARNING: No Auth0 ID/Access Token found. Supabase RLS may fail.");
+    }
+
     // Sync user to DB
-    const userSynced = await ensureUserExists(supabase, user);
-    if (!userSynced) {
-      console.error("Failed to sync user to database");
-      return { error: "System error: Failed to verify user profile." };
+    const syncResult = await ensureUserExists(supabase, user);
+    if (!syncResult.success) {
+      console.error("Failed to sync user to database:", syncResult.error);
+      return { error: `User Sync Failed: ${syncResult.error}. (Token present: ${!!token})` };
     }
 
     const title = formData.get("title") as string
