@@ -6,12 +6,13 @@ import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 interface ChatPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 export default async function ChatPage({ params }: ChatPageProps) {
+  const { id } = await params;
   const session = await auth0.getSession()
   const user = session?.user
 
@@ -50,7 +51,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
         avatar_url
       )
     `)
-    .eq('id', params.id)
+    .eq('id', id)
     .single()
 
   if (error || !chat) {
