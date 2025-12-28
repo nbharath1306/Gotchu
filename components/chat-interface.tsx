@@ -27,6 +27,8 @@ interface Message {
   content: string
   sender_id: string
   created_at: string
+  message_type?: 'TEXT' | 'IMAGE'
+  media_url?: string
 }
 
 interface ChatInterfaceProps {
@@ -53,12 +55,14 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   const [chatStatus, setChatStatus] = useState("OPEN")
   const [closureRequestedBy, setClosureRequestedBy] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [isUploading, setIsUploading] = useState(false)
 
   // UI State
   const [isActionsOpen, setIsActionsOpen] = useState(false)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // --- UTILS ---
   const scrollToBottom = () => {
@@ -115,6 +119,62 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       setIsActionsOpen(false);
     } catch (e) {
       toast.error("Failed to update");
+    }
+  }
+
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Optimistic UI for Image
+    const optimisticId = "opt-img-" + Math.random()
+    const objectUrl = URL.createObjectURL(file)
+
+    setMessages(prev => [...prev, {
+      id: optimisticId,
+      content: 'Sending image...',
+      sender_id: currentUserId,
+      created_at: new Date().toISOString(),
+      message_type: 'IMAGE',
+      media_url: objectUrl
+    }])
+    setTimeout(scrollToBottom, 50)
+    setIsUploading(true)
+
+    try {
+      // 1. Upload
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const uploadRes = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (!uploadRes.ok) throw new Error('Upload failed')
+
+      const { url } = await uploadRes.json()
+
+      // 2. Send Message
+      const msgRes = await fetch("/api/message", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          chat_id: chatId,
+          content: '',
+          message_type: 'IMAGE',
+          media_url: url
+        })
+      })
+
+      if (!msgRes.ok) throw new Error('Send failed')
+
+    } catch (error) {
+      toast.error("Failed to send image")
+      // Allow retry or remove optimistic message? For now just alert.
+    } finally {
+      setIsUploading(false)
+      if (fileInputRef.current) fileInputRef.current.value = ''
     }
   }
 
@@ -283,6 +343,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
                 // Date Separator Logic
                 const showDateSeparator = !prevMsg || new Date(msg.created_at).toDateString() !== new Date(prevMsg.created_at).toDateString()
+                const isImage = msg.message_type === 'IMAGE'
 
                 return (
                   <div key={msg.id} className="flex flex-col animate-in slide-in-from-bottom-2 fade-in duration-500 fill-mode-backwards" style={{ animationDelay: `${i * 0.05}s` }}>
@@ -322,28 +383,46 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                           </div>
                         )}
 
-                        {/* The Bubble */}
-                        <div className={`
-                                                relative px-4 py-2 text-[14px] leading-relaxed transition-all break-words whitespace-pre-wrap break-all
-                                                ${isOwn
-                            ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
-                            : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
-                          }
-                                                ${isGrouped && isOwn ? 'rounded-tr-2xl mr-0' : ''}
-                                                ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
-                                            `}>
-                          {msg.content}
+                        {isImage ? (
+                          <div className={`
+                                                    relative overflow-hidden rounded-2xl border border-gray-100 shadow-sm transition-all
+                                                    ${isOwn ? 'rounded-tr-sm bg-gray-900' : 'rounded-tl-sm bg-white'}
+                                                    ${isGrouped && isOwn ? 'rounded-tr-2xl' : ''}
+                                                    ${isGrouped && !isOwn ? 'rounded-tl-2xl' : ''}
+                                                `}>
+                            <img
+                              src={msg.media_url || ''}
+                              alt="Sent image"
+                              className="block max-w-[280px] w-full h-auto object-cover rounded-lg"
+                            />
+                            {isGrouped && (
+                              <div className={`absolute bottom-2 ${isOwn ? 'left-2' : 'right-2'} opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-white/80 font-medium tabular-nums shadow-sm bg-black/30 px-1.5 py-0.5 rounded-full backdrop-blur-md`}>
+                                {format(new Date(msg.created_at), 'h:mm a')}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className={`
+                                                    relative px-4 py-2 text-[14px] leading-relaxed transition-all break-words whitespace-pre-wrap break-all
+                                                    ${isOwn
+                              ? 'bg-gray-900 text-white rounded-2xl rounded-tr-sm'
+                              : 'bg-white text-gray-900 border border-gray-100 shadow-sm rounded-2xl rounded-tl-sm'
+                            }
+                                                    ${isGrouped && isOwn ? 'rounded-tr-2xl mr-0' : ''}
+                                                    ${isGrouped && !isOwn ? 'rounded-tl-2xl ml-0' : ''}
+                                                `}>
+                            {msg.content}
 
-                          {/* Timestamp on Hover (for grouped messages) */}
-                          {isGrouped && (
-                            <div className={`
-                                                        absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
-                                                        ${isOwn ? '-left-12 text-right w-10' : '-right-12 text-left w-10'}
-                                                    `}>
-                              {format(new Date(msg.created_at), 'h:mm a')}
-                            </div>
-                          )}
-                        </div>
+                            {isGrouped && (
+                              <div className={`
+                                                            absolute top-1/2 -translate-y-1/2 opacity-0 group-hover/msg:opacity-100 transition-opacity text-[9px] text-gray-400 font-medium tabular-nums
+                                                            ${isOwn ? '-left-12 text-right w-10' : '-right-12 text-left w-10'}
+                                                        `}>
+                                {format(new Date(msg.created_at), 'h:mm a')}
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -406,8 +485,22 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                             focus-within:border-gray-400 focus-within:ring-4 focus-within:ring-gray-50
                         `}
             >
+              {/* Hidden File Input */}
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
+                accept="image/*"
+                onChange={handleFileSelect}
+                disabled={isUploading}
+              />
+
               {/* Attach Button */}
-              <button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors">
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+                className={`p-2 rounded-lg transition-colors ${isUploading ? 'text-gray-300' : 'text-gray-400 hover:text-gray-600 hover:bg-gray-50'}`}
+              >
                 <Paperclip className="w-5 h-5 stroke-[1.5]" />
               </button>
 
@@ -425,7 +518,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
               {/* Send Button */}
               <button
                 onClick={() => handleSend()}
-                disabled={!newMessage.trim()}
+                disabled={!newMessage.trim() || isUploading}
                 className={`
                                 p-2 rounded-lg transition-all duration-200 flex items-center justify-center
                                 ${newMessage.trim()
