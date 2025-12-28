@@ -26,8 +26,8 @@ async function fetchItem(id: string): Promise<Item | null> {
   return data.item as Item
 }
 
-export default async function ItemDetailPage({ params }: { params: { id: string } }) {
-  const id = params.id
+export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   if (!id) notFound()
   const item = await fetchItem(id)
   if (!item) {
@@ -53,6 +53,17 @@ export default async function ItemDetailPage({ params }: { params: { id: string 
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-20 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
+
+        {/* TEMPORARY DEBUG VISUALIZER */}
+        {currentUserSub && (
+          <div className="mb-4 p-4 border-2 border-red-400 bg-red-50 text-red-800 font-mono text-xs break-all">
+            <p><strong>DEBUG INFO (Take a screenshot with CMD+SHIFT+4):</strong></p>
+            <p>Item Owner ID: {JSON.stringify(item.user_id)}</p>
+            <p>Your User ID: {JSON.stringify(currentUserSub)}</p>
+            <p>Match?: {String(item.user_id === currentUserSub)}</p>
+          </div>
+        )}
+
         <Link href="/feed" className="inline-flex items-center gap-2 text-[#666666] hover:text-black mb-8 transition-colors font-mono text-sm">
           <ArrowLeft className="w-4 h-4" />
           BACK TO FEED
