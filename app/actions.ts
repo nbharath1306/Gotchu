@@ -307,7 +307,7 @@ export async function deleteItem(itemId: string) {
     .eq('id', user.sub)
     .single();
 
-  const isAdmin = dbUser?.role === 'ADMIN' || (!!user.email && ["bharath.n@example.com"].includes(user.email)); // Keep hardcoded list synced for safety
+  const isAdmin = dbUser?.role === 'ADMIN' || (!!user.email && ["n.bharath3430@gmail.com", "amazingakhil2006@gmail.com"].includes(user.email));
 
   if (item.user_id !== user.sub && !isAdmin) {
     return { error: "You can only delete your own items" }
