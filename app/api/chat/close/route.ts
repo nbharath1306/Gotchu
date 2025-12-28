@@ -17,86 +17,106 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        // Use Admin Client
         const supabase = await createAdminClient();
         if (!supabase) {
-            return NextResponse.json({ error: 'Database error' }, { status: 500 });
+            return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
         }
 
-        // Fetch current state
-        const { data: chat, error: fetchError } = await supabase
+        // 1. Fetch Chat & Item Details
+        const { data: chat, error: chatError } = await supabase
             .from('chats')
-            .select('*')
+            .select('*, item:items(*)')
             .eq('id', chat_id)
             .single();
 
-        if (fetchError || !chat) {
+        if (chatError || !chat) {
             return NextResponse.json({ error: 'Chat not found' }, { status: 404 });
         }
 
-        // Verify participant
+        // Verify Participant
         if (chat.user_a !== user.sub && chat.user_b !== user.sub) {
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
         }
 
+        // 2. LOGIC: Handle State Transitions
+
+        // CASE A: Already Closed
         if (chat.status === 'CLOSED') {
-            return NextResponse.json({ success: true, status: 'CLOSED' });
+            return NextResponse.json({ message: 'Chat already closed' });
         }
 
-        // Logic: 
-        // 1. If no closure requested, set closure_requested_by = ME
-        // 2. If closure requested by ME, do nothing (waiting)
-        // 3. If closure requested by OTHER, set status = CLOSED
+        // CASE B: First Request (Transition to PENDING)
+        if (chat.status === 'OPEN' || !chat.closure_requested_by) {
+            const { error: updateError } = await supabase
+                .from('chats')
+                .update({
+                    status: 'PENDING_CLOSURE',
+                    closure_requested_by: user.sub
+                })
+                .eq('id', chat_id);
 
-        let updateData = {};
+            if (updateError) throw updateError;
+            return NextResponse.json({ status: 'PENDING_CLOSURE', message: 'Closure requested' });
+        }
 
-        if (!chat.closure_requested_by) {
-            updateData = { closure_requested_by: user.sub };
-        } else if (chat.closure_requested_by === user.sub) {
-            // Already requested by me, do nothing
-            return NextResponse.json({ success: true, status: 'OPEN', requested_by: user.sub });
-        } else {
-            // Requested by OTHER -> Confirm Closure (MUTUAL CONSENT REACHED)
-            updateData = { status: 'CLOSED' };
-
-            // --- EXECUTE LIFECYCLE ACTIONS ---
-
-            // 1. Purge Messages (Data Economy)
-            await supabase.from('messages').delete().eq('chat_id', chat_id);
-
-            // 2. Mark Item as Resolved (Feed Cleanup)
-            await supabase.from('items').update({ status: 'RESOLVED' }).eq('id', chat.item_id);
-
-            // 3. Award Karma (The Economy)
-            // Giving +10 Karma to BOTH users for successful cooperation
-            const { error: karmaError } = await supabase.rpc('increment_karma', {
-                user_ids: [chat.user_a, chat.user_b],
-                amount: 10
-            });
-
-            // Fallback if RPC doesn't exist (simpler update loop)
-            if (karmaError) {
-                await supabase.from('users').update({ karma_points: chat.user_a_data?.karma_points + 10 }).eq('id', chat.user_a); // logic requires fetching user data first, simplifying to simple increments if possible or ignore for now if too complex without RPC
-                // Actually, let's just use a direct increment if possible or individual updates.
-                // Since Supabase doesn't support `karma = karma + 10` easily without RPC, we will skip karma for this step OR create the RPC function.
-
-                // Let's create the RPC function via SQL Migration, but for now we will skip this step in code and ask user to run SQL.
+        // CASE C: Confirmation (Second Request from OTHER user)
+        if (chat.status === 'PENDING_CLOSURE') {
+            // Prevent same user from confirming their own request (though UI hides it)
+            if (chat.closure_requested_by === user.sub) {
+                return NextResponse.json({ message: 'Waiting for other user to confirm' });
             }
+
+            // --- RESOLUTION PROTOCOL ---
+
+            // 1. Close Chat
+            const { error: closeError } = await supabase
+                .from('chats')
+                .update({ status: 'CLOSED' })
+                .eq('id', chat_id);
+
+            if (closeError) throw closeError;
+
+            // 2. Resolve Item
+            if (chat.item_id) {
+                await supabase
+                    .from('items')
+                    .update({ status: 'RESOLVED' })
+                    .eq('id', chat.item_id);
+            }
+
+            // 3. KARMA AWARDING
+            // Logic: Who is the "Finder"?
+            // - If Item Type is LOST: The Reporter is the "Loser". The Other User is likely the "Finder".
+            // - If Item Type is FOUND: The Reporter is the "Finder".
+
+            let finderId = null;
+            if (chat.item) {
+                if (chat.item.type === 'FOUND') {
+                    finderId = chat.item.reporter_id; // Reporter Found it
+                } else if (chat.item.type === 'LOST') {
+                    // Reporter Lost it. The person chatting with them (who ISN'T the reporter) found it.
+                    // We need to find which user in the chat is NOT the reporter.
+                    if (chat.user_a === chat.item.reporter_id) finderId = chat.user_b;
+                    else finderId = chat.user_a;
+                }
+            }
+
+            if (finderId) {
+                // Call RPC to increment
+                const { error: karmaError } = await supabase.rpc('increment_karma', {
+                    user_ids: [finderId],
+                    amount: 10
+                });
+                if (karmaError) console.error("Karma Error:", karmaError);
+            }
+
+            return NextResponse.json({ status: 'CLOSED', message: 'Chat closed and karma awarded' });
         }
 
-        const { error: updateError } = await supabase
-            .from('chats')
-            .update(updateData)
-            .eq('id', chat_id);
+        return NextResponse.json({ error: 'Invalid state' }, { status: 400 });
 
-        if (updateError) {
-            return NextResponse.json({ error: updateError.message }, { status: 500 });
-        }
-
-        return NextResponse.json({ success: true, updated: true });
-
-    } catch (e: any) {
-        console.error("Chat close error:", e);
-        return NextResponse.json({ error: 'Server error' }, { status: 500 });
+    } catch (error: any) {
+        console.error("Close chat error:", error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
     }
 }

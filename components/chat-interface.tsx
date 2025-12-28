@@ -154,17 +154,35 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
   }
 
   const handleEndSession = async () => {
-    if (!confirm("Confirm resolution? This will archive the chat.")) return
+    // Optimistic UI Update handled by fetchMessages polling, but we can force one
+    let confirmMsg = "Mark this item as resolved? This will request confirmation from the other user."
+    if (closureRequestedBy && closureRequestedBy !== currentUserId) {
+      confirmMsg = "Confirm resolution? This will archive the chat and award Karma points."
+    }
+
+    if (!confirm(confirmMsg)) return
+
     try {
-      await fetch('/api/chat/close', {
+      const res = await fetch('/api/chat/close', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: chatId })
       });
-      toast.success("Status updated");
+
+      const data = await res.json()
+
+      if (data.status) setChatStatus(data.status)
+      if (data.status === 'PENDING_CLOSURE') {
+        setClosureRequestedBy(currentUserId)
+        toast.success("Request sent. Waiting for confirmation.")
+      } else if (data.status === 'CLOSED') {
+        toast.success("Resolution confirmed! Karma awarded.")
+        setChatStatus('CLOSED')
+      }
+
       setIsActionsOpen(false);
     } catch (e) {
-      toast.error("Failed to update");
+      toast.error("Failed to update status");
     }
   }
 
