@@ -37,7 +37,7 @@ export default async function ChatPage({ params }: ChatPageProps) {
       id,
       user_a,
       user_b,
-      item:items (
+      item:items!chats_item_id_fkey (
         title
       ),
       user_a_data:users!chats_user_a_fkey (
