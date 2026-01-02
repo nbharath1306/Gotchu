@@ -222,7 +222,7 @@ export async function startChat(itemId: string, relatedItemId?: string) {
   // 1. Fetch item to get owner
   const { data: item, error: itemError } = await supabase
     .from('items')
-    .select('user_id')
+    .select('user_id, type')
     .eq('id', itemId)
     .single()
 
@@ -232,6 +232,27 @@ export async function startChat(itemId: string, relatedItemId?: string) {
 
   if (item.user_id === user.sub) {
     return { error: `You cannot chat with yourself. (ItemOwner: ${item.user_id}, You: ${user.sub})` }
+  }
+
+  // 1.5 Verify Related Item (if provided)
+  if (relatedItemId) {
+    const { data: relatedItem } = await supabase
+      .from('items')
+      .select('user_id, type')
+      .eq('id', relatedItemId)
+      .single();
+
+    if (!relatedItem) {
+      return { error: "Related item not found" };
+    }
+
+    if (relatedItem.user_id !== user.sub) {
+      return { error: "You can only link items you reported." };
+    }
+
+    if (relatedItem.type === item.type) {
+      return { error: `Cannot link two ${item.type} items. Must link LOST with FOUND.` };
+    }
   }
 
   // 2. Check if chat already exists
@@ -266,7 +287,67 @@ export async function startChat(itemId: string, relatedItemId?: string) {
   }
 
   return { chatId: newChat.id }
-  return { chatId: newChat.id }
+}
+
+export async function resolveMatch(chatId: string) {
+  console.log("resolveMatch called for chat:", chatId);
+  const adminClient = await createAdminClient();
+  if (!adminClient) return { error: "Server Error: Admin client unavailable" };
+
+  const session = await auth0.getSession();
+  if (!session?.user) return { error: "Unauthorized" };
+
+  // 1. Fetch Chat & Items
+  const { data: chat, error: chatError } = await adminClient
+    .from('chats')
+    .select(`
+            *,
+            item:items!chats_item_id_fkey (*),
+            related_item:items!chats_related_item_id_fkey (*)
+        `)
+    .eq('id', chatId)
+    .single();
+
+  if (chatError || !chat) return { error: "Chat not found" };
+
+  // 2. Validate Permissions (One of the participants must initiate)
+  if (chat.user_a !== session.user.sub && chat.user_b !== session.user.sub) {
+    return { error: "Unauthorized" };
+  }
+
+  // 3. Resolve BOTH items
+  const updates = [];
+
+  if (chat.item && chat.item.status !== 'RESOLVED') {
+    updates.push(
+      adminClient.from('items').update({ status: 'RESOLVED' }).eq('id', chat.item.id)
+    );
+  }
+
+  if (chat.related_item && chat.related_item.status !== 'RESOLVED') { // Check if related_item is not null before accessing status
+    updates.push(
+      adminClient.from('items').update({ status: 'RESOLVED' }).eq('id', chat.related_item.id)
+    );
+  }
+
+  await Promise.all(updates);
+
+  // 4. Award Karma to the FINDER
+  // Whichever item is type 'FOUND', its reporter gets karma.
+  let finderId = null;
+  if (chat.item.type === 'FOUND') finderId = chat.item.user_id;
+  else if (chat.related_item?.type === 'FOUND') finderId = chat.related_item.user_id;
+
+  if (finderId) {
+    const { data: userData } = await adminClient.from('users').select('karma_points').eq('id', finderId).single();
+    if (userData) {
+      await adminClient.from('users').update({ karma_points: (userData.karma_points || 0) + 100 }).eq('id', finderId);
+    }
+  }
+
+  revalidatePath('/feed');
+  revalidatePath(`/chat/${chatId}`);
+  return { success: true };
 }
 
 export async function deleteItem(itemId: string) {

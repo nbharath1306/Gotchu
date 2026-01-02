@@ -172,41 +172,24 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     if (isProcessing) return
     setIsProcessing(true)
 
-    // Keep modal open while processing to show loading state
-
     try {
-      const res = await fetch('/api/chat/close', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: chatId })
-      });
+      // Use Server Action instead of API Route
+      const { resolveMatch } = await import("@/app/actions");
+      const res = await resolveMatch(chatId);
 
-      if (!res.ok) {
-        const errData = await res.json().catch(() => ({}))
-        throw new Error(errData.message || errData.error || "Failed to update status")
+      if (res.error) {
+        throw new Error(res.error)
       }
 
-      const data = await res.json()
-
-      if (data.status === 'PENDING_CLOSURE') {
-        setClosureRequestedBy(currentUserId)
-        toast.success("Request sent. Waiting for confirmation.")
-        setChatStatus('PENDING_CLOSURE')
-        setIsConfirmModalOpen(false) // Close only on success
-      } else if (data.status === 'DELETED') {
-        toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
-        router.push('/chat')
-      } else if (data.status === 'CLOSED') {
-        setChatStatus('CLOSED')
-        setIsConfirmModalOpen(false)
-      }
+      toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
+      router.push('/chat')
 
       setIsActionsOpen(false);
     } catch (e: any) {
       console.error(e)
       toast.error(e.message || "Failed to process request");
-      setIsConfirmModalOpen(false) // Close on error to reset
     } finally {
+      setIsConfirmModalOpen(false)
       setIsProcessing(false)
     }
   }

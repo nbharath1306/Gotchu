@@ -112,10 +112,10 @@ export async function POST(req: NextRequest) {
             let finderId = null;
             if (chat.item) {
                 if (chat.item.type === 'FOUND') {
-                    finderId = chat.item.reporter_id; // Reporter Found it
+                    finderId = chat.item.user_id; // Reporter Found it
                 } else if (chat.item.type === 'LOST') {
                     // Reporter Lost it. The person chatting with them (who ISN'T the reporter) found it.
-                    if (chat.user_a === chat.item.reporter_id) finderId = chat.user_b;
+                    if (chat.user_a === chat.item.user_id) finderId = chat.user_b;
                     else finderId = chat.user_a;
                 }
             }
