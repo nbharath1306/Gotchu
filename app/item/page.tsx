@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ContactButton } from "@/components/contact-button"
+// import { ContactButton } from "@/components/contact-button" // Deprecated for inline logic
 import type { Item } from "@/types"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { MapPin, Clock, ArrowLeft, Shield, Radio, Package, Trash2 } from "lucide-react"
+import { MapPin, Clock, ArrowLeft, Trash2, CheckCircle, Package } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import { useUser } from "@auth0/nextjs-auth0/client"
-import { deleteItem } from "@/app/actions"
+import { deleteItem, startChat } from "@/app/actions"
 import { toast } from "sonner"
+import { ItemSelectorModal } from "@/components/item-selector-modal"
 
 const categoryEmojis: Record<string, string> = {
   Electronics: "📱",
@@ -32,8 +33,14 @@ export default function ItemPageClient() {
   const [item, setItem] = useState<Item | null>(null)
   const [error, setError] = useState("")
   const [loading, setLoading] = useState(true)
+
+  // Actions
   const [isDeleting, setIsDeleting] = useState(false)
   const [isRevokeModalOpen, setIsRevokeModalOpen] = useState(false)
+
+  // Claiming
+  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false)
+  const [claimType, setClaimType] = useState<'LOST' | 'FOUND'>('LOST') // The type of item *I* have to offer
 
   const handleDelete = () => {
     setIsRevokeModalOpen(true)
@@ -46,7 +53,7 @@ export default function ItemPageClient() {
       const res = await deleteItem(id);
       if (res.error) {
         toast.error(res.error);
-        setIsDeleting(false); // Only reset if failed. If success, we redirect.
+        setIsDeleting(false);
       } else {
         toast.success("Item deleted successfully");
         router.push("/feed");
@@ -55,6 +62,38 @@ export default function ItemPageClient() {
       toast.error("An unexpected error occurred");
       console.error(err);
       setIsDeleting(false);
+    }
+  }
+
+  const handleClaimStart = () => {
+    if (!user) {
+      router.push("/api/auth/login")
+      return
+    }
+    // Logic: 
+    // If I am viewing a FOUND item, I want to say "This is mine" -> So I must select my LOST item.
+    // If I am viewing a LOST item, I want to say "I found this" -> So I must select my FOUND item.
+
+    const requiredMyItemType = item?.type === 'FOUND' ? 'LOST' : 'FOUND';
+    setClaimType(requiredMyItemType);
+    setIsClaimModalOpen(true);
+  }
+
+  const handleItemSelect = async (myItemId: string) => {
+    if (!id) return
+    setIsClaimModalOpen(false)
+    toast.info("Initiating secure channel...")
+
+    try {
+      const res = await startChat(id, myItemId)
+      if (res.error) {
+        toast.error(res.error)
+      } else if (res.chatId) {
+        toast.success("Connection established!")
+        router.push(`/chat/${res.chatId}`)
+      }
+    } catch (e) {
+      toast.error("Failed to connect")
     }
   }
 
@@ -91,7 +130,9 @@ export default function ItemPageClient() {
   )
   if (!item) return null
 
-
+  // Check if I am the owner
+  const isOwner = user && (user.sub === item.user_id)
+  const isAdmin = user && (user.email === "n.bharath3430@gmail.com" || user.email === "amazingakhil2006@gmail.com")
 
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-20 px-4 sm:px-6">
@@ -137,31 +178,63 @@ export default function ItemPageClient() {
               <div className="prose prose-lg text-[#666666] mb-8">
                 <p>{item.description || "No description provided."}</p>
               </div>
-              {/* No bounty_text in Item type, so skip reward section */}
-              {id && (
-                <div className="flex flex-col gap-6 mt-6">
-                  <ContactButton itemId={id} />
 
-                  {/* Owner Controls OR Admin Override */}
-                  {user && (user.sub === item.user_id || ["bharath.n@example.com", "n.bharath3430@gmail.com", "amazingakhil2006@gmail.com"].includes(user.email || "")) && (
-                    <div className="pt-6 border-t border-[#E5E5E5]">
-                      <h4 className="label-caps mb-3 text-red-600/70">DANGER ZONE</h4>
-                      <button
-                        onClick={handleDelete}
-                        disabled={isDeleting}
-                        className="w-full group relative overflow-hidden bg-white border border-red-200 hover:border-red-600 transition-all duration-300 py-4 px-6 flex items-center justify-center gap-3"
-                      >
-                        <div className={`absolute inset-0 bg-red-600 transform origin-left transition-transform duration-300 ${isDeleting ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
-                        <Trash2 className={`w-4 h-4 z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-500 group-hover:text-white'}`} />
-                        <span className={`font-mono text-xs font-bold tracking-widest z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-600 group-hover:text-white'}`}>
-                          {isDeleting ? "REVOKING..." : "REVOKE ITEM"}
-                        </span>
-                      </button>
-                      <p className="text-[10px] text-[#999999] mt-2 text-center font-mono">
-                        This action cannot be undone. All chats will be deleted.
-                      </p>
-                    </div>
-                  )}
+              {/* --- ACTION AREA --- */}
+              {id && !isOwner && item.status !== 'RESOLVED' && (
+                <div className="flex flex-col gap-6 mt-6">
+                  <button
+                    onClick={handleClaimStart}
+                    className={`w-full py-4 text-lg font-bold tracking-wide flex items-center justify-center gap-3 transition-all hover:scale-[1.02] shadow-xl ${item.type === 'FOUND'
+                        ? 'bg-emerald-600 text-white hover:bg-emerald-700 shadow-emerald-500/20'
+                        : 'bg-blue-600 text-white hover:bg-blue-700 shadow-blue-500/20'
+                      }`}
+                  >
+                    {item.type === 'FOUND' ? (
+                      <>
+                        <CheckCircle className="w-6 h-6" />
+                        THIS IS MINE
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle className="w-6 h-6" />
+                        I FOUND THIS
+                      </>
+                    )}
+                  </button>
+                  <p className="text-center text-xs text-gray-400 font-mono">
+                    {item.type === 'FOUND'
+                      ? "You will be asked to link your 'Lost' report."
+                      : "You will be asked to link your 'Found' report."}
+                  </p>
+                </div>
+              )}
+
+              {/* --- CHAT WITH YOURSELF WARNING --- */}
+              {isOwner && (
+                <div className="p-4 bg-gray-100 rounded-lg border border-gray-200 text-center">
+                  <p className="text-sm text-gray-500 font-mono">This is your item.</p>
+                </div>
+              )}
+
+
+              {/* Owner Controls OR Admin Override */}
+              {(isOwner || isAdmin) && (
+                <div className="pt-6 border-t border-[#E5E5E5] mt-6">
+                  <h4 className="label-caps mb-3 text-red-600/70">DANGER ZONE</h4>
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="w-full group relative overflow-hidden bg-white border border-red-200 hover:border-red-600 transition-all duration-300 py-4 px-6 flex items-center justify-center gap-3"
+                  >
+                    <div className={`absolute inset-0 bg-red-600 transform origin-left transition-transform duration-300 ${isDeleting ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+                    <Trash2 className={`w-4 h-4 z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-500 group-hover:text-white'}`} />
+                    <span className={`font-mono text-xs font-bold tracking-widest z-10 transition-colors duration-300 ${isDeleting ? 'text-white' : 'text-red-600 group-hover:text-white'}`}>
+                      {isDeleting ? "REVOKING..." : "REVOKE ITEM"}
+                    </span>
+                  </button>
+                  <p className="text-[10px] text-[#999999] mt-2 text-center font-mono">
+                    This action cannot be undone. All chats will be deleted.
+                  </p>
                 </div>
               )}
             </div>
@@ -202,6 +275,14 @@ export default function ItemPageClient() {
           </div>
         </div>
       )}
+
+      <ItemSelectorModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        onSelect={handleItemSelect}
+        filterType={claimType}
+        userId={user?.sub || ''}
+      />
     </div>
   )
 }
