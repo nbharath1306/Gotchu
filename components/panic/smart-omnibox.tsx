@@ -24,7 +24,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     const [isUploading, setIsUploading] = useState(false);
 
     // AI Integration
-    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress, isLoading: aiIsLoading, error: aiError, workerStatus } = useWorkerAI();
+    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress, isLoading: aiIsLoading, error: aiError, workerStatus, logs: aiLogs } = useWorkerAI();
 
     // State to track if we are waiting for embedding to submit
     const [isCalculatingEmbedding, setIsCalculatingEmbedding] = useState(false);
@@ -337,6 +337,20 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                     <p>ERROR: <span className="text-red-400">{aiError || 'NONE'}</span></p>
                     <p>RESULT: {aiResult ? `${aiResult[0]?.label} (${Math.round(aiResult[0]?.score * 100)}%)` : 'NULL'}</p>
                     <p>PROGRESS: {aiProgress?.progress ? `${Math.round(aiProgress.progress)}%` : '0%'}</p>
+
+                    <div className="mt-2 border-t border-green-900 pt-2 opacity-70">
+                        <p className="mb-1 text-white/40">EVENT LOG:</p>
+                        {aiLogs && aiLogs.map((log, i) => (
+                            <p key={i} className="whitespace-nowrap overflow-hidden text-ellipsis">→ {log}</p>
+                        ))}
+                    </div>
+
+                    <button
+                        onClick={() => classifyImage('https://raw.githubusercontent.com/nbharath1306/Gotchu/main/public/placeholder.jpg')} // Dummy test
+                        className="mt-2 text-xs bg-red-500/20 text-red-500 px-2 py-1 rounded hover:bg-red-500/40"
+                    >
+                        [TEST TRIGGER]
+                    </button>
                 </div>
             </div>
         </div>

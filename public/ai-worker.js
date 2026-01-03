@@ -5,6 +5,8 @@ import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
+self.postMessage({ status: 'init_alive', message: 'Worker script loaded' });
+
 // Singleton for Vision
 class VisionPipeline {
     static task = 'image-classification';
