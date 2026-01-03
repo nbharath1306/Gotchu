@@ -92,21 +92,21 @@ export function LandingPageClient({ stats }: LandingPageProps) {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 mb-32">
                         <div className="lg:col-span-8">
                             <motion.div variants={itemVariants} className="mb-8">
-                                <span className="pill-tag mb-4 inline-block">CAMPUS PROTOCOL V2</span>
+                                <span className="pill-tag mb-4 inline-block">CAMPUS RECOVERY NETWORK</span>
                                 <h1 className="text-6xl md:text-8xl font-display font-bold tracking-tighter leading-[0.9] mb-8 text-[#111111]">
                                     LOST & FOUND<br />
                                     REIMAGINED.
                                 </h1>
                                 <p className="text-xl md:text-2xl text-[#666666] max-w-2xl leading-relaxed font-light">
-                                    A decentralized recovery system for the modern campus.
-                                    Report items instantly. Track status in real-time.
+                                    A community-powered network to help you find what matters.
+                                    We search, match, and connect you instantly.
                                 </p>
                             </motion.div>
 
                             <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4">
                                 <Link href="/report/lost">
                                     <button className="btn-primary w-full sm:w-auto group">
-                                        REPORT LOST ITEM
+                                        I LOST SOMETHING
                                         <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                                     </button>
                                 </Link>
@@ -121,23 +121,23 @@ export function LandingPageClient({ stats }: LandingPageProps) {
                         <div className="lg:col-span-4 flex flex-col justify-end">
                             <motion.div variants={itemVariants} className="card-swiss p-6">
                                 <div className="flex items-center justify-between mb-4">
-                                    <span className="label-caps">SYSTEM STATUS</span>
+                                    <span className="label-caps">COMMUNITY ACTIVITY</span>
                                     <div className="flex items-center gap-2">
                                         <span className="w-2 h-2 bg-[var(--accent-success)] rounded-full animate-pulse"></span>
-                                        <span className="text-xs font-mono">OPERATIONAL</span>
+                                        <span className="text-xs font-mono">ACTIVE SCAN</span>
                                     </div>
                                 </div>
                                 <div className="space-y-4">
                                     <div className="flex justify-between items-center py-3 border-b border-[var(--border-default)]">
-                                        <span className="text-sm font-medium">Active Reports</span>
+                                        <span className="text-sm font-medium">Items Being Tracked</span>
                                         <span className="font-mono text-lg font-bold">{stats.activeReports}</span>
                                     </div>
                                     <div className="flex justify-between items-center py-3 border-b border-[var(--border-default)]">
-                                        <span className="text-sm font-medium">Recovered Total</span>
+                                        <span className="text-sm font-medium">Successfully Returned</span>
                                         <span className="font-mono text-lg font-bold text-green-600">{stats.recoveredCount}</span>
                                     </div>
                                     <div className="flex justify-between items-center py-3 border-b border-[var(--border-default)]">
-                                        <span className="text-sm font-medium">Community Members</span>
+                                        <span className="text-sm font-medium">Helpers Online</span>
                                         <span className="font-mono text-lg font-bold">{stats.totalUsers}</span>
                                     </div>
                                     <div className="flex justify-between items-center pt-2">
@@ -175,10 +175,10 @@ export function LandingPageClient({ stats }: LandingPageProps) {
                     >
                         <div className="relative z-10 max-w-3xl">
                             <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight text-white">
-                                READY TO RECOVER?
+                                WE'VE GOT YOU.
                             </h2>
                             <p className="text-lg text-gray-400 mb-8 max-w-xl">
-                                Join {stats.totalUsers > 1 ? stats.totalUsers : "thousands of"} students using Gotchu to keep their belongings safe.
+                                Join {stats.totalUsers > 1 ? stats.totalUsers : "thousands of"} students helping each other keep safe. Your item is likely already found.
                             </p>
                             <Link href="/feed">
                                 <button className="bg-white text-[#111111] px-8 py-4 font-bold tracking-tight hover:bg-[#0055FF] hover:text-white transition-colors duration-300 flex items-center gap-2">

@@ -1,22 +1,13 @@
 "use client"
 
-import { useState } from "react"
-import { toast } from "sonner"
+import { ReportWizard } from "@/components/report-wizard"
 import { useUser } from "@auth0/nextjs-auth0/client"
 import { useRouter } from "next/navigation"
-import { AlertCircle, CheckCircle2, ArrowLeft, Loader2 } from "lucide-react"
 import Link from "next/link"
-import { motion } from "framer-motion"
-import { submitReportAction } from "@/app/actions"
-import { ImageUpload } from "@/components/image-upload"
-import { CalendarInput } from "@/components/ui/calendar-input"
+import { ArrowLeft } from "lucide-react"
 
 export default function ReportLost() {
   const { user, isLoading } = useUser()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [imageUrl, setImageUrl] = useState("")
   const router = useRouter()
 
   if (isLoading) return <div className="min-h-screen bg-[#F2F2F2]" />
@@ -26,41 +17,9 @@ export default function ReportLost() {
     return null
   }
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
-
-    const formData = new FormData(e.currentTarget)
-    formData.append("type", "LOST")
-
-    try {
-      const result = await submitReportAction(formData)
-      if (result.error) {
-        toast.error(result.error)
-        throw new Error(result.error)
-      }
-      if (!result.itemId || typeof result.itemId !== "string" || result.itemId.trim() === "") {
-        const msg = "Failed to create item: No valid item ID returned from server.";
-        setError(msg);
-        toast.error(msg)
-        setLoading(false);
-        return;
-      }
-      setSuccess(true)
-      toast.success("Report filed! Redirecting to matches...")
-      setTimeout(() => router.push(`/item/${result.itemId}/matches`), 2000)
-    } catch (err: any) {
-      setError(err.message)
-      toast.error(err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
   return (
     <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-12 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <Link
           href="/"
           className="inline-flex items-center text-sm font-mono text-[#666666] hover:text-black mb-8 transition-colors"
@@ -69,131 +28,23 @@ export default function ReportLost() {
           RETURN TO FEED
         </Link>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="card-swiss p-8 md:p-12 bg-white"
-        >
-          <div className="mb-8 border-b border-[#E5E5E5] pb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse" />
-              <span className="font-mono text-xs font-bold text-red-500 tracking-widest">REPORT TYPE: LOST</span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-display font-bold text-[#111111]">
-              FILE A REPORT
-            </h1>
-            <p className="text-[#666666] mt-2">
-              Help us find your item by providing accurate details below.
-            </p>
+        {/* Header Section */}
+        <div className="text-center mb-12">
+          <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 bg-red-100 text-red-600 rounded-full">
+            <div className="w-2 h-2 bg-red-600 rounded-full animate-pulse" />
+            <span className="font-mono text-[10px] font-bold tracking-widest uppercase">Recovery Mode</span>
           </div>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-[#111111] mb-4">
+            Let's find your item.
+          </h1>
+          <p className="text-[#666666] text-lg max-w-xl mx-auto">
+            Don't worry. Our community protocols are designed to help you recover lost valuables quickly. Just answer a few questions.
+          </p>
+        </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-600 flex items-center gap-3 text-sm font-mono">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              {error}
-            </div>
-          )}
+        {/* Wizard Component */}
+        <ReportWizard type="LOST" />
 
-          {success ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <CheckCircle2 className="w-8 h-8 text-green-600" />
-              </div>
-              <h3 className="text-xl font-bold mb-2">REPORT FILED</h3>
-              <p className="text-[#666666] font-mono text-sm">REDIRECTING TO MATCHES...</p>
-            </div>
-          ) : (
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                    Item Name
-                  </label>
-                  <input
-                    name="title"
-                    required
-                    placeholder="e.g. Black Backpack"
-                    className="input-swiss w-full"
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                    Date Lost
-                  </label>
-                  <CalendarInput
-                    name="date"
-                    required
-                    className="input-swiss w-full bg-white"
-                    placeholder="Select date lost"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                  Category
-                </label>
-                <select name="category" required className="input-swiss w-full">
-                  <option value="">SELECT CATEGORY</option>
-                  <option value="Electronics">ELECTRONICS</option>
-                  <option value="ID">ID / CARDS</option>
-                  <option value="Keys">KEYS</option>
-                  <option value="Other">OTHER</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                  Last Seen Zone
-                </label>
-                <select name="location" required className="input-swiss w-full">
-                  <option value="">SELECT ZONE</option>
-                  <option value="Innovation_Labs">INNOVATION LABS</option>
-                  <option value="Canteen">CANTEEN</option>
-                  <option value="Bus_Bay">BUS BAY</option>
-                  <option value="Library">LIBRARY</option>
-                  <option value="Hostels">HOSTELS</option>
-                  <option value="Other">OTHER SECTOR</option>
-                </select>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-mono font-bold uppercase tracking-wider text-[#666666]">
-                  Description
-                </label>
-                <textarea
-                  name="description"
-                  required
-                  rows={4}
-                  placeholder="Provide distinguishing features, condition, or specific details..."
-                  className="input-swiss w-full resize-none"
-                />
-              </div>
-
-              {/* Image Upload Section */}
-              <input type="hidden" name="image_url" value={imageUrl} />
-              <ImageUpload onUploadComplete={setImageUrl} />
-
-              <div className="pt-6 border-t border-[#E5E5E5]">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full btn-primary py-4 text-sm font-bold tracking-widest flex items-center justify-center gap-2"
-                >
-                  {loading ? (
-                    <>
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                      PROCESSING...
-                    </>
-                  ) : (
-                    "SUBMIT REPORT"
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
-        </motion.div>
       </div>
     </div>
   )

@@ -95,9 +95,12 @@ export async function createItem(data: {
 }
 
 
+import { ReportSchema } from "@/lib/schemas";
+
 export async function submitReportAction(formData: FormData) {
   console.log("submitReportAction started");
   try {
+    // 1. Authentication
     let session;
     try {
       session = await auth0.getSession();
@@ -114,6 +117,27 @@ export async function submitReportAction(formData: FormData) {
     }
     console.log("User authenticated:", user.sub);
 
+    // 2. Data Validation with Zod
+    const rawData = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      category: formData.get("category"),
+      location: formData.get("location"),
+      date: formData.get("date"),
+      type: formData.get("type"),
+      image_url: formData.get("image_url"),
+    };
+
+    const validationResult = ReportSchema.safeParse(rawData);
+
+    if (!validationResult.success) {
+      const firstError = validationResult.error.issues[0].message;
+      return { error: firstError };
+    }
+
+    const val = validationResult.data;
+
+    // 3. Database Connection
     let supabase;
     let usingAdmin = false;
 
@@ -138,22 +162,12 @@ export async function submitReportAction(formData: FormData) {
       supabase = await createClient(token as string | undefined);
     }
 
-    // Sync user to DB
+    // 4. Sync User
     const syncResult = await ensureUserExists(supabase, user);
     if (!syncResult.success) {
       console.error("Failed to sync user to database:", syncResult.error);
       return { error: `User Sync Failed: ${syncResult.error}. (Admin: ${usingAdmin})` };
     }
-
-    const title = formData.get("title") as string
-    const description = formData.get("description") as string
-    const category = formData.get("category") as string
-    const location = formData.get("location") as string
-    const date = formData.get("date") as string
-    const type = formData.get("type") as "LOST" | "FOUND"
-    const imageUrl = formData.get("image_url") as string
-
-    console.log("Form data parsed:", { title, category, location, date, type, imageUrl });
 
     console.log("Inserting item into database...");
     const itemId = nanoid();
@@ -161,13 +175,13 @@ export async function submitReportAction(formData: FormData) {
       .from("items")
       .insert({
         id: itemId,
-        title,
-        description,
-        category,
-        location_zone: location,
-        date_reported: date,
-        image_url: imageUrl || null,
-        type,
+        title: val.title,
+        description: val.description,
+        category: val.category,
+        location_zone: val.location,
+        date_reported: val.date,
+        image_url: val.image_url || null,
+        type: val.type,
         user_id: user.sub, // Trusted user ID from session
         status: "OPEN"
       })

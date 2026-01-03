@@ -9,14 +9,20 @@ interface CalendarInputProps {
     required?: boolean
     className?: string
     placeholder?: string
+    value?: string
+    onChange?: (date: string) => void
 }
 
-export function CalendarInput({ name, required, className, placeholder = "Select date" }: CalendarInputProps) {
+export function CalendarInput({ name, required, className, placeholder = "Select date", value, onChange }: CalendarInputProps) {
     const [isOpen, setIsOpen] = React.useState(false)
-    const [date, setDate] = React.useState<Date | null>(null)
+    // Internal state only used if uncontrolled
+    const [internalDate, setInternalDate] = React.useState<Date | null>(null)
     const [currentMonth, setCurrentMonth] = React.useState(new Date())
 
     const containerRef = React.useRef<HTMLDivElement>(null)
+
+    // Derived state
+    const date = value ? new Date(value) : internalDate
 
     // Close on outside click
     React.useEffect(() => {
@@ -30,7 +36,12 @@ export function CalendarInput({ name, required, className, placeholder = "Select
     }, [])
 
     const handleDateClick = (day: Date) => {
-        setDate(day)
+        const formatted = format(day, "yyyy-MM-dd")
+        if (onChange) {
+            onChange(formatted)
+        } else {
+            setInternalDate(day)
+        }
         setIsOpen(false)
     }
 
@@ -53,7 +64,7 @@ export function CalendarInput({ name, required, className, placeholder = "Select
             for (let i = 0; i < 7; i++) {
                 formattedDate = format(day, dateFormat)
                 const cloneDay = day
-                const isSelected = date ? isSameDay(day, date) : false
+                const isSelected = (date && !isNaN(date.getTime())) ? isSameDay(day, date) : false
                 const isCurrentMonth = isSameMonth(day, monthStart)
 
                 days.push(
@@ -88,7 +99,7 @@ export function CalendarInput({ name, required, className, placeholder = "Select
             <input
                 type="hidden"
                 name={name}
-                value={date ? format(date, "yyyy-MM-dd") : ""}
+                value={date && !isNaN(date.getTime()) ? format(date, "yyyy-MM-dd") : ""}
                 required={required}
             />
 
@@ -104,8 +115,8 @@ export function CalendarInput({ name, required, className, placeholder = "Select
             >
                 <div className="flex items-center gap-3">
                     <CalendarIcon className="w-4 h-4 text-gray-400" />
-                    <span className={`text-sm font-medium ${date ? "text-gray-900" : "text-gray-400"}`}>
-                        {date ? format(date, "PPP") : placeholder}
+                    <span className={`text-sm font-medium ${date && !isNaN(date.getTime()) ? "text-gray-900" : "text-gray-400"}`}>
+                        {date && !isNaN(date.getTime()) ? format(date, "PPP") : placeholder}
                     </span>
                 </div>
             </button>
