@@ -9,7 +9,9 @@ export function useWorkerAI() {
 
     useEffect(() => {
         if (!workerRef.current) {
-            workerRef.current = new Worker(new URL('../lib/ai-worker.js', import.meta.url));
+            // Load from public folder to avoid Webpack bundling weirdness
+            // Note: type: "module" is needed because we use import in the worker
+            workerRef.current = new Worker('/ai-worker.js', { type: "module" });
 
             workerRef.current.addEventListener('message', (event) => {
                 const { status, task } = event.data;
