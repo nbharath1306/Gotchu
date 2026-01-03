@@ -7,10 +7,33 @@ env.useBrowserCache = true;
 
 self.postMessage({ status: 'init_alive', message: 'Worker script loaded' });
 
-// Singleton for Vision
+// The "Menu" of things we expect to find.
+// This restricts the AI to relevant items, preventing hallucinations like "Ostrich".
+const CANDIDATE_LABELS = [
+    "keys", "car key", "keychain",
+    "wallet", "purse", "handbag", "credit card", "id card", "passport",
+    "smartphone", "iphone", "android phone", "phone case",
+    "laptop", "macbook", "laptop bag", "tablet", "ipad", "kindle",
+    "headphones", "earbuds", "airpods", "speaker",
+    "smartwatch", "apple watch", "wristwatch",
+    "glasses", "sunglasses", "case",
+    "backpack", "rucksack", "tote bag", "luggage", "suitcase",
+    "jacket", "coat", "clothing", "shoe", "sneaker", "hat", "umbrella",
+    "water bottle", "tumbler", "thermos",
+    "jewelry", "ring", "necklace", "bracelet", "watch",
+    "document", "book", "notebook", "textbook",
+    "camera", "lens",
+    "musical instrument", "guitar",
+    "bicycle", "scooter", "skateboard", "helmet",
+    "toy", "plushie",
+    "tool", "charger", "cable",
+    "pet", "dog", "cat"
+];
+
+// Singleton for Vision (CLIP Zero-Shot)
 class VisionPipeline {
-    static task = 'image-classification';
-    static model = 'Xenova/vit-base-patch16-224';
+    static task = 'zero-shot-image-classification';
+    static model = 'Xenova/clip-vit-base-patch32';
     static instance = null;
 
     static async getInstance(progressCallback = null) {
@@ -42,10 +65,19 @@ self.addEventListener('message', async (event) => {
     try {
         if (image || type === 'classify') {
             const imgData = image || payload;
+
+            // Re-use VisionPipeline but now it's CLIP
             const classifier = await VisionPipeline.getInstance((x) => {
                 self.postMessage({ status: 'progress', task: 'vision', ...x });
             });
-            const output = await classifier(imgData);
+
+            // Zero-Shot call needs candidates
+            const output = await classifier(imgData, CANDIDATE_LABELS, {
+                hypothesis_template: "A photo of a {}"
+            });
+
+            // Output is usually [{ label: 'keys', score: 0.9 }, ...]
+            // Should be compatible with existing UI which expects array of { label, score }
             self.postMessage({ status: 'complete', task: 'vision', output });
         }
 
