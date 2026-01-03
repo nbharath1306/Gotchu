@@ -13,7 +13,7 @@ export default function ReportLostPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (text: string, imageUrl?: string, embedding?: number[]) => {
+  const handleSubmit = async (text: string, imageUrl?: string, embedding?: number[], aiLabel?: string) => {
     if (isSubmitting) return; // Prevent duplicates
     setIsSubmitting(true);
     // DO NOT set PROCESSING step immediately if we want to keep the input visible until we know it's working
@@ -23,7 +23,7 @@ export default function ReportLostPage() {
 
     try {
       const { submitNeuralReport } = await import("@/app/actions");
-      const result = await submitNeuralReport(text, imageUrl, "LOST", embedding);
+      const result = await submitNeuralReport(text, imageUrl, "LOST", embedding, aiLabel);
 
       if (result.error) {
         // Revert to input on error so user isn't stuck
