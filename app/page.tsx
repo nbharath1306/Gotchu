@@ -1,4 +1,4 @@
-import { LandingPageClient } from "@/components/landing-client";
+import { KineticLanding } from "@/components/landing/kinetic-landing";
 import { createClient } from "@/lib/supabase-server";
 
 // This is now a Server Component
@@ -20,11 +20,11 @@ export default async function Home() {
   const stats = {
     activeReports: openCount || 0,
     recoveredCount: resolvedCount || 0,
-    avgResponse: "~12m", // Hard to calculate without logs, keeping estimation for now
+    avgResponse: "~12m",
     totalUsers: usersCount || 0
   };
 
   return (
-    <LandingPageClient stats={stats} />
+    <KineticLanding stats={stats} />
   );
 }

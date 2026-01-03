@@ -1,100 +1,62 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter-tight), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-space-mono), ui-monospace, SFMono-Regular, monospace;
+  --font-display: var(--font-inter-tight), system-ui, sans-serif;
+  --font-mono: var(--font-space-mono), monospace;
 
-  --color-bg-paper: #F2F2F2;
-  --color-bg-surface: #FFFFFF;
-  
-  --color-text-primary: #111111;
-  --color-text-secondary: #666666;
-  --color-text-muted: #999999;
+  /* MIDNIGHT PALETTE */
+  --color-bg-deep: #050505;
+  --color-bg-glass: rgba(255, 255, 255, 0.03);
+  --color-bg-glass-hover: rgba(255, 255, 255, 0.08);
 
-  --color-border-default: #E5E5E5;
-  --color-border-black: #111111;
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-hover: rgba(255, 255, 255, 0.15);
 
-  --color-accent-alert: #FF3B30;
-  --color-accent-success: #00C853;
-  --color-accent-blue: #0055FF;
+  --color-text-primary: #FFFFFF;
+  --color-text-secondary: rgba(255, 255, 255, 0.6);
+  --color-text-muted: rgba(255, 255, 255, 0.3);
+
+  --color-glow-primary: rgba(124, 58, 237, 0.5);
+  /* Purple Haze */
+  --color-glow-success: rgba(16, 185, 129, 0.5);
+  /* Emerald Signal */
+
+  --shadow-glow: 0 0 20px var(--color-glow-primary);
 }
 
 @layer base {
   body {
-    @apply bg-[#F2F2F2] text-[#111111] font-sans;
+    background-color: var(--color-bg-deep);
+    color: var(--color-text-primary);
+    font-family: var(--font-display);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
 @layer utilities {
-  .font-display {
-    font-family: var(--font-inter-tight);
-  }
-  
-  .font-mono {
-    font-family: var(--font-space-mono);
-  }
-
-  .card-swiss {
-    @apply bg-white border border-[var(--border-default)] shadow-none transition-all duration-200;
-  }
-  
-  .card-swiss:hover {
-    @apply border-[var(--border-black)] translate-y-[-2px] shadow-[4px_4px_0px_0px_rgba(0,0,0,1)];
+  .glass-panel {
+    background: var(--color-bg-glass);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--color-border-subtle);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  .btn-primary {
-    @apply bg-black text-white px-6 py-3 font-medium tracking-tight hover:bg-[var(--accent-blue)] transition-colors duration-200 flex items-center justify-center gap-2;
+  .glass-panel:hover {
+    background: var(--color-bg-glass-hover);
+    border-color: var(--color-border-hover);
+    transform: translateY(-2px);
   }
 
-  .btn-outline {
-    @apply bg-transparent border border-black text-black px-6 py-3 font-medium tracking-tight hover:bg-black hover:text-white transition-colors duration-200 flex items-center justify-center gap-2;
+  /* Scanline Effect for 'Panic' Mode */
+  .scanlines {
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0),
+        rgba(255, 255, 255, 0) 50%,
+        rgba(0, 0, 0, 0.2) 50%,
+        rgba(0, 0, 0, 0.2));
+    background-size: 100% 4px;
+    pointer-events: none;
   }
-
-  .input-swiss {
-    @apply bg-white border border-[#E5E5E5] px-4 py-3 text-[#111111] placeholder-[#999999] focus:outline-none focus:border-black transition-colors duration-200 w-full;
-  }
-
-  .label-caps {
-    @apply text-[10px] font-mono uppercase tracking-widest text-[#666666];
-  }
-
-  .pill-tag {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono border border-[#E5E5E5] bg-[#F2F2F2];
-  }
-
-  .pill-lost {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#FF3B30] text-white;
-  }
-
-  .pill-found {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#00C853] text-white;
-  }
-  
-  .pill-resolved {
-    @apply px-2 py-1 rounded-full text-[10px] font-mono bg-[#666666] text-white;
-  }
-
-  .grid-bg {
-    background-size: 40px 40px;
-    background-image: linear-gradient(to right, rgba(0, 0, 0, 0.05) 1px, transparent 1px),
-                      linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 1px, transparent 1px);
-  }
-}
-
-/* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #999;
 }

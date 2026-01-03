@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { 
+import {
   Radio,
   Shield,
   Search,
@@ -25,7 +25,7 @@ const navItems = [
 export function Navbar() {
   const pathname = usePathname()
 
-  if (pathname === "/") return null
+  if (pathname === "/" || pathname.startsWith("/report")) return null
 
   return (
     <>
@@ -36,18 +36,17 @@ export function Navbar() {
           <span className="font-display text-xl font-bold tracking-tight text-[#111111]">GOTCHU</span>
           <span className="pill-tag">BETA</span>
         </Link>
-        
+
         {/* Center Nav Items */}
         <div className="flex items-center gap-1">
           {navItems.slice(0, 5).map((item) => {
             const isActive = pathname === item.href
             return (
               <Link key={item.href} href={item.href}>
-                <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${
-                  isActive 
-                    ? "bg-[#111111] text-white" 
+                <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${isActive
+                    ? "bg-[#111111] text-white"
                     : "text-[#666666] hover:text-[#111111] hover:bg-[#FFFFFF]"
-                }`}>
+                  }`}>
                   <item.icon className="w-5 h-5" />
                   {item.label}
                 </div>
@@ -70,9 +69,8 @@ export function Navbar() {
             return (
               <Link key={item.href} href={item.href} className="flex-1">
                 <div className="flex flex-col items-center justify-center gap-1 py-2">
-                  <div className={`p-1.5 rounded-full transition-colors ${
-                    isActive ? "bg-[#111111] text-white" : "text-[#666666]"
-                  }`}>
+                  <div className={`p-1.5 rounded-full transition-colors ${isActive ? "bg-[#111111] text-white" : "text-[#666666]"
+                    }`}>
                     <item.icon className="w-5 h-5" strokeWidth={2} />
                   </div>
                   <span className="text-[10px] font-medium text-[#666666]">{item.label}</span>
