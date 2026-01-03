@@ -37,7 +37,7 @@ export default async function ChatListPage() {
       id,
       created_at,
       status, 
-      item:items (
+      item:items!chats_item_id_fkey (
         title,
         type
       ),
@@ -169,8 +169,8 @@ export default async function ChatListPage() {
 
                       <div className="flex items-center gap-2">
                         <span className={`shrink-0 text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border ${item.type === 'LOST'
-                            ? 'bg-rose-50 text-rose-600 border-rose-100'
-                            : 'bg-indigo-50 text-indigo-600 border-indigo-100'
+                          ? 'bg-rose-50 text-rose-600 border-rose-100'
+                          : 'bg-indigo-50 text-indigo-600 border-indigo-100'
                           }`}>
                           {item.type}
                         </span>

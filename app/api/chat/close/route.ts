@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
         // 1. Fetch Chat & Item Details
         const { data: chat, error: chatError } = await supabase
             .from('chats')
-            .select('*, item:items(*)')
+            .select('*, item:items!chats_item_id_fkey(*)')
             .eq('id', chat_id)
             .single();
 
