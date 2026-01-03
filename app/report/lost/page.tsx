@@ -52,8 +52,11 @@ export default function ReportLostPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
-      {/* Background Ambience */}
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-[#050505] relative overflow-hidden">
+      {/* Background Decor */}
+      <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10 pointer-events-none" />
+
+      {/* Purple Glow (retained but adjusted for dark mode) */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-purple-900/10 blur-[120px] rounded-full animate-pulse" />
       </div>
