@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase";
 import { nanoid } from "nanoid";
 
 interface SmartOmniboxProps {
-    onSubmit: (value: string, imageUrl?: string, embedding?: number[]) => void;
+    onSubmit: (value: string, imageUrl?: string, embedding?: number[], aiLabel?: string) => void;
     isProcessing?: boolean;
     placeholder?: string;
 }
@@ -56,7 +56,14 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     useEffect(() => {
         if (isCalculatingEmbedding && nlpEmbedding) {
             setIsCalculatingEmbedding(false);
-            onSubmit(value, imageUrl || undefined, nlpEmbedding);
+
+            // Did the Vision AI see something?
+            let label = undefined;
+            if (aiResult && aiResult.length > 0) {
+                label = aiResult[0].label;
+            }
+
+            onSubmit(value, imageUrl || undefined, nlpEmbedding, label);
         }
     }, [nlpEmbedding, isCalculatingEmbedding, value, imageUrl, onSubmit]);
 
@@ -157,7 +164,13 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     };
 
     const handleSubmit = () => {
-        onSubmit(value, imageUrl || undefined);
+        // Did the AI see something?
+        let label = undefined;
+        if (aiResult && aiResult.length > 0) {
+            label = aiResult[0].label;
+        }
+
+        onSubmit(value, imageUrl || undefined, undefined, label); // Passing embedding as undefined locally, or we handle logic outside
     }
 
     return (

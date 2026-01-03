@@ -21,7 +21,7 @@ export default function ReportFoundPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSmartSubmit = async (text: string, imageUrl?: string, embedding?: number[]) => {
+  const handleSmartSubmit = async (text: string, imageUrl?: string, embedding?: number[], aiLabel?: string) => {
     if (isSubmitting) return; // Prevent duplicates
     setIsSubmitting(true);
     setStep("PROCESSING"); // DO NOT set SUCCESS step yet. Wait for result.
@@ -56,7 +56,7 @@ export default function ReportFoundPage() {
       }
 
       const { submitNeuralReport } = await import("@/app/actions");
-      const result = await submitNeuralReport(text, finalImageUrl, "FOUND", embedding);
+      const result = await submitNeuralReport(text, finalImageUrl, "FOUND", embedding, aiLabel);
 
       if (result.success && result.itemId) {
         setReportResult(result as any);

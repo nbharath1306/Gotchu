@@ -26,8 +26,10 @@ const DICTIONARIES = {
 };
 
 export class NeuralParser {
-    static parse(text: string): ParsedSignal {
+    static parse(text: string, aiHint?: string): ParsedSignal {
         const lower = text.toLowerCase();
+        // If text is short/empty but we have an AI Hint, use that as base for extraction too
+        const effectiveText = (text + " " + (aiHint || "")).toLowerCase();
 
         let category = null;
         let location = null;
@@ -39,17 +41,24 @@ export class NeuralParser {
             if (lower.includes(c)) {
                 color = c;
                 confidence += 0.2;
-                break; // Assume single color for simplicity
+                break;
             }
         }
 
         // 2. Extract Category
+        // Check text first, then AI Hint
         for (const [cat, keywords] of Object.entries(DICTIONARIES.categories)) {
-            if (keywords.some(k => lower.includes(k))) {
+            if (keywords.some(k => effectiveText.includes(k))) {
                 category = cat;
                 confidence += 0.5;
                 break;
             }
+        }
+
+        // Fallback: If no keyword matched but we have an AI hint, use the AI hint as the category (capitalized)
+        if (!category && aiHint) {
+            category = aiHint.charAt(0).toUpperCase() + aiHint.slice(1);
+            confidence += 0.4;
         }
 
         // 3. Extract Location

@@ -385,15 +385,15 @@ export async function deleteItem(itemId: string) {
 }
 import { NeuralParser } from "@/lib/neural/parser";
 
-export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST", embedding?: number[]) {
+export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST", embedding?: number[], aiHint?: string) {
   try {
     const session = await auth0.getSession();
     const user = session?.user;
 
     if (!user) return { error: "Unauthorized" };
 
-    // 1. Parse the input
-    const signal = NeuralParser.parse(query);
+    // 1. Parse the input (with AI Hint!)
+    const signal = NeuralParser.parse(query, aiHint);
 
     // 2. Map to Enum values (Simple heuristics for now)
     const categoryMap: any = {
@@ -449,7 +449,7 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
       .from("items")
       .insert({
         id: itemId,
-        title: signal.category || "Unknown Item", // e.g. "Red Wallet" if we had title extraction
+        title: signal.category || aiHint || (query.length > 5 ? query.substring(0, 20) + "..." : "Unknown Item"),
         description: query, // The full raw text is the description
         category: finalCategory,
         location_zone: finalLocation,
