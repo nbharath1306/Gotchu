@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 export default function ReportFoundPage() {
   const router = useRouter();
-  const [step, setStep] = useState<"CAPTURE" | "DETAILS" | "SUCCESS">("CAPTURE");
+  const [step, setStep] = useState<"CAPTURE" | "DETAILS" | "SUCCESS" | "PROCESSING">("CAPTURE");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [reportResult, setReportResult] = useState<{ itemId: string } | null>(null);
 
@@ -21,10 +21,10 @@ export default function ReportFoundPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSmartSubmit = async (text: string, imageUrl?: string) => {
+  const handleSmartSubmit = async (text: string, imageUrl?: string, embedding?: number[]) => {
     if (isSubmitting) return; // Prevent duplicates
     setIsSubmitting(true);
-    // DO NOT set SUCCESS step yet. Wait for result.
+    setStep("PROCESSING"); // DO NOT set SUCCESS step yet. Wait for result.
     // However, the Omnibox handles its own "Processing" state if we pass it down?
     // Actually, SmartOmnibox doesn't expose a processing prop we control externally very well for global page state
     // But we can just use the page-level generic loading or keep it on details.
@@ -56,7 +56,7 @@ export default function ReportFoundPage() {
       }
 
       const { submitNeuralReport } = await import("@/app/actions");
-      const result = await submitNeuralReport(text, finalImageUrl, "FOUND");
+      const result = await submitNeuralReport(text, finalImageUrl, "FOUND", embedding);
 
       if (result.success && result.itemId) {
         setReportResult(result as any);

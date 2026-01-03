@@ -7,10 +7,15 @@ import { createClient } from "@/lib/supabase";
 import { nanoid } from "nanoid";
 
 interface SmartOmniboxProps {
-    onSubmit: (value: string, imageUrl?: string) => void;
+    onSubmit: (value: string, imageUrl?: string, embedding?: number[]) => void;
     isProcessing?: boolean;
     placeholder?: string;
 }
+
+import { useWorkerAI } from "@/hooks/use-worker-ai";
+import { toast } from "sonner";
+
+
 
 export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I lost my..." }: SmartOmniboxProps) {
     const [value, setValue] = useState("");
@@ -18,11 +23,42 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     const [imageUrl, setImageUrl] = useState<string | null>(null);
     const [isUploading, setIsUploading] = useState(false);
 
+    // AI Integration
+    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress } = useWorkerAI();
+
+    // State to track if we are waiting for embedding to submit
+    const [isCalculatingEmbedding, setIsCalculatingEmbedding] = useState(false);
+
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const recognitionRef = useRef<any>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const supabase = createClient();
+
+    // AI Result Handler
+    useEffect(() => {
+        if (aiResult && aiResult.length > 0) {
+            const topPrediction = aiResult[0];
+            const label = topPrediction.label;
+            const score = Math.round(topPrediction.score * 100);
+
+            if (score > 70) {
+                toast.success(`AI Identified: ${label} (${score}%)`);
+                setValue(prev => {
+                    if (!prev.trim()) return `Found a ${label}.`;
+                    return prev + ` It looks like a ${label}.`;
+                });
+            }
+        }
+    }, [aiResult]);
+
+    // NLP Embedding Handler: Submit when ready
+    useEffect(() => {
+        if (isCalculatingEmbedding && nlpEmbedding) {
+            setIsCalculatingEmbedding(false);
+            onSubmit(value, imageUrl || undefined, nlpEmbedding);
+        }
+    }, [nlpEmbedding, isCalculatingEmbedding, value, imageUrl, onSubmit]);
 
     useEffect(() => {
         if (typeof window !== "undefined" && (window as any).webkitSpeechRecognition) {
@@ -75,6 +111,10 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
             alert("Image too large (max 5MB)");
             return;
         }
+
+        // 1. Trigger AI Analysis (Local Blob)
+        const blobUrl = URL.createObjectURL(file);
+        classifyImage(blobUrl);
 
         setIsUploading(true);
         try {
@@ -134,7 +174,13 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isListening ? "Listening..." : placeholder}
+                    placeholder={
+                        aiProgress?.status === 'loading'
+                            ? `Analysing image... ${Math.round(aiProgress.progress || 0)}%`
+                            : isListening
+                                ? "Listening..."
+                                : placeholder
+                    }
                     disabled={isProcessing}
                     rows={1}
                     className="w-full bg-transparent text-white text-2xl md:text-3xl font-display font-medium p-6 md:p-8 outline-none resize-none placeholder:text-white/20 disabled:opacity-50"

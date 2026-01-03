@@ -385,7 +385,7 @@ export async function deleteItem(itemId: string) {
 }
 import { NeuralParser } from "@/lib/neural/parser";
 
-export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST") {
+export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST", embedding?: number[]) {
   try {
     const session = await auth0.getSession();
     const user = session?.user;
@@ -457,7 +457,8 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
         image_url: imageUrl || null,
         type: reportType,
         user_id: user.sub,
-        status: "OPEN"
+        status: "OPEN",
+        embedding: embedding || null // Save the brain vector!
       })
       .select()
       .single();
