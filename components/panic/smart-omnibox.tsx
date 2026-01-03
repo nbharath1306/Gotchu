@@ -9,9 +9,10 @@ import { nanoid } from "nanoid";
 interface SmartOmniboxProps {
     onSubmit: (value: string, imageUrl?: string) => void;
     isProcessing?: boolean;
+    placeholder?: string;
 }
 
-export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxProps) {
+export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I lost my..." }: SmartOmniboxProps) {
     const [value, setValue] = useState("");
     const [isListening, setIsListening] = useState(false);
     const [imageUrl, setImageUrl] = useState<string | null>(null);
@@ -133,7 +134,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxPro
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isListening ? "Listening..." : "I lost my..."}
+                    placeholder={isListening ? "Listening..." : placeholder}
                     disabled={isProcessing}
                     rows={1}
                     className="w-full bg-transparent text-white text-2xl md:text-3xl font-display font-medium p-6 md:p-8 outline-none resize-none placeholder:text-white/20 disabled:opacity-50"

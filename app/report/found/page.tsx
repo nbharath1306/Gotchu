@@ -20,18 +20,18 @@ export default function ReportFoundPage() {
   };
 
   const handleSmartSubmit = async (text: string, imageUrl?: string) => {
-    setStep("SUCCESS"); // Or a PROCESSING step if we want to show analysis
+    // DO NOT set SUCCESS step yet. Wait for result.
+    // However, the Omnibox handles its own "Processing" state if we pass it down?
+    // Actually, SmartOmnibox doesn't expose a processing prop we control externally very well for global page state
+    // But we can just use the page-level generic loading or keep it on details.
+
+    // For now, let's keep it simple: Show alert on error, only move to success on actual success.
+    // The user saw infinite loading because it probably errored silently or redirect failed.
 
     try {
-      // If we have a captured file but no URL yet, we might need to upload it here or rely on the SmartOmnibox's own upload.
-      // BUT, the CameraCapture gives us a raw File. The SmartOmnibox handles uploads internally via its own file picker.
-      // To bridge them: Ideally, we upload the `imageFile` (from Camera) here, get a URL, and pass it.
-      // OR: We skip the Omnibox upload for the camera flow and just upload hiddenly.
-
       let finalImageUrl = imageUrl;
 
       if (imageFile && !finalImageUrl) {
-        // Upload the captured file on fly
         const { createClient } = await import("@/lib/supabase");
         const supabase = createClient();
         const { nanoid } = await import("nanoid");
@@ -45,6 +45,9 @@ export default function ReportFoundPage() {
         if (!uploadError) {
           const { data: { publicUrl } } = supabase.storage.from("items").getPublicUrl(filePath);
           finalImageUrl = publicUrl;
+        } else {
+          console.error("Image upload failed:", uploadError);
+          // Continue without image? or fail? Let's continue but warn.
         }
       }
 
@@ -53,19 +56,19 @@ export default function ReportFoundPage() {
 
       if (result.success && result.itemId) {
         setReportResult(result as any);
+        setStep("SUCCESS"); // NOW show success
         // Redirect after short delay
         setTimeout(() => {
           router.push(`/item/${result.itemId}/matches`);
         }, 2500);
       } else {
         alert("Error: " + result.error);
-        setStep("DETAILS");
+        // Stay on DETAILS step
       }
 
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
-      alert("System Error");
-      setStep("DETAILS");
+      alert("System Error: " + e.message);
     }
   };
 
@@ -134,7 +137,7 @@ export default function ReportFoundPage() {
 
               <div className="w-full">
                 {/* Dynamic Import to avoid cycle or simply use component */}
-                <SmartOmnibox onSubmit={handleSmartSubmit} />
+                <SmartOmnibox onSubmit={handleSmartSubmit} placeholder="I found a..." />
               </div>
 
             </motion.div>
