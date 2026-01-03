@@ -1,4 +1,5 @@
-import { pipeline, env } from '@xenova/transformers';
+
+import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.14.0';
 
 // Skip local model checks (we use CDN for browser)
 env.allowLocalModels = false;
@@ -34,10 +35,10 @@ class EmbeddingPipeline {
 
 // Listen for messages from the main thread
 self.addEventListener('message', async (event) => {
-    const { type, payload, image } = event.data; // Added 'image' for backward compatibility
+    const { type, payload, image } = event.data;
 
     try {
-        if (image || type === 'classify') { // Handle legacy {image} or new {type: 'classify'}
+        if (image || type === 'classify') {
             const imgData = image || payload;
             const classifier = await VisionPipeline.getInstance((x) => {
                 self.postMessage({ status: 'progress', task: 'vision', ...x });
@@ -51,10 +52,7 @@ self.addEventListener('message', async (event) => {
                 self.postMessage({ status: 'progress', task: 'nlp', ...x });
             });
 
-            // Generate embedding (mean pooling explanation: https://huggingface.co/Xenova/all-MiniLM-L6-v2)
             const output = await extractor(payload, { pooling: 'mean', normalize: true });
-
-            // Output is a Tensor. We need a plain array.
             const embedding = Array.from(output.data);
 
             self.postMessage({ status: 'complete', task: 'nlp', output: embedding });

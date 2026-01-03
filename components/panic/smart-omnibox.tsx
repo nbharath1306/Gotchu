@@ -176,7 +176,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                     onKeyDown={handleKeyDown}
                     placeholder={
                         aiProgress?.status === 'loading'
-                            ? `Analysing image... ${Math.round(aiProgress.progress || 0)}%`
+                            ? `Downloading AI Models... ${Math.round(aiProgress.progress || 0)}%`
                             : isListening
                                 ? "Listening..."
                                 : placeholder
