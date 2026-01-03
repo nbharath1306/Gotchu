@@ -9,9 +9,10 @@ import { toast } from "sonner"
 interface ContactButtonProps {
   itemId: string
   relatedItemId?: string
+  label?: string
 }
 
-export function ContactButton({ itemId, relatedItemId }: ContactButtonProps) {
+export function ContactButton({ itemId, relatedItemId, label = "CONTACT OWNER" }: ContactButtonProps) {
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
@@ -48,7 +49,7 @@ export function ContactButton({ itemId, relatedItemId }: ContactButtonProps) {
       ) : (
         <MessageSquare className="w-5 h-5" />
       )}
-      CONTACT OWNER
+      {label}
     </button>
   )
 }

@@ -146,8 +146,11 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
                                         Inspect
                                     </Link>
                                     <div className="flex-1">
-                                        {/* Note: ContactButton might need restyling or passing distinct className */}
-                                        <ContactButton itemId={match.id} relatedItemId={projectId} />
+                                        <ContactButton
+                                            itemId={match.id}
+                                            relatedItemId={projectId}
+                                            label={currentItem.type === 'LOST' ? "CONTACT FINDER" : "CONTACT OWNER"}
+                                        />
                                     </div>
                                 </div>
                             </div>
