@@ -24,7 +24,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     const [isUploading, setIsUploading] = useState(false);
 
     // AI Integration
-    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress, isLoading: aiIsLoading } = useWorkerAI();
+    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress, isLoading: aiIsLoading, error: aiError } = useWorkerAI();
 
     // State to track if we are waiting for embedding to submit
     const [isCalculatingEmbedding, setIsCalculatingEmbedding] = useState(false);
@@ -327,6 +327,16 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                 <p className="text-white/20 text-xs font-mono uppercase tracking-widest">
                     {isListening ? 'VOICE MODULE ACTIVE' : 'AI ANALYSIS ACTIVE • SECURE CHANNEL'}
                 </p>
+
+                {/* DEBUG CONSOLE (Temporary) */}
+                <div className="mt-4 p-4 bg-black/50 rounded-xl text-left font-mono text-[10px] text-green-400 border border-green-900 overflow-hidden">
+                    <p className="mb-1 text-white/50 border-b border-white/10 pb-1">SYSTEM DIAGNOSTICS (v2.1)</p>
+                    <p>STATUS: {aiIsLoading ? <span className="text-yellow-400 animate-pulse">BUSY</span> : <span className="text-green-500">IDLE</span>}</p>
+                    <p>WORKER: {typeof Worker !== 'undefined' ? 'OK' : 'UNSUPPORTED'}</p>
+                    <p>ERROR: <span className="text-red-400">{aiError || 'NONE'}</span></p>
+                    <p>RESULT: {aiResult ? `${aiResult[0]?.label} (${Math.round(aiResult[0]?.score * 100)}%)` : 'NULL'}</p>
+                    <p>PROGRESS: {aiProgress?.progress ? `${Math.round(aiProgress.progress)}%` : '0%'}</p>
+                </div>
             </div>
         </div>
     );
