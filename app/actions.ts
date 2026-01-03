@@ -408,6 +408,27 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
 
     await ensureUserExists(supabase, user);
 
+    // 2.5: Server-side Deduplication (Idempotency)
+    // Check if the same user submitted the same description in the last 60 seconds
+    const { data: recentItem } = await supabase
+      .from('items')
+      .select('id, created_at')
+      .eq('user_id', user.sub)
+      .eq('description', query)
+      .eq('type', reportType)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .single();
+
+    if (recentItem && recentItem.created_at) {
+      const timeSince = Date.now() - new Date(recentItem.created_at).getTime();
+      if (timeSince < 60000) { // 60 seconds window
+        console.log("Duplicate submission detected. Returning existing item.", recentItem.id);
+        revalidatePath('/feed');
+        return { success: true, itemId: recentItem.id };
+      }
+    }
+
     const itemId = nanoid();
     const { data: newItem, error } = await supabase
       .from("items")
