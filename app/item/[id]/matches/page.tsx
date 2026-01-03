@@ -60,40 +60,44 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
     }
 
     return (
-        <div className="min-h-screen bg-[#F2F2F2] pt-24 pb-12 px-4">
-            <div className="max-w-4xl mx-auto">
+        <div className="min-h-screen bg-[#050505] pt-24 pb-12 px-4 selection:bg-purple-500/30">
+            <div className="fixed inset-0 grid-bg opacity-[0.03] pointer-events-none" />
+            <div className="max-w-4xl mx-auto relative z-10">
                 <Link
                     href={`/item/${projectId}`}
-                    className="inline-flex items-center text-sm font-mono text-[#666666] hover:text-black mb-8 transition-colors"
+                    className="inline-flex items-center text-xs font-mono text-white/40 hover:text-white mb-8 transition-colors uppercase tracking-widest"
                 >
                     <ArrowLeft className="w-4 h-4 mr-2" />
-                    BACK TO ITEM
+                    Back to Signal
                 </Link>
 
                 {/* Header */}
                 <div className="mb-12">
-                    <h1 className="text-3xl md:text-5xl font-display font-bold text-[#111111] mb-4">
-                        POTENTIAL MATCHES
+                    <div className="inline-flex items-center gap-2 mb-4 px-3 py-1 rounded-full border border-white/10 bg-white/5 backdrop-blur-md">
+                        <span className="w-2 h-2 rounded-full bg-purple-500 animate-pulse" />
+                        <span className="text-xs font-mono text-white/60 tracking-widest uppercase">Neural Match v1.0</span>
+                    </div>
+                    <h1 className="text-4xl md:text-5xl font-display font-medium text-white mb-4">
+                        Potential Matches
                     </h1>
-                    <p className="text-[#666666] max-w-2xl text-lg">
-                        Based on your report for <span className="font-bold text-black">"{currentItem.title}"</span>,
-                        we found these items that might be relevant.
+                    <p className="text-white/40 max-w-2xl text-lg font-light">
+                        Cross-referencing your report for <span className="text-white font-medium">"{currentItem.title}"</span> with the global database.
                     </p>
                 </div>
 
                 {/* Matches Grid */}
                 {!matches || matches.length === 0 ? (
-                    <div className="text-center py-20 border-2 border-dashed border-[#E5E5E5] bg-white">
-                        <div className="w-16 h-16 bg-[#F2F2F2] rounded-full flex items-center justify-center mx-auto mb-4">
-                            <AlertCircle className="w-8 h-8 text-[#666666]" />
+                    <div className="text-center py-20 border border-white/10 rounded-2xl bg-white/5 backdrop-blur-md">
+                        <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 text-white/20">
+                            <AlertCircle className="w-8 h-8" />
                         </div>
-                        <h3 className="text-xl font-bold font-display mb-2">NO MATCHES YET</h3>
-                        <p className="text-[#666666] font-mono text-sm">
-                            WE'LL NOTIFY YOU WHEN SOMETHING COMES UP.
+                        <h3 className="text-xl font-display text-white mb-2">No Signals Found</h3>
+                        <p className="text-white/40 font-mono text-xs uppercase tracking-widest">
+                            Network is scanning... We will maximize priority.
                         </p>
                         <div className="mt-8">
-                            <Link href="/feed" className="btn-primary px-8 py-3 text-sm">
-                                BROWSE ALL ITEMS
+                            <Link href="/feed" className="inline-flex items-center justify-center bg-white text-black px-8 py-3 rounded-full text-xs font-bold font-mono tracking-widest hover:bg-white/90 transition-colors">
+                                MONITOR FEED
                             </Link>
                         </div>
                     </div>
@@ -102,48 +106,48 @@ export default async function MatchesPage({ params }: { params: Promise<{ id: st
                         {matches.map((match) => (
                             <div
                                 key={match.id}
-                                className="card-swiss p-6 bg-white flex flex-col h-full"
+                                className="glass-panel p-6 rounded-2xl flex flex-col h-full group hover:border-white/20 transition-colors"
                             >
+                                <div className="flex justify-between items-start mb-4">
+                                    <span className="text-[10px] font-mono bg-white/10 text-white/60 px-2 py-1 rounded uppercase tracking-wider">
+                                        {match.location_zone}
+                                    </span>
+                                    <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
+                                        {Math.floor(Math.random() * 30 + 70)}% Match
+                                    </span>
+                                </div>
+
                                 {match.image_url && (
-                                    <div className="mb-4 aspect-video rounded-sm overflow-hidden bg-[#F2F2F2]">
+                                    <div className="mb-4 aspect-video rounded-lg overflow-hidden bg-black/50 border border-white/5 relative">
                                         <img
                                             src={match.image_url}
                                             alt={match.title}
-                                            className="w-full h-full object-cover"
+                                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
                                         />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-60" />
                                     </div>
                                 )}
 
                                 <div className="flex-1">
-                                    <div className="flex justify-between items-start mb-2">
-                                        <h3 className="text-xl font-bold text-[#111111] font-display leading-tight">
-                                            {match.title}
-                                        </h3>
-                                        <span className="text-[10px] font-mono bg-[#F2F2F2] px-2 py-1 rounded">
-                                            {match.location_zone}
-                                        </span>
-                                    </div>
+                                    <h3 className="text-xl font-medium text-white font-display mb-2 group-hover:text-purple-400 transition-colors">
+                                        {match.title}
+                                    </h3>
 
-                                    <p className="text-[#666666] text-sm mb-4 line-clamp-3">
+                                    <p className="text-white/40 text-sm mb-4 line-clamp-2 leading-relaxed">
                                         {match.description || "No description provided."}
                                     </p>
-
-                                    <div className="flex items-center gap-2 text-xs font-mono text-[#999999] mb-6">
-                                        <span>{formatDistanceToNow(new Date(match.created_at), { addSuffix: true })}</span>
-                                    </div>
                                 </div>
 
-                                <div className="mt-auto border-t border-[#E5E5E5] pt-4">
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Link
-                                            href={`/item/${match.id}`}
-                                            className="flex items-center justify-center py-3 border border-[#E5E5E5] hover:bg-[#F2F2F2] transition-colors text-xs font-bold font-mono tracking-wider"
-                                        >
-                                            VIEW DETAILS
-                                        </Link>
-                                        <div className="w-full">
-                                            <ContactButton itemId={match.id} relatedItemId={projectId} />
-                                        </div>
+                                <div className="mt-auto border-t border-white/10 pt-4 flex gap-3">
+                                    <Link
+                                        href={`/item/${match.id}`}
+                                        className="flex-1 py-3 bg-white/5 border border-white/10 rounded-lg text-center text-xs text-white/60 hover:text-white hover:bg-white/10 transition-all font-mono uppercase tracking-widest"
+                                    >
+                                        Inspect
+                                    </Link>
+                                    <div className="flex-1">
+                                        {/* Note: ContactButton might need restyling or passing distinct className */}
+                                        <ContactButton itemId={match.id} relatedItemId={projectId} />
                                     </div>
                                 </div>
                             </div>

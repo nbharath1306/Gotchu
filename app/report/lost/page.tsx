@@ -14,16 +14,29 @@ export default function ReportLostPage() {
   const handleSubmit = async (text: string) => {
     setStep("PROCESSING");
 
-    // Simulate AI Analysis / Network Scan
-    setTimeout(() => {
-      setStep("SUCCESS");
-      // In a real app, we would parse the 'text' here and post to DB
+    try {
+      const { submitNeuralReport } = await import("@/app/actions"); // Dynamic import to avoid server-client issues if any
+      const result = await submitNeuralReport(text);
 
-      // Auto-redirect after success animation
-      setTimeout(() => {
-        router.push("/feed");
-      }, 2000);
-    }, 1500);
+      if (result.error) {
+        alert("Signal jammed: " + result.error); // Simple fallback
+        setStep("INPUT");
+        return;
+      }
+
+      if (result.success && result.itemId) {
+        setStep("SUCCESS");
+        setTimeout(() => {
+          router.push(`/item/${result.itemId}/matches`);
+        }, 2000);
+      } else {
+        throw new Error("No ID returned");
+      }
+
+    } catch (e) {
+      console.error(e);
+      setStep("INPUT");
+    }
   };
 
   return (

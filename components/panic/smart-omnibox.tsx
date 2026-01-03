@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, Mic, Send } from "lucide-react";
+import { Loader2, Mic, Send, MicOff } from "lucide-react";
 
 interface SmartOmniboxProps {
     onSubmit: (value: string) => void;
@@ -11,7 +11,52 @@ interface SmartOmniboxProps {
 
 export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxProps) {
     const [value, setValue] = useState("");
+    const [isListening, setIsListening] = useState(false);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const recognitionRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && (window as any).webkitSpeechRecognition) {
+            const SpeechRecognition = (window as any).webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.lang = "en-US";
+
+            recognition.onresult = (event: any) => {
+                let transcript = "";
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    transcript += event.results[i][0].transcript;
+                }
+                setValue(prev => {
+                    // Avoid appending duplicate segments from interim results
+                    // Simplest approach: Replace for now, or append intelligently
+                    // For MVP: Just replace/set if empty
+                    return transcript;
+                });
+            };
+
+            recognition.onend = () => {
+                setIsListening(false);
+            };
+
+            recognitionRef.current = recognition;
+        }
+    }, []);
+
+    const toggleVoice = () => {
+        if (!recognitionRef.current) {
+            alert("Voice input not supported in this browser.");
+            return;
+        }
+
+        if (isListening) {
+            recognitionRef.current.stop();
+        } else {
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
 
     // Auto-resize textarea
     useEffect(() => {
@@ -31,7 +76,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxPro
     return (
         <div className="w-full max-w-2xl mx-auto relative group">
             {/* Glow Effect */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl opacity-0 group-focus-within:opacity-20 blur-xl transition-opacity duration-500" />
+            <div className={`absolute -inset-1 bg-gradient-to-r from-purple-600 to-indigo-600 rounded-2xl opacity-0 transition-opacity duration-500 blur-xl ${isListening ? 'opacity-40 animate-pulse' : 'group-focus-within:opacity-20'}`} />
 
             <motion.div
                 layout
@@ -42,7 +87,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxPro
                     value={value}
                     onChange={(e) => setValue(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder="I lost my..."
+                    placeholder={isListening ? "Listening..." : "I lost my..."}
                     disabled={isProcessing}
                     rows={1}
                     className="w-full bg-transparent text-white text-2xl md:text-3xl font-display font-medium p-6 md:p-8 outline-none resize-none placeholder:text-white/20 disabled:opacity-50"
@@ -50,8 +95,12 @@ export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxPro
                 />
 
                 <div className="flex items-center justify-between px-4 pb-4 md:px-6 md:pb-6">
-                    <button className="p-2 rounded-full hover:bg-white/10 text-white/40 hover:text-white transition-colors">
-                        <Mic className="w-5 h-5" />
+                    <button
+                        onClick={toggleVoice}
+                        className={`p-2 rounded-full transition-colors flex items-center gap-2 ${isListening ? 'bg-red-500/20 text-red-400' : 'hover:bg-white/10 text-white/40 hover:text-white'}`}
+                    >
+                        {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+                        {isListening && <span className="text-xs font-mono uppercase animate-pulse">Recording</span>}
                     </button>
 
                     <AnimatePresence>
@@ -84,7 +133,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false }: SmartOmniboxPro
             {/* Helper Text */}
             <div className="mt-4 text-center">
                 <p className="text-white/20 text-xs font-mono uppercase tracking-widest">
-                    AI Analysis Active • Secure Channel
+                    {isListening ? 'VOICE MODULE ACTIVE' : 'AI ANALYSIS ACTIVE • SECURE CHANNEL'}
                 </p>
             </div>
         </div>

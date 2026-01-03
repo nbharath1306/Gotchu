@@ -368,3 +368,70 @@ export async function deleteItem(itemId: string) {
 
   return { success: true }
 }
+import { NeuralParser } from "@/lib/neural/parser";
+
+export async function submitNeuralReport(query: string) {
+  try {
+    const session = await auth0.getSession();
+    const user = session?.user;
+
+    if (!user) return { error: "Unauthorized" };
+
+    // 1. Parse the input
+    const signal = NeuralParser.parse(query);
+
+    // 2. Map to Enum values (Simple heuristics for now)
+    const categoryMap: any = {
+      "electronics": "Electronics",
+      "keys": "Keys",
+      "id / wallet": "ID",
+      "clothing": "Other", // Schema doesn't have Clothing? Let's check schema. Schema has: Electronics, ID, Keys, Other.
+      "documents": "Other"
+    };
+
+    // Schema demands: "Innovation_Labs", "Canteen", "Bus_Bay", "Library", "Hostels", "Other"
+    const locationMap: any = {
+      "innovation_labs": "Innovation_Labs",
+      "canteen": "Canteen",
+      "bus_bay": "Bus_Bay",
+      "library": "Library",
+      "hostels": "Hostels",
+      "sports_complex": "Other"
+    };
+
+    const finalCategory = categoryMap[signal.category?.toLowerCase() || ""] || "Other";
+    const finalLocation = locationMap[signal.location?.toLowerCase() || ""] || "Other";
+
+    // 3. Create Item directly (Bypassing strict form schema for now to allow "Magic")
+    const adminClient = await createAdminClient();
+    const supabase = adminClient || await createClient(); // Fallback
+
+    await ensureUserExists(supabase, user);
+
+    const itemId = nanoid();
+    const { data: newItem, error } = await supabase
+      .from("items")
+      .insert({
+        id: itemId,
+        title: signal.category || "Unknown Item", // e.g. "Red Wallet" if we had title extraction
+        description: query, // The full raw text is the description
+        category: finalCategory,
+        location_zone: finalLocation,
+        date_reported: new Date().toISOString().split('T')[0],
+        type: "LOST",
+        user_id: user.sub,
+        status: "OPEN"
+      })
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    revalidatePath('/feed');
+    return { success: true, itemId };
+
+  } catch (e: any) {
+    console.error("Neural Submit Error:", e);
+    return { error: e.message };
+  }
+}
