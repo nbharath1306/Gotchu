@@ -6,6 +6,7 @@ export function useWorkerAI() {
     const [embedding, setEmbedding] = useState<number[] | null>(null); // NLP result
     const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState<{ status: string; task?: string; progress?: number; file?: string } | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         if (!workerRef.current) {
@@ -14,13 +15,19 @@ export function useWorkerAI() {
             workerRef.current = new Worker('/ai-worker.js', { type: "module" });
 
             workerRef.current.onerror = (err) => {
+                const msg = err instanceof Event ? "Worker load failed (404/CORS)" : (err as any).message || String(err);
                 console.error("AI Worker Startup Error:", err);
+                setError(msg); // Expose to UI
                 setIsLoading(false);
                 setProgress(null);
             };
 
             workerRef.current.addEventListener('message', (event) => {
                 const { status, task } = event.data;
+
+                if (status !== 'error') {
+                    setError(null); // Clear errors on success signal
+                }
 
                 if (status === 'progress') {
                     const { file, progress } = event.data;
@@ -36,6 +43,7 @@ export function useWorkerAI() {
                     setIsLoading(false);
                 } else if (status === 'error') {
                     console.error("AI Worker Error:", event.data);
+                    setError(event.data.error || "Processing failed"); // Expose to UI
                     setIsLoading(false);
                     setProgress(null);
                 }
@@ -62,5 +70,5 @@ export function useWorkerAI() {
         }
     }, []);
 
-    return { result, embedding, classifyImage, embedText, progress, isLoading };
+    return { result, embedding, classifyImage, embedText, progress, isLoading, error };
 }
