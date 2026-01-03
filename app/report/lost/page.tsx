@@ -11,12 +11,12 @@ export default function ReportLostPage() {
   const router = useRouter();
   const [step, setStep] = useState<"INPUT" | "PROCESSING" | "SUCCESS">("INPUT");
 
-  const handleSubmit = async (text: string) => {
+  const handleSubmit = async (text: string, imageUrl?: string) => {
     setStep("PROCESSING");
 
     try {
       const { submitNeuralReport } = await import("@/app/actions"); // Dynamic import to avoid server-client issues if any
-      const result = await submitNeuralReport(text);
+      const result = await submitNeuralReport(text, imageUrl);
 
       if (result.error) {
         alert("Signal jammed: " + result.error); // Simple fallback

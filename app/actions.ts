@@ -370,7 +370,7 @@ export async function deleteItem(itemId: string) {
 }
 import { NeuralParser } from "@/lib/neural/parser";
 
-export async function submitNeuralReport(query: string) {
+export async function submitNeuralReport(query: string, imageUrl?: string) {
   try {
     const session = await auth0.getSession();
     const user = session?.user;
@@ -418,6 +418,7 @@ export async function submitNeuralReport(query: string) {
         category: finalCategory,
         location_zone: finalLocation,
         date_reported: new Date().toISOString().split('T')[0],
+        image_url: imageUrl || null,
         type: "LOST",
         user_id: user.sub,
         status: "OPEN"
