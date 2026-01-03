@@ -11,20 +11,30 @@ export default function ReportLostPage() {
   const router = useRouter();
   const [step, setStep] = useState<"INPUT" | "PROCESSING" | "SUCCESS">("INPUT");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmit = async (text: string, imageUrl?: string) => {
+    if (isSubmitting) return; // Prevent duplicates
+    setIsSubmitting(true);
+    // DO NOT set PROCESSING step immediately if we want to keep the input visible until we know it's working
+    // But for the "Scanner" effect, we want to show it.
+    // Let's set PROCESSING but handle error reversion carefully.
     setStep("PROCESSING");
 
     try {
-      const { submitNeuralReport } = await import("@/app/actions"); // Dynamic import to avoid server-client issues if any
-      const result = await submitNeuralReport(text, imageUrl);
+      const { submitNeuralReport } = await import("@/app/actions");
+      const result = await submitNeuralReport(text, imageUrl, "LOST");
 
       if (result.error) {
-        alert("Signal jammed: " + result.error); // Simple fallback
+        // Revert to input on error so user isn't stuck
+        alert("Signal jammed: " + result.error);
         setStep("INPUT");
+        setIsSubmitting(false);
         return;
       }
 
       if (result.success && result.itemId) {
+        // Success! Keep the scanner or move to checkmark
         setStep("SUCCESS");
         setTimeout(() => {
           router.push(`/item/${result.itemId}/matches`);
@@ -33,9 +43,11 @@ export default function ReportLostPage() {
         throw new Error("No ID returned");
       }
 
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      alert("System Error: " + e.message);
       setStep("INPUT");
+      setIsSubmitting(false);
     }
   };
 
@@ -75,7 +87,7 @@ export default function ReportLostPage() {
                 </p>
               </div>
 
-              <SmartOmnibox onSubmit={handleSubmit} />
+              <SmartOmnibox onSubmit={handleSubmit} isProcessing={isSubmitting} />
             </motion.div>
           )}
 
