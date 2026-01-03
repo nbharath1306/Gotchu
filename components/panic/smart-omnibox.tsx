@@ -24,7 +24,7 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     const [isUploading, setIsUploading] = useState(false);
 
     // AI Integration
-    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress } = useWorkerAI();
+    const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, progress: aiProgress, isLoading: aiIsLoading } = useWorkerAI();
 
     // State to track if we are waiting for embedding to submit
     const [isCalculatingEmbedding, setIsCalculatingEmbedding] = useState(false);
@@ -253,13 +253,13 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                                 animate={{ scale: 1, opacity: 1 }}
                                 exit={{ scale: 0.8, opacity: 0 }}
                                 onClick={handleSubmit}
-                                disabled={isProcessing}
+                                disabled={isProcessing || aiIsLoading} // BLOCK SUBMIT IF AI IS THINKING
                                 className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full font-medium text-sm hover:bg-white/90 transition-colors disabled:opacity-50"
                             >
-                                {isProcessing ? (
+                                {isProcessing || aiIsLoading ? (
                                     <>
                                         <Loader2 className="w-4 h-4 animate-spin" />
-                                        Analyzing...
+                                        {aiIsLoading ? "Analyzing..." : "Processing..."}
                                     </>
                                 ) : (
                                     <>

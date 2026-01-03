@@ -4,7 +4,7 @@ export function useWorkerAI() {
     const workerRef = useRef<Worker | null>(null);
     const [result, setResult] = useState<any>(null); // Vision result
     const [embedding, setEmbedding] = useState<number[] | null>(null); // NLP result
-    const [isReady, setIsReady] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
     const [progress, setProgress] = useState<{ status: string; task?: string; progress?: number; file?: string } | null>(null);
 
     useEffect(() => {
@@ -19,12 +19,18 @@ export function useWorkerAI() {
                 if (status === 'progress') {
                     const { file, progress } = event.data;
                     setProgress({ status: 'loading', task, file, progress });
+                    setIsLoading(true);
                 } else if (status === 'complete') {
-                    if (task === 'vision' || !task) { // !task for backward compatibility if any
+                    if (task === 'vision' || !task) {
                         setResult(event.data.output);
                     } else if (task === 'nlp') {
                         setEmbedding(event.data.output);
                     }
+                    setProgress(null);
+                    setIsLoading(false);
+                } else if (status === 'error') {
+                    console.error("AI Worker Error:", event.data);
+                    setIsLoading(false);
                     setProgress(null);
                 }
             });
@@ -38,6 +44,8 @@ export function useWorkerAI() {
 
     const classifyImage = useCallback((imageUrl: string) => {
         if (workerRef.current) {
+            setResult(null); // Clear previous result
+            setIsLoading(true);
             workerRef.current.postMessage({ type: 'classify', payload: imageUrl });
         }
     }, []);
@@ -48,5 +56,5 @@ export function useWorkerAI() {
         }
     }, []);
 
-    return { result, embedding, classifyImage, embedText, progress };
+    return { result, embedding, classifyImage, embedText, progress, isLoading };
 }
