@@ -13,6 +13,12 @@ export function useWorkerAI() {
             // Note: type: "module" is needed because we use import in the worker
             workerRef.current = new Worker('/ai-worker.js', { type: "module" });
 
+            workerRef.current.onerror = (err) => {
+                console.error("AI Worker Startup Error:", err);
+                setIsLoading(false);
+                setProgress(null);
+            };
+
             workerRef.current.addEventListener('message', (event) => {
                 const { status, task } = event.data;
 
