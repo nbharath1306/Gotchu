@@ -173,16 +173,26 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     setIsProcessing(true)
 
     try {
-      // Use Server Action instead of API Route
-      const { resolveMatch } = await import("@/app/actions");
-      const res = await resolveMatch(chatId);
+      const res = await fetch("/api/chat/close", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId }),
+      })
 
-      if (res.error) {
-        throw new Error(res.error)
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to process request")
       }
 
-      toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
-      router.push('/chat')
+      if (data.status === 'PENDING_CLOSURE') {
+        toast.info("Resolution requested. Waiting for confirmation.")
+        setChatStatus('PENDING_CLOSURE')
+        setClosureRequestedBy(currentUserId)
+      } else if (data.status === 'DELETED' || data.status === 'CLOSED') {
+        toast.success("Item Resolved! Chat history cleared.", { duration: 4000 })
+        router.push('/chat')
+      }
 
       setIsActionsOpen(false);
     } catch (e: any) {
