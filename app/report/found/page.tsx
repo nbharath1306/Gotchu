@@ -170,6 +170,9 @@ export default function ReportFoundPage() {
           )}
         </AnimatePresence>
       </div>
+      <div className="absolute bottom-4 right-4 text-white/10 text-[10px] font-mono pointer-events-none">
+        GOTCHU OS v2.1 • NEURAL ENGINE ONLINE
+      </div>
     </div>
   );
 }

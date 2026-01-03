@@ -138,6 +138,13 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                 .getPublicUrl(filePath);
 
             setImageUrl(publicUrl);
+
+            // Artificial delay to ensure user sees the "Scanning" animation (UX)
+            // If the model is cached, it might be too fast (0ms).
+            if (!aiIsLoading) {
+                // Force a re-classify to show animation if it was instant
+                classifyImage(blobUrl);
+            }
         } catch (error: any) {
             console.error("Upload error:", error);
             alert("Upload failed");
