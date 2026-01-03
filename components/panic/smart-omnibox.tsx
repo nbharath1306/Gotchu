@@ -36,18 +36,16 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
     const supabase = createClient();
 
     // AI Result Handler
+    // AI Result Handler - Kept minimal as HUD handles display now
     useEffect(() => {
         if (aiResult && aiResult.length > 0) {
             const topPrediction = aiResult[0];
             const label = topPrediction.label;
             const score = Math.round(topPrediction.score * 100);
 
-            if (score > 70) {
-                toast.success(`AI Identified: ${label} (${score}%)`);
-                setValue(prev => {
-                    if (!prev.trim()) return `Found a ${label}.`;
-                    return prev + ` It looks like a ${label}.`;
-                });
+            // Auto-populate text if empty
+            if (score > 70 && !value.trim()) {
+                setValue(`Found a ${label}.`);
             }
         }
     }, [aiResult]);
@@ -200,23 +198,67 @@ export function SmartOmnibox({ onSubmit, isProcessing = false, placeholder = "I 
                     style={{ minHeight: "100px" }}
                 />
 
-                {/* Image Preview Pill */}
+                {/* Image Preview & Neural HUD */}
                 <AnimatePresence>
-                    {imageUrl && (
+                    {(imageUrl || aiResult) && (
                         <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="px-6 pb-2"
+                            className="px-6 pb-2 space-y-3"
                         >
-                            <div className="relative inline-block group/img">
-                                <img src={imageUrl} alt="Evidence" className="h-16 w-16 object-cover rounded-lg border border-white/20" />
-                                <button
-                                    onClick={() => setImageUrl(null)}
-                                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/img:opacity-100 transition-opacity"
-                                >
-                                    <X className="w-3 h-3" />
-                                </button>
+                            <div className="flex items-center gap-4">
+                                {imageUrl && (
+                                    <div className="relative inline-block group/img">
+                                        <div className={`relative rounded-lg overflow-hidden ${aiIsLoading ? 'ring-2 ring-purple-500 ring-offset-2 ring-offset-black/50' : ''}`}>
+                                            <img src={imageUrl} alt="Evidence" className="h-16 w-16 object-cover" />
+                                            {aiIsLoading && (
+                                                <div className="absolute inset-0 bg-purple-500/20 animate-pulse" />
+                                            )}
+                                        </div>
+
+                                        <button
+                                            onClick={() => setImageUrl(null)}
+                                            className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover/img:opacity-100 transition-opacity z-10"
+                                        >
+                                            <X className="w-3 h-3" />
+                                        </button>
+                                    </div>
+                                )}
+
+                                {/* VISUAL INTELLIGENCE CHIP */}
+                                {aiResult && aiResult.length > 0 && !aiIsLoading && (
+                                    <motion.div
+                                        initial={{ x: -10, opacity: 0 }}
+                                        animate={{ x: 0, opacity: 1 }}
+                                        className="flex-1 bg-white/5 border border-white/10 rounded-xl p-3 flex items-center gap-3 backdrop-blur-sm"
+                                    >
+                                        <div className="bg-gradient-to-br from-green-400 to-green-600 rounded-full p-1.5 flex-shrink-0">
+                                            <div className="w-2 h-2 bg-white rounded-full animate-ping" />
+                                        </div>
+                                        <div>
+                                            <p className="text-white/60 text-[10px] font-mono uppercase tracking-widest leading-tight">NEURAL VISION MATCH</p>
+                                            <p className="text-white font-medium text-sm leading-tight">
+                                                {aiResult[0].label} <span className="text-white/40">({Math.round(aiResult[0].score * 100)}%)</span>
+                                            </p>
+                                        </div>
+                                    </motion.div>
+                                )}
+
+                                {aiIsLoading && (
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="flex-1"
+                                    >
+                                        <div className="h-10 bg-white/5 rounded-xl animate-pulse flex items-center px-4">
+                                            <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce mr-1" />
+                                            <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce delay-75 mr-1" />
+                                            <div className="h-1.5 w-1.5 bg-purple-400 rounded-full animate-bounce delay-150 mr-2" />
+                                            <span className="text-purple-300 text-xs font-mono">NEURAL SCANNING...</span>
+                                        </div>
+                                    </motion.div>
+                                )}
                             </div>
                         </motion.div>
                     )}
