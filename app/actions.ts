@@ -6,79 +6,77 @@ import { revalidatePath } from "next/cache"
 import { nanoid } from "nanoid";
 import { ensureUserExists } from "@/lib/users";
 
-export async function resolveItem(itemId: string) {
-  // Strategy: Try Admin first, then fallback to user token
-  let supabase = null;
-  const adminClient = await createAdminClient();
-
-  if (adminClient) {
-    supabase = adminClient;
-  } else {
-    supabase = await createClient();
-  }
-
+export async function resolveExchange(chatId: string) {
   const session = await auth0.getSession();
   const user = session?.user;
+  if (!user) return { error: "Unauthorized" };
 
-  if (!user) {
-    return { error: "Unauthorized" }
+  const adminClient = await createAdminClient();
+  const supabase = adminClient || await createClient();
+
+  await ensureUserExists(supabase, user);
+
+  // 1. Fetch Chat to get both items
+  const { data: chat, error: chatError } = await supabase
+    .from('chats')
+    .select('item_id, related_item_id, item:items!chats_item_id_fkey(user_id, status), related:items!chats_related_item_id_fkey(user_id, status)')
+    .eq('id', chatId)
+    .single();
+
+  if (chatError || !chat) return { error: "Chat not found" };
+
+  const itemA = chat.item as any; // Type casting for convenience in raw sql response
+  const itemB = chat.related as any;
+
+  // 2. Verify Ownership (Must be one of the involved parties)
+  // Actually, usually the "Loser" (Creator of Lost Item) should confirm receipt.
+  // Or the "Finder" (Creator of Found Item) marks as Handed Over.
+  // For simplicity: EITHER party involves can "Mark Resolved".
+  // But strictly, let's say ANY of the owners can resolve.
+
+  const isOwnerA = itemA.user_id === user.sub;
+  const isOwnerB = itemB?.user_id === user.sub;
+
+  if (!isOwnerA && !isOwnerB) {
+    return { error: "You are not a participant in this exchange." };
   }
 
-  if (!supabase && !adminClient) {
-    // Revert to token logic if admin fails to init
-    let token = session?.idToken || session?.accessToken;
-    supabase = await createClient(token as string | undefined);
-  }
+  // 3. Resolve Both Items
+  const itemsToResolve = [chat.item_id];
+  if (chat.related_item_id) itemsToResolve.push(chat.related_item_id);
 
-  // 1. Fetch the item to verify ownership and type
-  const { data: item, error: fetchError } = await supabase
-    .from('items')
-    .select('*')
-    .eq('id', itemId)
-    .single()
-
-  if (fetchError || !item) {
-    return { error: "Item not found" }
-  }
-
-  if (item.user_id !== user.sub) {
-    return { error: "You can only resolve your own items" }
-  }
-
-  if (item.status === 'RESOLVED') {
-    return { error: "Item already resolved" }
-  }
-
-  // 2. Update item status
   const { error: updateError } = await supabase
     .from('items')
     .update({ status: 'RESOLVED' })
-    .eq('id', itemId)
+    .in('id', itemsToResolve);
 
-  if (updateError) {
-    return { error: "Failed to update item status" }
-  }
+  if (updateError) return { error: "Failed to update items." };
 
-  // 3. Award Karma if it was a FOUND item
-  if (item.type === 'FOUND') {
-    const { data: userData, error: userError } = await supabase
-      .from('users')
-      .select('karma_points')
-      .eq('id', user.sub)
-      .single()
+  // 4. Award Karma
+  // Who gets Karma? The finder.
+  // If ItemA is FOUND, ItemA Owner gets Karma.
+  // If ItemB is FOUND, ItemB Owner gets Karma.
+  // We need to check TYPES.
+  // Fetch types if not in initial query (or just fetch users to award).
 
-    if (!userError && userData) {
-      const newKarma = (userData.karma_points || 0) + 50
+  // Let's do a quick fetch to be precise about Karma.
+  const { data: itemsDetails } = await supabase.from('items').select('id, type, user_id').in('id', itemsToResolve);
 
-      await supabase
-        .from('users')
-        .update({ karma_points: newKarma })
-        .eq('id', user.sub)
+  if (itemsDetails) {
+    for (const item of itemsDetails) {
+      if (item.type === 'FOUND') {
+        // Award this user
+        const { data: userData } = await supabase.from('users').select('karma_points').eq('id', item.user_id).single();
+        if (userData) {
+          await supabase.from('users').update({ karma_points: (userData.karma_points || 0) + 50 }).eq('id', item.user_id);
+        }
+      }
     }
   }
 
-  revalidatePath('/feed')
-  return { success: true }
+  revalidatePath('/feed');
+  revalidatePath(`/chat/${chatId}`);
+  return { success: true };
 }
 
 
@@ -351,7 +349,24 @@ export async function deleteItem(itemId: string) {
     return { error: "You can only delete your own items" }
   }
 
-  // 3. Delete
+  // 3. Manual Cascade: Delete linked chats/messages first
+  // Find chats where this item is primary OR related
+  const { data: linkedChats } = await supabase
+    .from('chats')
+    .select('id')
+    .or(`item_id.eq.${itemId},related_item_id.eq.${itemId}`);
+
+  if (linkedChats && linkedChats.length > 0) {
+    const chatIds = linkedChats.map(c => c.id);
+
+    // Delete messages
+    await supabase.from('messages').delete().in('chat_id', chatIds);
+
+    // Delete chats
+    await supabase.from('chats').delete().in('id', chatIds);
+  }
+
+  // 4. Delete Item
   const { error: deleteError } = await supabase
     .from('items')
     .delete()

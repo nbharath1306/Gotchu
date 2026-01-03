@@ -121,7 +121,22 @@ export async function POST(req: NextRequest) {
             }
 
             if (finderId) {
-                await supabase.rpc('increment_karma', { user_ids: [finderId], amount: 10 });
+                // Award 50 Karma directly
+                const { data: userData } = await supabase
+                    .from('users')
+                    .select('karma_points')
+                    .eq('id', finderId)
+                    .single();
+
+                if (userData) {
+                    const newKarma = (userData.karma_points || 0) + 50;
+                    const { error: karmaError } = await supabase
+                        .from('users')
+                        .update({ karma_points: newKarma })
+                        .eq('id', finderId);
+
+                    if (karmaError) console.error("Karma Update Failed:", karmaError);
+                }
             }
 
             return NextResponse.json({ status: 'DELETED', message: 'Chat deleted and karma awarded' });
