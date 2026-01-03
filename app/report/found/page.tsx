@@ -19,7 +19,11 @@ export default function ReportFoundPage() {
     setTimeout(() => setStep("DETAILS"), 800);
   };
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSmartSubmit = async (text: string, imageUrl?: string) => {
+    if (isSubmitting) return; // Prevent duplicates
+    setIsSubmitting(true);
     // DO NOT set SUCCESS step yet. Wait for result.
     // However, the Omnibox handles its own "Processing" state if we pass it down?
     // Actually, SmartOmnibox doesn't expose a processing prop we control externally very well for global page state
@@ -64,11 +68,13 @@ export default function ReportFoundPage() {
       } else {
         alert("Error: " + result.error);
         // Stay on DETAILS step
+        setIsSubmitting(false); // Re-enable on error
       }
 
     } catch (e: any) {
       console.error(e);
       alert("System Error: " + e.message);
+      setIsSubmitting(false); // Re-enable on error
     }
   };
 
@@ -137,7 +143,7 @@ export default function ReportFoundPage() {
 
               <div className="w-full">
                 {/* Dynamic Import to avoid cycle or simply use component */}
-                <SmartOmnibox onSubmit={handleSmartSubmit} placeholder="I found a..." />
+                <SmartOmnibox onSubmit={handleSmartSubmit} placeholder="I found a..." isProcessing={isSubmitting} />
               </div>
 
             </motion.div>
