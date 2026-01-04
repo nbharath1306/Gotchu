@@ -15,7 +15,7 @@ export const TextReveal = ({ text, className, delay = 0, gradient = false }: Tex
 
     const container = {
         hidden: { opacity: 0 },
-        visible: (i = 1) => ({
+        visible: (i: number = 1) => ({
             opacity: 1,
             transition: { staggerChildren: 0.12, delayChildren: 0.04 * i + delay },
         }),
@@ -27,7 +27,7 @@ export const TextReveal = ({ text, className, delay = 0, gradient = false }: Tex
             y: 0,
             filter: "blur(0px)",
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 damping: 12,
                 stiffness: 100,
             },
@@ -37,7 +37,7 @@ export const TextReveal = ({ text, className, delay = 0, gradient = false }: Tex
             y: 20,
             filter: "blur(10px)",
             transition: {
-                type: "spring",
+                type: "spring" as const,
                 damping: 12,
                 stiffness: 100,
             },
