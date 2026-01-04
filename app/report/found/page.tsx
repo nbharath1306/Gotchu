@@ -96,7 +96,7 @@ export default function ReportFoundPage() {
             <ArrowLeft className="w-4 h-4" />
           </div>
           <span className="text-sm font-medium tracking-widest uppercase opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            Return to Base
+            Go Back Home
           </span>
         </Link>
       </nav>
@@ -108,8 +108,8 @@ export default function ReportFoundPage() {
             <div
               key={s}
               className={`h-1 rounded-full transition-all duration-700 ease-out ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
-                  ? "w-12 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                  : "w-2 bg-white/10"
+                ? "w-12 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
+                : "w-2 bg-white/10"
                 }`}
             />
           ))}
@@ -128,7 +128,7 @@ export default function ReportFoundPage() {
               <div className="text-center space-y-4">
                 <div className="flex justify-center">
                   <TextReveal
-                    text="Secure the Asset."
+                    text="You found something!"
                     className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
                     delay={0.2}
                   />
@@ -139,7 +139,7 @@ export default function ReportFoundPage() {
                   transition={{ delay: 0.8 }}
                   className="text-white/40 text-lg font-light"
                 >
-                  Visual identification is required for neural tagging.
+                  Thanks for helping. A photo makes it much easier to find the owner.
                 </motion.p>
               </div>
 
@@ -169,7 +169,7 @@ export default function ReportFoundPage() {
                   onClick={() => setStep("DETAILS")}
                   className="text-sm font-medium text-slate-500 hover:text-white transition-colors"
                 >
-                  I can't take a photo
+                  Skip photo for now
                 </MagneticButton>
               </div>
             </motion.div>
@@ -186,17 +186,17 @@ export default function ReportFoundPage() {
             >
               <div className="space-y-3 mb-12">
                 <TextReveal
-                  text="Log the Discovery."
+                  text="What does it look like?"
                   className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
                 />
-                <p className="text-slate-400 text-lg">Help us categorize this item accurately.</p>
+                <p className="text-slate-400 text-lg">Give us a few keywords so we can match it.</p>
               </div>
 
               {/* If we have an image from step 1, show a small preview pill here? */}
               {imageFile && (
                 <div className="inline-flex items-center gap-2 bg-emerald-500/10 py-1.5 px-4 rounded-full mb-6 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-medium text-emerald-200">VISUAL SECURED</span>
+                  <span className="text-sm font-medium text-emerald-200">Photo Added</span>
                 </div>
               )}
 
@@ -204,7 +204,7 @@ export default function ReportFoundPage() {
                 {/* Clean SmartOmnibox - Passed the AI Label from Step 1 */}
                 <SmartOmnibox
                   onSubmit={handleSmartSubmit}
-                  placeholder="I found a..."
+                  placeholder="I found a blue wallet..."
                   isProcessing={isSubmitting}
                   aiLabel={aiResult && aiResult.length > 0 ? aiResult[0].label : undefined}
                 />
@@ -227,31 +227,31 @@ export default function ReportFoundPage() {
               </div>
 
               <div className="text-center space-y-2">
-                <h2 className="text-4xl font-display font-medium text-white">Item Logged</h2>
-                <p className="text-emerald-400 font-medium tracking-wide mt-2">COMMUNITY REWARD ISSUED</p>
+                <h2 className="text-4xl font-display font-medium text-white">Item Logged!</h2>
+                <p className="text-emerald-400 font-medium tracking-wide mt-2">YOU'RE A HERO</p>
               </div>
 
               {/* What Happens Next Card */}
               <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl hover:bg-white/10 transition-colors duration-500">
-                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">Protocol: Asset Recovery</h3>
+                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">Next Steps</h3>
                 <ul className="space-y-6">
                   <li className="flex gap-4 items-start group">
                     <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
                       <span className="text-emerald-400 text-xs font-bold">1</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">Logged in public database [ID: {reportResult?.itemId?.slice(0, 8) || "GENERATED"}].</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">We've added this to the public database [ID: {reportResult?.itemId?.slice(0, 8) || "GENERATED"}].</span>
                   </li>
                   <li className="flex gap-4 items-start group">
                     <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
                       <span className="text-emerald-400 text-xs font-bold">2</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">Owner notification pending match confirmation.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">We'll let the owner know as soon as there's a match.</span>
                   </li>
                   <li className="flex gap-4 items-start group">
                     <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
                       <span className="text-emerald-400 text-xs font-bold">3</span>
                     </div>
-                    <span className="text-slate-200 text-sm leading-relaxed font-medium">You earned <span className="text-emerald-400 text-shadow-emerald">+50 Karma</span>.</span>
+                    <span className="text-slate-200 text-sm leading-relaxed font-medium">You earned <span className="text-emerald-400 text-shadow-emerald">+50 Karma</span> for helping out.</span>
                   </li>
                 </ul>
               </div>
@@ -260,7 +260,7 @@ export default function ReportFoundPage() {
                 onClick={() => router.push('/')}
                 className="w-full py-5 bg-white text-black font-medium rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
               >
-                Return to Dashboard
+                Go Home
               </MagneticButton>
             </motion.div>
           )}

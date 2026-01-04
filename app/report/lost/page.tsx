@@ -83,7 +83,7 @@ export default function ReportLostPage() {
             <ArrowLeft className="w-4 h-4" />
           </div>
           <span className="text-sm font-medium tracking-widest uppercase opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            Return to Base
+            Go Back Home
           </span>
         </Link>
       </nav>
@@ -116,7 +116,7 @@ export default function ReportLostPage() {
               <div className="text-center space-y-4">
                 <div className="flex justify-center">
                   <TextReveal
-                    text="Identify the Lost."
+                    text="Tell us what you lost."
                     className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
                     delay={0.2}
                   />
@@ -127,7 +127,7 @@ export default function ReportLostPage() {
                   transition={{ delay: 0.8 }}
                   className="text-white/40 text-lg font-light"
                 >
-                  Do you have a visual reference? Our neural engine can match it.
+                  Take a deep breath. A photo helps us search, but it's okay if you don't have one.
                 </motion.p>
               </div>
 
@@ -154,7 +154,7 @@ export default function ReportLostPage() {
 
               <div className="text-center">
                 <MagneticButton onClick={() => setStep("DETAILS")} className="text-sm text-white/40 hover:text-white underline decoration-dashed underline-offset-4 cursor-pointer">
-                  NO VISUAL DATA • SKIP
+                  I don't have a photo
                 </MagneticButton>
               </div>
             </motion.div>
@@ -172,11 +172,11 @@ export default function ReportLostPage() {
             >
               <div className="text-center space-y-4">
                 <TextReveal
-                  text="Reconstruct the Event."
+                  text="Help us find it."
                   className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
                 />
                 <p className="text-white/40 text-lg">
-                  Provide descriptive parameters. We will triangulate matches.
+                  Share a few details. The community is ready to look out for you.
                 </p>
               </div>
 
@@ -184,7 +184,7 @@ export default function ReportLostPage() {
                 <div className="flex justify-center">
                   <div className="inline-flex items-center gap-3 bg-indigo-500/10 py-2 px-5 rounded-full border border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
                     <CheckCircle2 className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm font-medium text-indigo-200 tracking-wide">VISUAL DATA LOCKED</span>
+                    <span className="text-sm font-medium text-indigo-200 tracking-wide">Photo Attached</span>
                   </div>
                 </div>
               )}
@@ -216,7 +216,9 @@ export default function ReportLostPage() {
               </div>
 
               <div className="text-center space-y-2">
-                <TextReveal text="UPLOADING TO NEURAL MESH..." className="text-lg font-mono text-indigo-300 justify-center" delay={0.5} />
+                <div className="text-center space-y-2">
+                  <TextReveal text="Broadcasting your signal..." className="text-lg font-mono text-indigo-300 justify-center" delay={0.5} />
+                </div>
               </div>
             </motion.div>
           )}
@@ -235,25 +237,25 @@ export default function ReportLostPage() {
               </div>
 
               <div className="text-center space-y-2">
-                <h2 className="text-4xl font-display font-medium text-white">Signal Broadcasted</h2>
-                <p className="text-emerald-400/80 tracking-wide font-mono text-sm">NETWORK SYNCHRONIZED</p>
+                <h2 className="text-4xl font-display font-medium text-white">We've started the search.</h2>
+                <p className="text-emerald-400/80 tracking-wide font-mono text-sm">NOTIFICATIONS ACTIVE</p>
               </div>
 
               {/* Glass Card */}
               <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl hover:bg-white/10 transition-colors duration-500">
-                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">Protocol: Post-Upload</h3>
+                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">What happens now?</h3>
                 <ul className="space-y-6">
                   <li className="flex gap-4 items-start group">
                     <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">1</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">Active Scan initiated across 15,000+ local nodes.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">Your report is being shown to people nearby.</span>
                   </li>
                   <li className="flex gap-4 items-start group">
                     <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">2</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">Neural Matching Engine will trigger a push notification upon &gt;90% confidence match.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">If someone finds something similar, we'll alert you immediately.</span>
                   </li>
                 </ul>
               </div>
@@ -262,7 +264,7 @@ export default function ReportLostPage() {
                 onClick={() => router.push('/')}
                 className="w-full py-5 bg-white text-black font-medium rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
               >
-                Return to Dashboard
+                Go Home
               </MagneticButton>
             </motion.div>
           )}
