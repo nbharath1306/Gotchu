@@ -7,6 +7,10 @@ if (!process.env.AUTH0_SECRET) {
 }
 
 export const auth0 = new Auth0Client({
+  // Map standard Auth0 env vars to what Auth0Client expects
+  domain: process.env.AUTH0_ISSUER_BASE_URL,
+  appBaseUrl: process.env.AUTH0_BASE_URL,
+
   authorizationParameters: {
     scope: 'openid profile email',
   },

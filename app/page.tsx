@@ -1,9 +1,11 @@
 import { KineticLanding } from "@/components/landing/kinetic-landing";
 import { createClient } from "@/lib/supabase-server";
+import { auth0 } from "@/lib/auth0";
 
 // This is now a Server Component
 export default async function Home() {
   const supabase = await createClient();
+  const session = await auth0.getSession();
 
   // Fetch Real Stats (Parallel)
   const [
@@ -25,6 +27,6 @@ export default async function Home() {
   };
 
   return (
-    <KineticLanding stats={stats} />
+    <KineticLanding stats={stats} session={session} />
   );
 }

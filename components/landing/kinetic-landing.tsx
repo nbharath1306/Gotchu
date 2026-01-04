@@ -1,19 +1,51 @@
 "use client";
 
 import { motion, useScroll, useTransform } from "framer-motion";
-import { ArrowRight, Search, Shield, Zap } from "lucide-react";
+import { ArrowRight, Search, Shield, Zap, User, LogIn } from "lucide-react";
 import Link from "next/link";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
-export function KineticLanding({ stats }: { stats: any }) {
+export function KineticLanding({ stats, session }: { stats: any, session: any }) {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
     const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
     return (
         <AuroraBackground className="min-h-screen overflow-x-hidden selection:bg-purple-500/30">
+            {/* Sticky Nav */}
+            <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-6">
+                <div className="max-w-7xl mx-auto flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-md border border-white/10">
+                            <Zap className="w-4 h-4 text-white" />
+                        </div>
+                        <span className="text-sm font-bold text-white tracking-wider">GOTCHU</span>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        {session ? (
+                            <Link href="/profile">
+                                <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-md group cursor-pointer">
+                                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 group-hover:bg-indigo-500/30">
+                                        <User className="w-3 h-3" />
+                                    </div>
+                                    <span className="text-sm text-white/80 group-hover:text-white font-medium">Profile</span>
+                                </div>
+                            </Link>
+                        ) : (
+                            <Link href="/login">
+                                <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-md group cursor-pointer">
+                                    <LogIn className="w-4 h-4 text-white/60 group-hover:text-white transition-colors" />
+                                    <span className="text-sm text-white/60 group-hover:text-white transition-colors">Log In</span>
+                                </div>
+                            </Link>
+                        )}
+                    </div>
+                </div>
+            </nav>
+
             {/* Hero Section */}
             <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 z-10">
                 <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
