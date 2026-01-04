@@ -2,16 +2,18 @@
 
 import { useState } from "react";
 import { SmartOmnibox } from "@/components/panic/smart-omnibox";
-import { VisionCamera } from "@/components/mobile/vision-camera"; // [NEW] Unified Vision
+import { VisionCamera } from "@/components/mobile/vision-camera";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useWorkerAI } from "@/hooks/use-worker-ai"; // [NEW] AI Hook
+import { useWorkerAI } from "@/hooks/use-worker-ai";
+import { AuroraBackground } from "@/components/ui/aurora-background";
+import { TextReveal } from "@/components/ui/text-reveal";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 export default function ReportLostPage() {
   const router = useRouter();
-  // Standardized Steps: CAPTURE -> DETAILS -> SUCCESS
   const [step, setStep] = useState<"CAPTURE" | "DETAILS" | "SUCCESS" | "PROCESSING">("CAPTURE");
   const [imageFile, setImageFile] = useState<File | null>(null);
 
@@ -20,7 +22,6 @@ export default function ReportLostPage() {
 
   const handleCapture = (file: File) => {
     setImageFile(file);
-    // Auto-advance after scan so user sees the "Keys" tag
     setTimeout(() => setStep("DETAILS"), 2000);
   };
 
@@ -34,7 +35,6 @@ export default function ReportLostPage() {
     try {
       let finalImageUrl = undefined;
 
-      // 1. Upload Reference Photo (if exists)
       if (imageFile) {
         const { createClient } = await import("@/lib/supabase");
         const supabase = createClient();
@@ -52,16 +52,12 @@ export default function ReportLostPage() {
         }
       }
 
-      // 2. Submit with AI Label (if scanned)
       const aiLabel = aiResult && aiResult.length > 0 ? aiResult[0].label : undefined;
       const { submitNeuralReport } = await import("@/app/actions");
       const result = await submitNeuralReport(text, finalImageUrl, "LOST", undefined, aiLabel);
 
       if (result.success && result.itemId) {
         setStep("SUCCESS");
-        setTimeout(() => {
-          router.push(`/item/${result.itemId}/matches`);
-        }, 2000);
       } else {
         alert("Signal jammed: " + result.error);
         setIsSubmitting(false);
@@ -77,79 +73,89 @@ export default function ReportLostPage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-slate-950 relative overflow-hidden transition-colors duration-1000">
-      {/* Soothing Background Gradients */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-indigo-900/20 blur-[120px] rounded-full mix-blend-screen" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-violet-900/20 blur-[120px] rounded-full mix-blend-screen" />
-        <div className="absolute top-[20%] right-[20%] w-[30%] h-[30%] bg-blue-900/10 blur-[100px] rounded-full mix-blend-screen animate-pulse duration-[10000ms]" />
-      </div>
-
-      <nav className="absolute top-8 left-8 z-10">
+    <AuroraBackground className="min-h-screen">
+      <nav className="absolute top-8 left-8 z-20">
         <Link
           href="/"
-          className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors text-sm font-medium tracking-wide group"
+          className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
         >
-          <div className="p-2 rounded-full bg-white/5 group-hover:bg-white/10 transition-colors">
+          <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors backdrop-blur-md">
             <ArrowLeft className="w-4 h-4" />
           </div>
-          <span>Go Back</span>
+          <span className="text-sm font-medium tracking-widest uppercase opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
+            Return to Base
+          </span>
         </Link>
       </nav>
 
-      <div className="w-full max-w-2xl relative z-10 p-4">
-        {/* Progress Stepper - visualized as simple dots for now */}
-        <div className="flex justify-center mb-12 gap-3">
+      <div className="w-full max-w-3xl relative z-10 p-6">
+        {/* Cinematic Progress Stepper */}
+        <div className="flex justify-center mb-16 gap-4">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`h-1.5 rounded-full transition-all duration-500 ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
-                ? "w-8 bg-indigo-500"
-                : "w-2 bg-white/10"
+              className={`h-1 rounded-full transition-all duration-700 ease-out ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
+                  ? "w-12 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                  : "w-2 bg-white/10"
                 }`}
             />
           ))}
         </div>
 
         <AnimatePresence mode="wait">
-
-          {/* STEP 1: REFERENCE IMAGE (Optional) */}
+          {/* STEP 1: REFERENCE IMAGE */}
           {step === "CAPTURE" && (
             <motion.div
               key="capture"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              className="space-y-8"
+              initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+              exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
+              transition={{ duration: 0.5, ease: "circOut" }}
+              className="space-y-12"
             >
-              <div className="text-center space-y-3 mb-8">
-                <h1 className="text-3xl font-display font-medium text-white tracking-tight">
-                  Do you have a photo?
-                </h1>
-                <p className="text-slate-400 text-base">
-                  Uploading a photo helps our AI match your item with found reports.
-                </p>
-              </div>
-
-              <div className="max-w-md mx-auto relative group">
-                <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-2xl blur-lg group-hover:blur-xl transition-all opacity-50" />
-                <VisionCamera
-                  onCapture={handleCapture}
-                  onScan={classifyImage}
-                  isScanning={aiIsLoading}
-                  scanResult={aiResult}
-                  debugLogs={aiLogs}
-                  workerStatus={workerStatus}
-                />
-              </div>
-
-              <div className="text-center mt-8">
-                <button
-                  onClick={() => setStep("DETAILS")}
-                  className="text-sm font-medium text-slate-500 hover:text-white transition-colors"
+              <div className="text-center space-y-4">
+                <div className="flex justify-center">
+                  <TextReveal
+                    text="Identify the Lost."
+                    className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
+                    delay={0.2}
+                  />
+                </div>
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.8 }}
+                  className="text-white/40 text-lg font-light"
                 >
-                  I don't have a photo
-                </button>
+                  Do you have a visual reference? Our neural engine can match it.
+                </motion.p>
+              </div>
+
+              <div className="max-w-md mx-auto relative group perspective-[1000px]">
+                {/* Holographic Frame */}
+                <div className="absolute -inset-4 border border-white/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-105" />
+                <div className="absolute -inset-1 bg-gradient-to-t from-indigo-500/20 to-transparent rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
+
+                <div className="relative transform transition-transform duration-500 group-hover:rotate-x-2 group-hover:rotate-y-2">
+                  <VisionCamera
+                    onCapture={handleCapture}
+                    onScan={classifyImage}
+                    isScanning={aiIsLoading}
+                    scanResult={aiResult}
+                    debugLogs={aiLogs}
+                    workerStatus={workerStatus}
+                  />
+                  {/* Scanning Line Effect */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+                    <div className="w-full h-[2px] bg-indigo-500/50 shadow-[0_0_20px_#6366f1] animate-[scan_3s_ease-in-out_infinite]" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="text-center">
+                <MagneticButton onClick={() => setStep("DETAILS")} className="text-sm text-white/40 hover:text-white underline decoration-dashed underline-offset-4 cursor-pointer">
+                  NO VISUAL DATA • SKIP
+                </MagneticButton>
               </div>
             </motion.div>
           )}
@@ -158,25 +164,27 @@ export default function ReportLostPage() {
           {step === "DETAILS" && (
             <motion.div
               key="details"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="space-y-8"
+              initial={{ opacity: 0, x: 50, filter: "blur(10px)" }}
+              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6, ease: "circOut" }}
+              className="space-y-12"
             >
-              <div className="text-center space-y-3">
-                <h1 className="text-3xl md:text-4xl font-display font-medium text-white tracking-tight">
-                  Tell us what happened
-                </h1>
-                <p className="text-slate-400 text-lg">
-                  Describe the item and where you might have lost it.
+              <div className="text-center space-y-4">
+                <TextReveal
+                  text="Reconstruct the Event."
+                  className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
+                />
+                <p className="text-white/40 text-lg">
+                  Provide descriptive parameters. We will triangulate matches.
                 </p>
               </div>
 
               {imageFile && (
                 <div className="flex justify-center">
-                  <div className="inline-flex items-center gap-2 bg-indigo-500/10 py-1.5 px-4 rounded-full border border-indigo-500/20">
+                  <div className="inline-flex items-center gap-3 bg-indigo-500/10 py-2 px-5 rounded-full border border-indigo-500/30 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
                     <CheckCircle2 className="w-4 h-4 text-indigo-400" />
-                    <span className="text-sm font-medium text-indigo-200">Photo Attached</span>
+                    <span className="text-sm font-medium text-indigo-200 tracking-wide">VISUAL DATA LOCKED</span>
                   </div>
                 </div>
               )}
@@ -196,23 +204,19 @@ export default function ReportLostPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="flex flex-col items-center justify-center space-y-8"
+              className="flex flex-col items-center justify-center space-y-12"
             >
-              <div className="relative w-24 h-24">
-                <div className="absolute inset-0 border-2 border-indigo-500/30 rounded-full animate-ping" />
-                <div className="absolute inset-0 border-2 border-purple-500/30 rounded-full animate-ping delay-300" />
-                <div className="absolute inset-4 bg-indigo-500/20 rounded-full animate-pulse blur-xl" />
+              {/* Sci-Fi Loader */}
+              <div className="relative w-32 h-32">
+                <div className="absolute inset-0 border-t-2 border-indigo-500 rounded-full animate-spin duration-1000" />
+                <div className="absolute inset-4 border-r-2 border-purple-500 rounded-full animate-spin duration-2000 reverse" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="w-3 h-3 bg-indigo-400 rounded-full shadow-[0_0_20px_rgba(99,102,241,0.5)]" />
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse shadow-[0_0_20px_white]" />
                 </div>
               </div>
+
               <div className="text-center space-y-2">
-                <h2 className="text-xl font-medium text-white">
-                  Processing Report...
-                </h2>
-                <p className="text-slate-500 text-sm">
-                  Analyzing details and checking for matches
-                </p>
+                <TextReveal text="UPLOADING TO NEURAL MESH..." className="text-lg font-mono text-indigo-300 justify-center" delay={0.5} />
               </div>
             </motion.div>
           )}
@@ -221,54 +225,49 @@ export default function ReportLostPage() {
           {step === "SUCCESS" && (
             <motion.div
               key="success"
-              initial={{ opacity: 0, scale: 0.9 }}
+              initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="flex flex-col items-center justify-center space-y-8 max-w-md mx-auto"
+              transition={{ type: "spring", bounce: 0.5 }}
+              className="flex flex-col items-center justify-center space-y-8 max-w-lg mx-auto"
             >
-              <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.2)]">
-                <CheckCircle2 className="w-10 h-10 text-emerald-500" />
+              <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center border border-emerald-500/20 shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-float">
+                <Sparkles className="w-12 h-12 text-emerald-400" />
               </div>
 
               <div className="text-center space-y-2">
-                <h2 className="text-3xl font-display font-medium text-white">Report Received</h2>
-                <p className="text-slate-400">We've alerted the community nearby.</p>
+                <h2 className="text-4xl font-display font-medium text-white">Signal Broadcasted</h2>
+                <p className="text-emerald-400/80 tracking-wide font-mono text-sm">NETWORK SYNCHRONIZED</p>
               </div>
 
-              {/* What Happens Next Card */}
-              <div className="w-full bg-white/5 border border-white/10 rounded-2xl p-6 backdrop-blur-sm">
-                <h3 className="text-sm font-medium text-slate-300 mb-4 uppercase tracking-wider">What happens next?</h3>
-                <ul className="space-y-4">
-                  <li className="flex gap-3 text-sm text-slate-400">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
+              {/* Glass Card */}
+              <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl hover:bg-white/10 transition-colors duration-500">
+                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">Protocol: Post-Upload</h3>
+                <ul className="space-y-6">
+                  <li className="flex gap-4 items-start group">
+                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">1</span>
                     </div>
-                    <span>Our AI is currently scanning all found items for matches.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">Active Scan initiated across 15,000+ local nodes.</span>
                   </li>
-                  <li className="flex gap-3 text-sm text-slate-400">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
+                  <li className="flex gap-4 items-start group">
+                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">2</span>
                     </div>
-                    <span>You'll get an instant notification if we find a high-confidence match.</span>
-                  </li>
-                  <li className="flex gap-3 text-sm text-slate-400">
-                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0">
-                      <span className="text-indigo-400 text-xs font-bold">3</span>
-                    </div>
-                    <span>Check your dashboard to track the status.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">Neural Matching Engine will trigger a push notification upon >90% confidence match.</span>
                   </li>
                 </ul>
               </div>
 
-              <button
+              <MagneticButton
                 onClick={() => router.push('/')}
-                className="w-full py-4 bg-white text-black font-medium rounded-xl hover:bg-slate-200 transition-colors"
+                className="w-full py-5 bg-white text-black font-medium rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
               >
-                Return Home
-              </button>
+                Return to Dashboard
+              </MagneticButton>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
-    </div>
+    </AuroraBackground>
   );
 }

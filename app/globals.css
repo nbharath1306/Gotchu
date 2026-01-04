@@ -4,63 +4,49 @@
   --font-display: var(--font-inter-tight), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), monospace;
 
-  /* MIDNIGHT PALETTE */
-  --color-bg-deep: #050505;
-  --color-bg-glass: rgba(255, 255, 255, 0.03);
-  --color-bg-glass-hover: rgba(255, 255, 255, 0.08);
-
-  --color-border-subtle: rgba(255, 255, 255, 0.08);
-  --color-border-hover: rgba(255, 255, 255, 0.15);
-
-  --color-text-primary: #FFFFFF;
-  --color-text-secondary: rgba(255, 255, 255, 0.6);
-  --color-text-muted: rgba(255, 255, 255, 0.3);
-
-  --color-glow-primary: rgba(124, 58, 237, 0.5);
-  /* Purple Haze */
-  --color-glow-success: rgba(16, 185, 129, 0.5);
-  /* Emerald Signal */
-
-  --shadow-glow: 0 0 20px var(--color-glow-primary);
+  --color-bg-deep: #020202;
 }
 
 @layer base {
   body {
     background-color: var(--color-bg-deep);
-    color: var(--color-text-primary);
+    color: #ffffff;
     font-family: var(--font-display);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 }
 
 @layer utilities {
   .glass-panel {
-    background: var(--color-bg-glass);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--color-border-subtle);
-    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   }
 
-  .glass-panel:hover {
-    background: var(--color-bg-glass-hover);
-    border-color: var(--color-border-hover);
-    transform: translateY(-2px);
+  .text-gradient {
+    background: linear-gradient(to bottom right, #ffffff, #a5b4fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
   }
 
-  /* Scanline Effect for 'Panic' Mode */
-  .scanlines {
-    background: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, 0) 50%,
-        rgba(0, 0, 0, 0.2) 50%,
-        rgba(0, 0, 0, 0.2));
-    background-size: 100% 4px;
-    pointer-events: none;
+  .animate-aurora {
+    animation: aurora 60s linear infinite;
   }
 
-  /* Animation Utilities */
+  @keyframes aurora {
+    from {
+      background-position: 50% 50%, 50% 50%;
+    }
+
+    to {
+      background-position: 350% 50%, 350% 50%;
+    }
+  }
+
   @keyframes float {
 
     0%,
@@ -74,6 +60,6 @@
   }
 
   .animate-float {
-    animation: float 3s ease-in-out infinite;
+    animation: float 6s ease-in-out infinite;
   }
 }
