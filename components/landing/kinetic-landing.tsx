@@ -28,9 +28,17 @@ export function KineticLanding({ stats, session }: { stats: any, session: any })
                         {session ? (
                             <Link href="/profile">
                                 <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-md group cursor-pointer">
-                                    <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 group-hover:bg-indigo-500/30">
-                                        <User className="w-3 h-3" />
-                                    </div>
+                                    {session.user?.picture ? (
+                                        <img
+                                            src={session.user.picture}
+                                            alt="Profile"
+                                            className="w-6 h-6 rounded-full border border-white/20"
+                                        />
+                                    ) : (
+                                        <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center text-indigo-300 group-hover:bg-indigo-500/30">
+                                            <User className="w-3 h-3" />
+                                        </div>
+                                    )}
                                     <span className="text-sm text-white/80 group-hover:text-white font-medium">Profile</span>
                                 </div>
                             </Link>
