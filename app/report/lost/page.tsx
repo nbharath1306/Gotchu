@@ -95,8 +95,8 @@ export default function ReportLostPage() {
             <div
               key={s}
               className={`h-1 rounded-full transition-all duration-700 ease-out ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
-                  ? "w-12 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
-                  : "w-2 bg-white/10"
+                ? "w-12 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
+                : "w-2 bg-white/10"
                 }`}
             />
           ))}
@@ -253,7 +253,7 @@ export default function ReportLostPage() {
                     <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">2</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">Neural Matching Engine will trigger a push notification upon >90% confidence match.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">Neural Matching Engine will trigger a push notification upon &gt;90% confidence match.</span>
                   </li>
                 </ul>
               </div>
