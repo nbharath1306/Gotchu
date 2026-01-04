@@ -3,24 +3,19 @@
 import { motion, useScroll, useTransform } from "framer-motion";
 import { ArrowRight, Search, Shield, Zap } from "lucide-react";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { AuroraBackground } from "@/components/ui/aurora-background";
+import { TextReveal } from "@/components/ui/text-reveal";
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 export function KineticLanding({ stats }: { stats: any }) {
     const { scrollY } = useScroll();
     const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-    const y2 = useTransform(scrollY, [0, 500], [0, -150]);
     const opacity = useTransform(scrollY, [0, 300], [1, 0]);
 
     return (
-        <div className="min-h-screen bg-[#050505] overflow-x-hidden selection:bg-purple-500/30">
-            {/* Background Grid */}
-            <div className="fixed inset-0 grid-bg opacity-[0.03] pointer-events-none" />
-
+        <AuroraBackground className="min-h-screen overflow-x-hidden selection:bg-purple-500/30">
             {/* Hero Section */}
-            <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20">
-                <motion.div style={{ y: y1, opacity }} className="absolute top-1/4 -left-20 w-96 h-96 bg-purple-600/20 rounded-full blur-[120px] pointer-events-none" />
-                <motion.div style={{ y: y2, opacity }} className="absolute bottom-1/4 -right-20 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none" />
-
+            <section className="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20 z-10">
                 <div className="relative z-10 max-w-5xl mx-auto text-center space-y-8">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -32,14 +27,13 @@ export function KineticLanding({ stats }: { stats: any }) {
                         <span className="text-xs font-mono text-white/60 tracking-widest uppercase">System Online • {stats.activeReports} Active Signals</span>
                     </motion.div>
 
-                    <motion.h1
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.8, delay: 0.1 }}
-                        className="text-6xl md:text-9xl font-display font-medium text-white tracking-tighter leading-none"
-                    >
-                        Gotchu<span className="text-purple-500">.</span>
-                    </motion.h1>
+                    <div className="flex justify-center">
+                        <TextReveal
+                            text="Gotchu."
+                            className="text-6xl md:text-9xl font-display font-medium text-white tracking-tighter leading-none"
+                            gradient
+                        />
+                    </div>
 
                     <motion.p
                         initial={{ opacity: 0 }}
@@ -58,33 +52,37 @@ export function KineticLanding({ stats }: { stats: any }) {
                         transition={{ duration: 0.8, delay: 0.4 }}
                         className="flex flex-col md:flex-row items-center justify-center gap-4 mt-12"
                     >
-                        <Link href="/report/lost" className="group relative w- full md:w-64 h-24">
-                            <div className="absolute inset-0 bg-white/5 border border-white/10 rounded-2xl group-hover:bg-red-500/10 group-hover:border-red-500/30 transition-all duration-500" />
-                            <div className="relative h-full flex items-center justify-between px-8">
-                                <div className="text-left">
-                                    <div className="text-xs font-mono text-red-400 uppercase tracking-widest mb-1">Panic Mode</div>
-                                    <div className="text-2xl font-display text-white">I Lost It</div>
+                        <MagneticButton intensity={0.3}>
+                            <Link href="/report/lost" className="group relative w-full md:w-64 h-24 block">
+                                <div className="absolute inset-0 bg-white/5 border border-white/10 rounded-2xl group-hover:bg-red-500/10 group-hover:border-red-500/30 transition-all duration-500" />
+                                <div className="relative h-full flex items-center justify-between px-8">
+                                    <div className="text-left">
+                                        <div className="text-xs font-mono text-red-400 uppercase tracking-widest mb-1">Panic Mode</div>
+                                        <div className="text-2xl font-display text-white">I Lost It</div>
+                                    </div>
+                                    <ArrowRight className="text-red-400 group-hover:translate-x-1 transition-transform" />
                                 </div>
-                                <ArrowRight className="text-red-400 group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </Link>
+                            </Link>
+                        </MagneticButton>
 
-                        <Link href="/report/found" className="group relative w-full md:w-64 h-24">
-                            <div className="absolute inset-0 bg-white/5 border border-white/10 rounded-2xl group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-all duration-500" />
-                            <div className="relative h-full flex items-center justify-between px-8">
-                                <div className="text-left">
-                                    <div className="text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">Hero Mode</div>
-                                    <div className="text-2xl font-display text-white">I Found It</div>
+                        <MagneticButton intensity={0.3}>
+                            <Link href="/report/found" className="group relative w-full md:w-64 h-24 block">
+                                <div className="absolute inset-0 bg-white/5 border border-white/10 rounded-2xl group-hover:bg-emerald-500/10 group-hover:border-emerald-500/30 transition-all duration-500" />
+                                <div className="relative h-full flex items-center justify-between px-8">
+                                    <div className="text-left">
+                                        <div className="text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">Hero Mode</div>
+                                        <div className="text-2xl font-display text-white">I Found It</div>
+                                    </div>
+                                    <ArrowRight className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
                                 </div>
-                                <ArrowRight className="text-emerald-400 group-hover:translate-x-1 transition-transform" />
-                            </div>
-                        </Link>
+                            </Link>
+                        </MagneticButton>
                     </motion.div>
                 </div>
             </section>
 
             {/* Live Feed Teaser */}
-            <section className="py-32 px-4 border-t border-white/5 bg-black/50">
+            <section className="py-32 px-4 border-t border-white/5 bg-black/50 relative z-10 backdrop-blur-sm">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex items-center justify-between mb-12">
                         <h2 className="text-3xl font-display text-white">Live Signals</h2>
@@ -123,6 +121,6 @@ export function KineticLanding({ stats }: { stats: any }) {
                     </div>
                 </div>
             </section>
-        </div>
+        </AuroraBackground>
     );
 }
