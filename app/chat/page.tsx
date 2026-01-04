@@ -4,6 +4,7 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { auth0 } from "@/lib/auth0";
 import { MessageSquare, ArrowRight, Search, Zap, CheckCircle2, Circle } from "lucide-react";
+import { MatrixGrid } from "@/components/ui/matrix-grid";
 
 export default async function ChatListPage() {
   const session = await auth0.getSession();
@@ -68,128 +69,135 @@ export default async function ChatListPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAFAFA] font-sans text-gray-900">
+    <div className="min-h-screen bg-black font-sans text-white relative pt-24">
+      <MatrixGrid />
 
       {/* Header Area */}
-      <div className="bg-white border-b border-gray-100">
-        <div className="max-w-3xl mx-auto px-4 py-8 sm:px-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-xl font-bold tracking-tight text-gray-900">Inbox</h1>
-            <div className="flex items-center gap-2">
-              <span className="text-[11px] font-medium text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 uppercase tracking-wider">
-                {chats?.length || 0} Open
-              </span>
-            </div>
-          </div>
-
-          {/* Search Bar (Visual) */}
-          <div className="relative group">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400 group-hover:text-gray-500 transition-colors" />
-            </div>
-            <input
-              type="text"
-              className="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-gray-300 sm:text-sm transition-shadow shadow-sm group-hover:border-gray-300"
-              placeholder="Search messages..."
-            />
-            <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-              <span className="text-gray-400 text-xs border border-gray-200 rounded px-1.5 py-0.5">⌘K</span>
-            </div>
+      <div className="relative z-10 max-w-3xl mx-auto px-4 py-8 sm:px-6">
+        <div className="flex items-center justify-between mb-8">
+          <h1 className="text-2xl font-display font-medium tracking-tight text-white flex items-center gap-3">
+            <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+            SECURE INBOX
+          </h1>
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-mono font-bold text-white/40 bg-white/5 px-3 py-1.5 rounded-lg border border-white/10 uppercase tracking-wider">
+              {chats?.length || 0} Open Channels
+            </span>
           </div>
         </div>
-      </div>
 
-      {/* List Area */}
-      <div className="max-w-3xl mx-auto px-4 py-6 sm:px-6">
-        {(!chats || chats.length === 0) ? (
-          <div className="text-center py-24">
-            <div className="w-16 h-16 bg-gray-50 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-gray-100">
-              <MessageSquare className="h-7 w-7 text-gray-300" />
+        {/* Search Bar (Visual) */}
+        <div className="relative group mb-8">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <Search className="h-4 w-4 text-white/20 group-hover:text-white/40 transition-colors" />
+          </div>
+          <input
+            type="text"
+            className="block w-full pl-10 pr-3 py-3 border border-white/10 rounded-xl leading-5 bg-white/5 placeholder-white/20 focus:outline-none focus:ring-1 focus:ring-purple-500/50 focus:border-purple-500/50 text-sm transition-all focus:bg-white/10 text-white font-mono"
+            placeholder="Scan for communications..."
+          />
+          <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+            <span className="text-white/20 text-[10px] border border-white/10 rounded px-1.5 py-0.5 font-mono">⌘K</span>
+          </div>
+        </div>
+
+        {/* List Area */}
+        <div className="space-y-4">
+          {(!chats || chats.length === 0) ? (
+            <div className="text-center py-24 border border-dashed border-white/10 rounded-2xl bg-white/5">
+              <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6 border border-white/10">
+                <MessageSquare className="h-8 w-8 text-white/20" />
+              </div>
+              <h3 className="text-lg font-medium text-white mb-2">NO SIGNALS DETECTED</h3>
+              <p className="text-white/40 text-sm font-mono uppercase tracking-wider mb-6">Start a secure channel from the matrix.</p>
+              <Link href="/feed" className="inline-flex items-center justify-center rounded-lg text-xs font-bold font-mono uppercase tracking-wider transition-colors bg-white text-black hover:bg-white/90 h-10 px-8 py-2">
+                Access Feed
+              </Link>
             </div>
-            <h3 className="text-sm font-semibold text-gray-900">No messages yet</h3>
-            <p className="text-sm text-gray-500 mt-1 mb-6">Start a conversation from an item listing.</p>
-            <Link href="/feed" className="inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors bg-gray-900 text-white hover:bg-gray-800 h-9 px-6 py-2 shadow-sm">
-              Browse Items
-            </Link>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            {chats.map((chat: any) => {
-              const userA = Array.isArray(chat.user_a_data) ? chat.user_a_data[0] : chat.user_a_data
-              const userB = Array.isArray(chat.user_b_data) ? chat.user_b_data[0] : chat.user_b_data
-              const item = Array.isArray(chat.item) ? chat.item[0] : chat.item
-              const otherUser = userA.id === user.sub ? userB : userA
-              const isClosed = chat.status === 'CLOSED' || chat.status === 'RESOLVED'
+          ) : (
+            <div className="space-y-3">
+              {chats.map((chat: any) => {
+                const userA = Array.isArray(chat.user_a_data) ? chat.user_a_data[0] : chat.user_a_data
+                const userB = Array.isArray(chat.user_b_data) ? chat.user_b_data[0] : chat.user_b_data
+                const item = Array.isArray(chat.item) ? chat.item[0] : chat.item
+                const otherUser = userA.id === user.sub ? userB : userA
+                const isClosed = chat.status === 'CLOSED' || chat.status === 'RESOLVED'
 
-              return (
-                <Link
-                  key={chat.id}
-                  href={`/chat/${chat.id}`}
-                  className="block group relative"
-                >
-                  <div className="bg-white hover:bg-gray-50/80 border border-gray-100 hover:border-gray-200 rounded-xl p-4 transition-all duration-200 shadow-sm hover:shadow-md flex items-start gap-4">
-                    {/* Avatar */}
-                    <div className="shrink-0 relative">
-                      {otherUser.avatar_url ? (
-                        <img
-                          src={otherUser.avatar_url}
-                          alt={otherUser.full_name}
-                          className="w-12 h-12 rounded-xl object-cover border border-gray-100 shadow-sm"
-                        />
-                      ) : (
-                        <div className="w-12 h-12 rounded-xl bg-gray-50 flex items-center justify-center text-gray-500 font-semibold border border-gray-100">
-                          {otherUser.full_name?.[0] || 'U'}
-                        </div>
-                      )}
-                      {/* Status Dot */}
-                      {!isClosed && (
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                          <div className="w-2.5 h-2.5 bg-emerald-500 rounded-full ring-2 ring-white"></div>
-                        </div>
-                      )}
-                    </div>
+                return (
+                  <Link
+                    key={chat.id}
+                    href={`/chat/${chat.id}`}
+                    className="block group"
+                  >
+                    <div className="relative group bg-white/5 hover:bg-white/10 border border-white/10 hover:border-purple-500/30 rounded-xl p-4 transition-all duration-300 backdrop-blur-md overflow-hidden">
+                      {/* Hover Gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-                    {/* Content */}
-                    <div className="flex-1 min-w-0 pt-0.5">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className={`text-sm font-semibold truncate ${isClosed ? 'text-gray-500' : 'text-gray-900'}`}>
-                          {otherUser.full_name}
-                        </h3>
-                        <div className="flex items-center gap-2">
-                          {isClosed && (
-                            <span className="flex items-center gap-1 text-[10px] uppercase font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded border border-gray-100">
-                              <CheckCircle2 className="w-3 h-3" /> Resolved
-                            </span>
+                      <div className="relative flex items-start gap-4 z-10">
+                        {/* Avatar */}
+                        <div className="shrink-0 relative">
+                          {otherUser.avatar_url ? (
+                            <img
+                              src={otherUser.avatar_url}
+                              alt={otherUser.full_name}
+                              className="w-12 h-12 rounded-lg object-cover border border-white/10 shadow-lg grayscale group-hover:grayscale-0 transition-all duration-300"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 rounded-lg bg-white/10 flex items-center justify-center text-white/40 font-bold border border-white/10">
+                              {otherUser.full_name?.[0] || 'U'}
+                            </div>
                           )}
-                          <span className="text-[11px] text-gray-400 tabular-nums">
-                            {formatDistanceToNow(new Date(chat.created_at), { addSuffix: true })}
-                          </span>
+                          {/* Status Dot */}
+                          {!isClosed && (
+                            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-black rounded-full flex items-center justify-center border border-white/10">
+                              <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <h3 className={`text-sm font-medium tracking-tight truncate ${isClosed ? 'text-white/40' : 'text-white group-hover:text-purple-300 transition-colors'}`}>
+                              {otherUser.full_name}
+                            </h3>
+                            <div className="flex items-center gap-2">
+                              {isClosed && (
+                                <span className="flex items-center gap-1 text-[9px] uppercase font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
+                                  <CheckCircle2 className="w-2.5 h-2.5" /> Resolved
+                                </span>
+                              )}
+                              <span className="text-[10px] font-mono text-white/30 tabular-nums">
+                                {formatDistanceToNow(new Date(chat.created_at), { addSuffix: true })}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            <span className={`shrink-0 text-[9px] font-mono font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border ${item.type === 'LOST'
+                              ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                              : 'bg-indigo-500/10 text-indigo-400 border-indigo-500/20'
+                              }`}>
+                              {item.type}
+                            </span>
+                            <p className="text-xs text-white/50 truncate font-light">
+                              {item.title}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Hover Arrow */}
+                        <div className="self-center">
+                          <ArrowRight className="w-4 h-4 text-white/20 group-hover:text-purple-400 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all duration-300" />
                         </div>
                       </div>
-
-                      <div className="flex items-center gap-2">
-                        <span className={`shrink-0 text-[10px] font-bold tracking-wider uppercase px-1.5 py-0.5 rounded border ${item.type === 'LOST'
-                          ? 'bg-rose-50 text-rose-600 border-rose-100'
-                          : 'bg-indigo-50 text-indigo-600 border-indigo-100'
-                          }`}>
-                          {item.type}
-                        </span>
-                        <p className="text-xs text-gray-500 truncate">
-                          {item.title}
-                        </p>
-                      </div>
                     </div>
-
-                    {/* Hover Arrow */}
-                    <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 duration-200">
-                      <ArrowRight className="w-4 h-4 text-gray-400" />
-                    </div>
-                  </div>
-                </Link>
-              )
-            })}
-          </div>
-        )}
+                  </Link>
+                )
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

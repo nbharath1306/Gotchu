@@ -17,14 +17,15 @@ export default async function FeedPage() {
   if (error) {
     console.error("Error fetching items:", error);
     return (
-      <div className="min-h-screen bg-[#F2F2F2] pt-24 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto px-6">
-          <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
-            <AlertCircle className="h-6 w-6 text-red-600" />
+      <div className="min-h-screen bg-black pt-24 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-red-500/5 animate-pulse" />
+        <div className="text-center max-w-md mx-auto px-6 relative z-10">
+          <div className="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-6 border border-red-500/20 shadow-[0_0_30px_rgba(239,68,68,0.2)]">
+            <AlertCircle className="h-8 w-8 text-red-500" />
           </div>
-          <h2 className="text-xl font-display font-bold text-[#111111] mb-2">SYSTEM ERROR</h2>
-          <p className="text-[#666666] font-mono text-sm">
-            UNABLE TO RETRIEVE DATABASE RECORDS. REFRESH REQUIRED.
+          <h2 className="text-2xl font-display font-medium text-white mb-2 tracking-tight">SYSTEM FAILURE</h2>
+          <p className="text-red-400/60 font-mono text-sm tracking-widest uppercase">
+            UNABLE TO ESTABLISH UPLINK.
           </p>
         </div>
       </div>
