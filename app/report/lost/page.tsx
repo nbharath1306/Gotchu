@@ -145,10 +145,7 @@ export default function ReportLostPage() {
                     debugLogs={aiLogs}
                     workerStatus={workerStatus}
                   />
-                  {/* Scanning Line Effect */}
-                  <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
-                    <div className="w-full h-[2px] bg-indigo-500/50 shadow-[0_0_20px_#6366f1] animate-[scan_3s_ease-in-out_infinite]" />
-                  </div>
+                  {/* Internal UI handles scanning effects now */}
                 </div>
               </div>
 
