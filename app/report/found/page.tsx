@@ -154,8 +154,6 @@ export default function ReportFoundPage() {
                     onScan={classifyImage}
                     isScanning={aiIsLoading}
                     scanResult={aiResult}
-                    debugLogs={aiLogs}
-                    workerStatus={workerStatus}
                   />
                   {/* Internal UI handles scanning effects now */}
                 </div>
