@@ -74,29 +74,34 @@ export default function ReportLostPage() {
 
   return (
     <AuroraBackground className="min-h-screen">
-      <nav className="absolute top-8 left-8 z-20">
+      {/* Glass Navigation */}
+      <nav className="fixed top-6 left-6 z-50">
         <Link
           href="/"
-          className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
+          className="group flex items-center gap-3"
         >
-          <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors backdrop-blur-md">
-            <ArrowLeft className="w-4 h-4" />
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-xl border border-white/10 group-hover:bg-white/10 group-hover:border-white/20 transition-all active:scale-95 shadow-lg shadow-black/20">
+            <ArrowLeft className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
           </div>
-          <span className="text-sm font-medium tracking-widest uppercase opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            Go Back Home
-          </span>
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-sm font-medium tracking-widest uppercase text-white/50 group-hover:text-white transition-colors hidden md:block"
+          >
+            Abort
+          </motion.span>
         </Link>
       </nav>
 
-      <div className="w-full max-w-3xl relative z-10 p-6">
+      <div className="w-full max-w-3xl relative z-10 p-6 pt-24">
         {/* Cinematic Progress Stepper */}
-        <div className="flex justify-center mb-16 gap-4">
+        <div className="flex justify-center mb-12 gap-3">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`h-1 rounded-full transition-all duration-700 ease-out ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
-                ? "w-12 bg-white shadow-[0_0_15px_rgba(255,255,255,0.5)]"
-                : "w-2 bg-white/10"
+              className={`h-1.5 rounded-full transition-all duration-700 ease-out backdrop-blur-sm ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
+                ? "w-16 bg-gradient-to-r from-violet-500 to-cyan-500 shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+                : "w-3 bg-white/10"
                 }`}
             />
           ))}
