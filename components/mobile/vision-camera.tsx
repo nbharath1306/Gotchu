@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { Image as ImageIcon, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,18 +17,8 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imgSrc, setImgSrc] = useState<string | null>(null);
     const [cameraActive, setCameraActive] = useState(true);
-    const [hexRes, setHexRes] = useState<string[]>([]);
 
-    // Simulated 3D Data particles
-    useEffect(() => {
-        if (!isScanning) return;
-        const interval = setInterval(() => {
-            setHexRes(prev => [Math.random().toString(16).substring(2, 6).toUpperCase(), ...prev.slice(0, 8)]);
-        }, 100);
-        return () => clearInterval(interval);
-    }, [isScanning]);
-
-    // Haptic feedback
+    // Haptic feedback helper
     const vibrate = (pattern: number | number[]) => {
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern);
     };
@@ -36,14 +26,14 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
-            vibrate([50, 30, 50]);
+            vibrate(50);
             setImgSrc(imageSrc);
             setCameraActive(false);
 
             fetch(imageSrc)
                 .then(res => res.blob())
                 .then(blob => {
-                    const file = new File([blob], "quantum-capture.jpg", { type: "image/jpeg" });
+                    const file = new File([blob], "capture.jpg", { type: "image/jpeg" });
                     onCapture(file);
                 });
 
@@ -66,33 +56,15 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const retake = () => {
         setImgSrc(null);
         setCameraActive(true);
-        setHexRes([]);
     };
 
     const label = scanResult?.[0]?.label;
     const score = scanResult?.[0]?.score;
 
     return (
-        <div className="relative w-full aspect-[4/5] bg-black rounded-3xl overflow-hidden shadow-2xl group isolate perspective-[1200px]">
+        <div className="relative w-full aspect-[4/5] bg-black rounded-3xl overflow-hidden shadow-2xl group isolate">
 
-            {/* SVG Filter Declarations for Bloom */}
-            <svg className="absolute w-0 h-0">
-                <defs>
-                    <filter id="hologram-bloom" x="-50%" y="-50%" width="200%" height="200%">
-                        <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
-                        <feColorMatrix in="blur" type="matrix" values="0 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7" result="goo" />
-                        <feComposite in="SourceGraphic" in2="goo" operator="atop" />
-                        <feDropShadow dx="0" dy="0" stdDeviation="5" floodColor="#00ffcc" floodOpacity="0.5" />
-                    </filter>
-                    <filter id="chromatic-aberration">
-                        <feOffset in="SourceGraphic" dx="-2" dy="0" result="left" />
-                        <feOffset in="SourceGraphic" dx="2" dy="0" result="right" />
-                        <feBlend in="left" in2="right" mode="screen" />
-                    </filter>
-                </defs>
-            </svg>
-
-            {/* A. Camera Feed Layer */}
+            {/* A. Live Webcam Feed - Crystal Clear, No Overlays */}
             <div className="absolute inset-0 z-0">
                 {cameraActive && (
                     <Webcam
@@ -100,152 +72,84 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
                         videoConstraints={{ facingMode: "environment" }}
-                        className="absolute inset-0 w-full h-full object-cover opacity-90 transition-transform duration-700 ease-out group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover"
                     />
                 )}
                 {!cameraActive && imgSrc && (
                     <img src={imgSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
                 )}
-
-                {/* Cinematic Overlays */}
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(0,10,20,0.8)_100%)]" />
-                <div className="absolute inset-0 bg-gradient-to-t from-cyan-900/20 via-transparent to-purple-900/20 mix-blend-overlay" />
-                <div className="absolute inset-0 bg-[url('/grid-noise.png')] opacity-[0.05] mix-blend-plus-lighter pointer-events-none" />
             </div>
 
-            {/* B. The Holographic HUD (Z-Space) */}
-            <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between" style={{ transformStyle: 'preserve-3d' }}>
+            {/* B. Minimalist HUD Interface */}
+            <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between pointer-events-none">
 
-                {/* 1. Header: Quantum Status */}
-                <div className="flex justify-between items-start translate-z-10">
-                    <div className="bg-black/40 backdrop-blur-md border border-cyan-500/30 px-3 py-1 rounded-full flex items-center gap-3">
-                        <div className="flex gap-1" style={{ filter: 'url(#hologram-bloom)' }}>
-                            <div className="w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse" />
-                            <div className="w-1.5 h-1.5 bg-cyan-400/50 rounded-full" />
-                            <div className="w-1.5 h-1.5 bg-cyan-400/20 rounded-full" />
-                        </div>
-                        <span className="text-[10px] font-mono text-cyan-300 tracking-widest uppercase">Quantum.Link</span>
-                    </div>
-
-                    {/* Data Particles Float */}
-                    <div className="flex flex-col items-end pointer-events-none">
-                        <AnimatePresence>
-                            {isScanning && hexRes.map((hex, i) => (
-                                <motion.div
-                                    key={i}
-                                    initial={{ opacity: 0, x: 20, rotateX: 90 }}
-                                    animate={{ opacity: 1 - i * 0.1, x: 0, rotateX: 0 }}
-                                    exit={{ opacity: 0 }}
-                                    className="text-[9px] font-mono text-cyan-500/80 tracking-widest font-bold"
-                                    style={{ textShadow: '0 0 5px cyan' }}
-                                >
-                                    0x{hex}
-                                </motion.div>
-                            ))}
-                        </AnimatePresence>
+                {/* 1. Header: Subtle Status */}
+                <div className="flex justify-between items-start">
+                    <div className="bg-black/20 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
+                        <div className={`w-1.5 h-1.5 rounded-full ${isScanning ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
+                        <span className="text-[10px] font-medium text-white/90 tracking-wide uppercase">
+                            {isScanning ? 'ANALYZING' : 'READY'}
+                        </span>
                     </div>
                 </div>
 
-                {/* 2. Core: The Gyroscope */}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none perspective-[1000px]">
-                    <AnimatePresence>
-                        {isScanning ? (
-                            <motion.div
-                                initial={{ opacity: 0, scale: 0.5, z: -100 }}
-                                animate={{ opacity: 1, scale: 1, z: 0 }}
-                                exit={{ opacity: 0, scale: 1.5, filter: "blur(20px)" }}
-                                className="relative w-80 h-80 flex items-center justify-center"
-                                style={{ transformStyle: 'preserve-3d' }}
-                            >
-                                {/* Volumetric Beam */}
-                                <motion.div
-                                    animate={{ opacity: [0.2, 0.5, 0.2] }}
-                                    transition={{ duration: 2, repeat: Infinity }}
-                                    className="absolute w-1 h-96 bg-gradient-to-t from-cyan-400/0 via-cyan-400/50 to-cyan-400/0 blur-md transform -rotate-45"
-                                />
+                {/* 2. Center: Precision Reticle */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                    {/* The Framing Corners */}
+                    <div className="relative w-64 h-64 transition-all duration-500">
+                        {/* TL */}
+                        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/80 rounded-tl-lg" />
+                        {/* TR */}
+                        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/80 rounded-tr-lg" />
+                        {/* BL */}
+                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/80 rounded-bl-lg" />
+                        {/* BR */}
+                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/80 rounded-br-lg" />
 
-                                {/* Ring X */}
+                        {/* Active Scanning Line */}
+                        <AnimatePresence>
+                            {isScanning && (
                                 <motion.div
-                                    animate={{ rotateX: 360, rotateY: 45 }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                                    className="absolute inset-0 border-[2px] border-cyan-500/40 rounded-full border-t-cyan-300"
-                                    style={{ boxShadow: '0 0 20px rgba(0,255,255,0.2)' }}
-                                />
-                                {/* Ring Y */}
-                                <motion.div
-                                    animate={{ rotateY: 360, rotateX: -45 }}
-                                    transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-                                    className="absolute inset-4 border-[1px] border-purple-500/40 rounded-full border-l-purple-300 border-dashed"
-                                />
-                                {/* Ring Z */}
-                                <motion.div
-                                    animate={{ rotateZ: 360 }}
-                                    transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
-                                    className="absolute inset-12 border-[4px] border-transparent border-t-emerald-400/60 rounded-full"
-                                    style={{ filter: 'url(#hologram-bloom)' }}
-                                />
+                                    initial={{ top: "0%" }}
+                                    animate={{ top: "100%" }}
+                                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
+                                    className="absolute left-0 w-full h-[2px] bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.8)]"
+                                >
+                                    {/* Scan Trail */}
+                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-emerald-400/20 to-transparent" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </div>
 
-                                {/* The Core */}
-                                <div className="absolute w-4 h-4 bg-white rounded-full animate-ping shadow-[0_0_30px_white]" />
-                            </motion.div>
-                        ) : (
-                            cameraActive && (
-                                <div className="w-16 h-16 opacity-30 relative group-hover:opacity-60 transition-opacity">
-                                    <div className="absolute top-0 left-0 w-4 h-[1px] bg-white" />
-                                    <div className="absolute top-0 left-0 w-[1px] h-4 bg-white" />
-                                    <div className="absolute top-0 right-0 w-4 h-[1px] bg-white" />
-                                    <div className="absolute top-0 right-0 w-[1px] h-4 bg-white" />
-                                    <div className="absolute bottom-0 left-0 w-4 h-[1px] bg-white" />
-                                    <div className="absolute bottom-0 left-0 w-[1px] h-4 bg-white" />
-                                    <div className="absolute bottom-0 right-0 w-4 h-[1px] bg-white" />
-                                    <div className="absolute bottom-0 right-0 w-[1px] h-4 bg-white" />
-                                </div>
-                            )
-                        )}
-                    </AnimatePresence>
-
-                    {/* 3. Result Materialization */}
+                    {/* Result Card: Compact & Clean */}
                     <AnimatePresence>
                         {!isScanning && label && !cameraActive && (
                             <motion.div
-                                initial={{ opacity: 0, scale: 0.8, rotateX: 20 }}
-                                animate={{ opacity: 1, scale: 1, rotateX: 0 }}
-                                transition={{ type: "spring", bounce: 0.5 }}
-                                className="absolute z-20 w-3/4"
-                                style={{ transformStyle: 'preserve-3d' }}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="absolute bottom-24 bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl text-center shadow-lg pointer-events-auto"
                             >
-                                <div className="relative overflow-hidden bg-black/60 backdrop-blur-2xl border border-cyan-500/40 p-6 rounded-2xl text-center shadow-[0_0_50px_rgba(0,255,255,0.2)]">
-                                    {/* Holographic Scanline */}
-                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/10 to-transparent h-2 animate-[scan_2s_linear_infinite]" />
-
-                                    <div className="relative z-10">
-                                        <div className="inline-block px-3 py-1 mb-3 border border-cyan-500/50 rounded-full bg-cyan-900/30">
-                                            <span className="text-[10px] font-mono text-cyan-300 font-bold tracking-widest uppercase glow-text">
-                                                Identified {(score * 100).toFixed(0)}%
-                                            </span>
-                                        </div>
-                                        <h2 className="text-3xl font-display text-white capitalize drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
-                                            {label}
-                                        </h2>
-                                    </div>
-
-                                    {/* Tech Decorations */}
-                                    <div className="absolute top-0 left-0 w-2 h-2 border-t border-l border-cyan-500" />
-                                    <div className="absolute bottom-0 right-0 w-2 h-2 border-b border-r border-cyan-500" />
-                                </div>
+                                <p className="text-[10px] text-emerald-300 font-bold uppercase tracking-wider mb-1">
+                                    CONFIDENCE {(score * 100).toFixed(0)}%
+                                </p>
+                                <h2 className="text-2xl font-bold text-white capitalize">
+                                    {label}
+                                </h2>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
-                {/* 4. Controls */}
-                <div className="flex items-center justify-between mt-auto z-20 pb-2">
-                    {/* Gallery Button */}
+                {/* 3. Controls: Glass Pills */}
+                <div className="flex items-center justify-between mt-auto mx-4 pointer-events-auto">
+
+                    {/* Gallery */}
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="w-14 h-14 flex items-center justify-center rounded-full bg-white/5 backdrop-blur-md border border-white/10 hover:bg-white/10 hover:scale-105 active:scale-95 transition-all"
+                        className="w-12 h-12 flex items-center justify-center rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-white/10 active:scale-95 transition-all"
                     >
-                        <ImageIcon className="w-5 h-5 text-cyan-200/80" />
+                        <ImageIcon className="w-5 h-5 text-white" />
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -255,35 +159,25 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                         />
                     </button>
 
-                    {/* Quantum Shutter */}
+                    {/* Shutter */}
                     {cameraActive ? (
                         <button
                             onClick={capture}
-                            className="relative w-24 h-24 group cursor-pointer"
+                            className="w-20 h-20 rounded-full border-4 border-white/30 flex items-center justify-center relative group"
                         >
-                            {/* Energy Field */}
-                            <div className="absolute inset-0 bg-cyan-500/20 rounded-full blur-xl group-hover:bg-cyan-500/40 transition-all duration-500" />
-                            <div className="absolute inset-2 border-2 border-cyan-400/50 rounded-full animate-[spin_10s_linear_infinite]" />
-                            <div className="absolute inset-4 border border-purple-400/30 rounded-full animate-[spin_5s_linear_infinite_reverse]" />
-
-                            {/* Core */}
-                            <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-16 h-16 bg-white rounded-full shadow-[0_0_20px_white] group-active:scale-90 transition-transform duration-200 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-cyan-200 to-white" />
-                                </div>
-                            </div>
+                            <div className="w-16 h-16 rounded-full bg-white group-active:scale-90 transition-transform shadow-[0_0_20px_rgba(255,255,255,0.3)]" />
                         </button>
                     ) : (
                         <button
                             onClick={retake}
-                            className="w-16 h-16 flex items-center justify-center rounded-full bg-white text-black hover:scale-110 active:scale-95 transition-all shadow-[0_0_25px_rgba(255,255,255,0.5)]"
+                            className="w-12 h-12 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-95 transition-all shadow-lg"
                         >
-                            <RotateCcw className="w-6 h-6" />
+                            <RotateCcw className="w-5 h-5" />
                         </button>
                     )}
 
-                    {/* Placeholder */}
-                    <div className="w-14" />
+                    {/* Balance */}
+                    <div className="w-12" />
                 </div>
             </div>
         </div>
