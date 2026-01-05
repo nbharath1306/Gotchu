@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
-import { Image as ImageIcon, RotateCcw, ScanLine } from "lucide-react";
+import { Image as ImageIcon, RotateCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VisionCameraProps {
@@ -10,26 +10,13 @@ interface VisionCameraProps {
     onScan: (imageUrl: string) => void;
     isScanning: boolean;
     scanResult: any;
-    debugLogs?: string[];
-    workerStatus?: string;
 }
 
-export function VisionCamera({ onCapture, onScan, isScanning, scanResult, debugLogs, workerStatus }: VisionCameraProps) {
+export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: VisionCameraProps) {
     const webcamRef = useRef<Webcam>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imgSrc, setImgSrc] = useState<string | null>(null);
     const [cameraActive, setCameraActive] = useState(true);
-    const [dataStream, setDataStream] = useState<string[]>([]);
-
-    // Simulate random data stream
-    useEffect(() => {
-        if (!isScanning) return;
-        const interval = setInterval(() => {
-            const hex = Math.random().toString(16).substring(2, 8).toUpperCase();
-            setDataStream(prev => [`0x${hex}`, ...prev.slice(0, 5)]);
-        }, 150);
-        return () => clearInterval(interval);
-    }, [isScanning]);
 
     // Haptic feedback helper
     const vibrate = (pattern: number | number[]) => {
@@ -71,132 +58,116 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult, debugL
     const retake = () => {
         setImgSrc(null);
         setCameraActive(true);
-        setDataStream([]);
     };
 
     const label = scanResult?.[0]?.label;
     const score = scanResult?.[0]?.score;
 
     return (
-        <div className="relative w-full aspect-[4/5] bg-black rounded-3xl overflow-hidden border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)] group">
+        <div className="relative w-full aspect-[4/5] bg-black rounded-3xl overflow-hidden border border-white/5 shadow-2xl group isolate">
 
-            {/* A. Live Webcam Feed */}
-            {cameraActive && (
-                <Webcam
-                    audio={false}
-                    ref={webcamRef}
-                    screenshotFormat="image/jpeg"
-                    videoConstraints={{ facingMode: "environment" }}
-                    className="absolute inset-0 w-full h-full object-cover opacity-90"
-                />
-            )}
+            {/* A. Live Webcam Feed with Chromatic Aberration Effect */}
+            <div className="absolute inset-0 z-0">
+                {cameraActive && (
+                    <Webcam
+                        audio={false}
+                        ref={webcamRef}
+                        screenshotFormat="image/jpeg"
+                        videoConstraints={{ facingMode: "environment" }}
+                        className="absolute inset-0 w-full h-full object-cover opacity-80"
+                    />
+                )}
+                {!cameraActive && imgSrc && (
+                    <img src={imgSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
+                )}
+                {/* Vignette */}
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_50%,rgba(0,0,0,0.8)_100%)]" />
+                {/* Fake Chromatic/Grain Overlay */}
+                <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03] mix-blend-overlay pointer-events-none" />
+            </div>
 
-            {/* B. Captured/Uploaded Image */}
-            {!cameraActive && imgSrc && (
-                <img src={imgSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
-            )}
-
-            {/* C. Grid Overlay (Always visible but subtle) */}
-            <div className="absolute inset-0 bg-[linear-gradient(rgba(16,185,129,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(16,185,129,0.03)_1px,transparent_1px)] bg-[size:40px_40px] pointer-events-none" />
-
-            {/* D. HUD Interface */}
+            {/* B. Abstract HUD Interface */}
             <div className="absolute inset-0 z-10 flex flex-col justify-between p-6">
 
-                {/* HUD Top: Status & Worker */}
+                {/* HUD Top: Status Indicators (Minimalist) */}
                 <div className="flex justify-between items-start">
-                    <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-2 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full border border-emerald-500/30">
-                            <div className={`w-2 h-2 rounded-full ${workerStatus === 'READY' ? 'bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.8)]' : 'bg-amber-500'} animate-pulse`} />
-                            <span className="text-[10px] font-mono text-emerald-400 font-bold tracking-widest">
-                                {workerStatus || 'Sys.Check...'}
-                            </span>
-                        </div>
-                        {debugLogs && debugLogs.length > 0 && (
-                            <span className="text-[8px] font-mono text-emerald-500/60 pl-2">
-                                {">"} {debugLogs[debugLogs.length - 1]}
-                            </span>
-                        )}
+                    <div className="flex gap-1.5">
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/80 shadow-[0_0_10px_white] animate-pulse" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/40" />
+                        <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
                     </div>
-
-                    {/* Scanning Indicator (Top Right) */}
-                    <AnimatePresence>
-                        {isScanning && (
-                            <motion.div
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                className="flex flex-col items-end gap-1"
-                            >
-                                <span className="text-[10px] font-mono text-emerald-400 tracking-widest animate-pulse">PROCESSING</span>
-                                {dataStream.map((hex, i) => (
-                                    <span key={i} className="text-[8px] font-mono text-emerald-500/50 block leading-none">
-                                        {hex}
-                                    </span>
-                                ))}
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
                 </div>
 
-                {/* HUD Center: Target Lock & Scanning */}
+                {/* HUD Center: Abstract Target Lock */}
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-
-                    {/* Scanning Animation */}
                     <AnimatePresence>
-                        {isScanning && (
+                        {isScanning ? (
                             <motion.div
                                 initial={{ opacity: 0, scale: 0.8 }}
                                 animate={{ opacity: 1, scale: 1 }}
-                                exit={{ opacity: 0, scale: 1.1 }}
-                                className="relative w-64 h-64"
+                                exit={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+                                className="relative w-72 h-72 flex items-center justify-center"
                             >
-                                {/* Outer Rotating Ring */}
-                                <div className="absolute inset-0 border border-emerald-500/30 rounded-full border-t-emerald-400 border-r-transparent animate-[spin_3s_linear_infinite]" />
-                                {/* Inner Rotating Ring (Counter) */}
-                                <div className="absolute inset-8 border border-emerald-500/20 rounded-full border-b-emerald-400 border-l-transparent animate-[spin_2s_linear_infinite_reverse]" />
-                                {/* Scanning Grid Pulse */}
-                                <div className="absolute inset-0 bg-emerald-500/5 rounded-full animate-pulse" />
-                                {/* Scanning Laser Line */}
-                                <div className="absolute top-0 left-0 w-full h-full overflow-hidden rounded-full">
-                                    <div className="w-full h-1 bg-emerald-400/80 shadow-[0_0_15px_rgba(52,211,153,1)] animate-[scan_2s_ease-in-out_infinite]" />
-                                </div>
+                                {/* Complex Rotation Geometry */}
+                                <motion.div animate={{ rotate: 360 }} transition={{ duration: 10, repeat: Infinity, ease: "linear" }} className="absolute inset-0 border-[0.5px] border-cyan-400/30 rounded-full border-dashed" />
+                                <motion.div animate={{ rotate: -360 }} transition={{ duration: 15, repeat: Infinity, ease: "linear" }} className="absolute inset-8 border-[0.5px] border-purple-400/20 rounded-full border-dashed" />
+                                <motion.div animate={{ rotate: 180 }} transition={{ duration: 8, repeat: Infinity, ease: "linear" }} className="absolute inset-16 border border-emerald-400/10 rounded-full border-t-emerald-400/60" />
+
+                                {/* Central Core */}
+                                <div className="absolute w-2 h-2 bg-white rounded-full shadow-[0_0_20px_white] animate-ping" />
+
+                                {/* Radar Sweep */}
+                                <div className="absolute inset-0 bg-[conic-gradient(from_0deg,transparent_0deg,rgba(0,255,255,0.1)_360deg)] animate-[spin_2s_linear_infinite] rounded-full opacity-30" />
                             </motion.div>
+                        ) : (
+                            /* Static Passive Reticle */
+                            cameraActive && (
+                                <div className="w-12 h-12 opacity-20 relative">
+                                    <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-white" />
+                                    <div className="absolute top-0 right-0 w-3 h-3 border-t border-r border-white" />
+                                    <div className="absolute bottom-0 left-0 w-3 h-3 border-b border-l border-white" />
+                                    <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-white" />
+                                </div>
+                            )
                         )}
                     </AnimatePresence>
 
-                    {/* Result Display (Post-Scan) */}
+                    {/* Result Card: Glassmorphism */}
                     <AnimatePresence>
                         {!isScanning && label && !cameraActive && (
                             <motion.div
-                                initial={{ scale: 0.9, opacity: 0, y: 20 }}
-                                animate={{ scale: 1, opacity: 1, y: 0 }}
-                                className="relative z-20"
+                                initial={{ y: 40, opacity: 0, scale: 0.95 }}
+                                animate={{ y: 0, opacity: 1, scale: 1 }}
+                                className="absolute z-20"
                             >
-                                <div className="relative bg-black/80 backdrop-blur-xl border border-emerald-500/50 p-6 rounded-2xl text-center shadow-[0_0_50px_rgba(16,185,129,0.2)]">
-                                    <div className="absolute -top-3 -left-3 w-6 h-6 border-t-2 border-l-2 border-emerald-400" />
-                                    <div className="absolute -bottom-3 -right-3 w-6 h-6 border-b-2 border-r-2 border-emerald-400" />
+                                <div className="relative overflow-hidden bg-white/5 backdrop-blur-2xl border border-white/10 p-8 rounded-[2rem] text-center shadow-[0_0_100px_rgba(0,0,0,0.5)]">
+                                    {/* Shimmer Effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent skew-x-12 translate-x-[-100%] animate-[shimmer_2s_infinite]" />
 
-                                    <p className="text-[10px] text-emerald-400 font-mono tracking-[0.2em] uppercase mb-2 border-b border-emerald-500/20 pb-2">
-                                        Match Logic: {Math.round(score * 100)}%
-                                    </p>
-                                    <h2 className="text-3xl font-display text-white capitalize bg-gradient-to-r from-white to-emerald-200 bg-clip-text text-transparent">
-                                        {label}
-                                    </h2>
+                                    <div className="relative z-10 space-y-2">
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 mb-2">
+                                            <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)]" />
+                                            <span className="text-[10px] font-mono text-emerald-300 tracking-wider font-bold">MATCH {(score * 100).toFixed(0)}%</span>
+                                        </div>
+                                        <h2 className="text-4xl font-display text-white capitalize drop-shadow-lg tracking-tight">
+                                            {label}
+                                        </h2>
+                                    </div>
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
-                {/* HUD Bottom: Controls */}
-                <div className="flex items-center justify-between mt-auto z-20">
+                {/* HUD Bottom: Ethereal Controls */}
+                <div className="flex items-center justify-between mt-auto z-20 pb-4">
 
-                    {/* Upload */}
+                    {/* Gallery Fab */}
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="p-4 bg-black/40 backdrop-blur border border-white/10 rounded-full hover:bg-white/10 active:scale-95 transition-all"
+                        className="w-12 h-12 flex items-center justify-center rounded-full bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/5 transition-all active:scale-95 group"
                     >
-                        <ImageIcon className="w-5 h-5 text-white/80" />
+                        <ImageIcon className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -206,47 +177,32 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult, debugL
                         />
                     </button>
 
-                    {/* Shutter / Scan Button */}
+                    {/* Shutter / Orb */}
                     {cameraActive ? (
                         <button
                             onClick={capture}
-                            className="relative w-20 h-20 group"
+                            className="relative group cursor-pointer"
                         >
-                            {/* Outer Glow */}
-                            <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl group-hover:bg-emerald-500/30 transition-all" />
-                            {/* Ring */}
-                            <div className="absolute inset-0 border-2 border-emerald-500/50 rounded-full animate-[spin_10s_linear_infinite]" />
-                            {/* Core */}
-                            <div className="absolute inset-2 bg-white rounded-full shadow-[0_0_20px_white] flex items-center justify-center group-active:scale-90 transition-transform">
-                                <ScanLine className="w-8 h-8 text-black opacity-50" />
+                            <div className="relative w-24 h-24 flex items-center justify-center">
+                                {/* Ambient Glow */}
+                                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/30 to-purple-500/30 blur-2xl opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                                {/* Rotating Ring */}
+                                <div className="absolute inset-2 rounded-full border border-white/20 border-t-white/60 animate-[spin_8s_linear_infinite]" />
+                                {/* The Core Orb */}
+                                <div className="w-16 h-16 rounded-full bg-white shadow-[0_0_30px_rgba(255,255,255,0.6)] group-active:scale-90 transition-transform duration-300" />
                             </div>
                         </button>
                     ) : (
                         <button
                             onClick={retake}
-                            className="px-6 py-3 bg-white text-black font-mono text-xs font-bold tracking-widest rounded-full hover:shadow-[0_0_20px_white] transition-all flex items-center gap-2"
+                            className="w-16 h-16 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 transition-all shadow-[0_0_20px_rgba(255,255,255,0.4)]"
                         >
-                            <RotateCcw className="w-4 h-4" />
-                            RESET
+                            <RotateCcw className="w-6 h-6" />
                         </button>
                     )}
 
-                    {/* Placeholder for Balance */}
-                    <div className="w-14 h-14" />
-                </div>
-            </div>
-
-            {/* Corner Reticles (Static HUD) */}
-            <div className="absolute inset-4 pointer-events-none opacity-40">
-                <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-emerald-500" />
-                <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-emerald-500" />
-                <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-emerald-500" />
-                <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-emerald-500" />
-
-                {/* Center Crosshair small */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4 h-4">
-                    <div className="absolute top-0 left-1/2 -translate-x-1/2 h-full w-[1px] bg-emerald-500/50" />
-                    <div className="absolute top-1/2 left-0 -translate-y-1/2 w-full h-[1px] bg-emerald-500/50" />
+                    {/* Placeholder */}
+                    <div className="w-12" />
                 </div>
             </div>
         </div>
