@@ -87,29 +87,34 @@ export default function ReportFoundPage() {
 
   return (
     <AuroraBackground className="min-h-screen">
-      <nav className="absolute top-8 left-8 z-20">
+      {/* Glass Navigation */}
+      <nav className="fixed top-6 left-6 z-50">
         <Link
           href="/"
-          className="flex items-center gap-3 text-white/50 hover:text-white transition-colors group"
+          className="group flex items-center gap-3"
         >
-          <div className="p-3 rounded-full bg-white/5 border border-white/10 group-hover:bg-white/10 transition-colors backdrop-blur-md">
-            <ArrowLeft className="w-4 h-4" />
+          <div className="w-12 h-12 flex items-center justify-center rounded-full bg-black/40 backdrop-blur-xl border border-white/10 group-hover:bg-white/10 group-hover:border-white/20 transition-all active:scale-95 shadow-lg shadow-black/20">
+            <ArrowLeft className="w-5 h-5 text-white/70 group-hover:text-white transition-colors" />
           </div>
-          <span className="text-sm font-medium tracking-widest uppercase opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-            Go Back Home
-          </span>
+          <motion.span
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="text-sm font-medium tracking-widest uppercase text-white/50 group-hover:text-white transition-colors hidden md:block"
+          >
+            Abort
+          </motion.span>
         </Link>
       </nav>
 
-      <div className="w-full max-w-3xl relative z-10 p-6">
-        {/* Cinematic Progress Stepper (Emerald) */}
-        <div className="flex justify-center mb-16 gap-4">
+      <div className="w-full max-w-3xl relative z-10 p-6 pt-24">
+        {/* Cinematic Progress Stepper */}
+        <div className="flex justify-center mb-12 gap-3">
           {[1, 2, 3].map((s) => (
             <div
               key={s}
-              className={`h-1 rounded-full transition-all duration-700 ease-out ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
-                ? "w-12 bg-emerald-500 shadow-[0_0_15px_rgba(16,185,129,0.5)]"
-                : "w-2 bg-white/10"
+              className={`h-1.5 rounded-full transition-all duration-700 ease-out backdrop-blur-sm ${(s === 1 && step === "CAPTURE") || (s === 2 && step === "DETAILS") || (s === 3 && step === "SUCCESS")
+                ? "w-16 bg-gradient-to-r from-violet-500 to-cyan-500 shadow-[0_0_15px_rgba(139,92,246,0.5)]"
+                : "w-3 bg-white/10"
                 }`}
             />
           ))}
@@ -119,148 +124,99 @@ export default function ReportFoundPage() {
           {step === "CAPTURE" && (
             <motion.div
               key="capture"
-              initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
-              animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-              exit={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-              transition={{ duration: 0.5, ease: "circOut" }}
-              className="space-y-12"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+              transition={{ duration: 0.5 }}
+              className="w-full max-w-md mx-auto"
             >
-              <div className="text-center space-y-4">
-                <div className="flex justify-center">
-                  <TextReveal
-                    text="You found something!"
-                    className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
-                    delay={0.2}
-                  />
-                </div>
-                <motion.p
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.8 }}
-                  className="text-white/40 text-lg font-light"
-                >
-                  Thanks for helping. A photo makes it much easier to find the owner.
-                </motion.p>
+              <div className="text-center mb-8">
+                <TextReveal text="Found Something?" className="text-4xl font-bold text-white mb-2" />
+                <p className="text-white/50">Point the camera at the item to analyze it.</p>
               </div>
 
-              <div className="max-w-md mx-auto relative group perspective-[1000px]">
-                {/* Holographic Frame (Emerald) */}
-                <div className="absolute -inset-4 border border-emerald-500/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 scale-105" />
-                <div className="absolute -inset-1 bg-gradient-to-t from-emerald-500/20 to-transparent rounded-2xl blur-2xl opacity-20 group-hover:opacity-40 transition-opacity" />
-
-                <div className="relative transform transition-transform duration-500 group-hover:rotate-x-2 group-hover:rotate-y-2">
-                  <VisionCamera
-                    onCapture={handleCapture}
-                    onScan={classifyImage}
-                    isScanning={aiIsLoading}
-                    scanResult={aiResult}
-                  />
-                  {/* Internal UI handles scanning effects now */}
-                </div>
-              </div>
-
-              <div className="text-center">
-                <MagneticButton
-                  onClick={() => setStep("DETAILS")}
-                  className="text-sm font-medium text-slate-500 hover:text-white transition-colors"
-                >
-                  Skip photo for now
-                </MagneticButton>
-              </div>
+              <VisionCamera
+                onCapture={handleCapture}
+                onScan={(url) => {
+                  classifyImage(url);
+                }}
+                isScanning={aiIsLoading}
+                scanResult={aiLogs} // Using logs as transient result or similar
+              />
             </motion.div>
           )}
 
           {step === "DETAILS" && (
             <motion.div
               key="details"
-              initial={{ opacity: 0, x: 50, filter: "blur(10px)" }}
-              animate={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ duration: 0.6, ease: "circOut" }}
-              className="space-y-12 text-center"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              className="w-full max-w-md mx-auto"
             >
-              <div className="space-y-3 mb-12">
-                <TextReveal
-                  text="What does it look like?"
-                  className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
-                />
-                <p className="text-slate-400 text-lg">Give us a few keywords so we can match it.</p>
-              </div>
-
-              {/* If we have an image from step 1, show a small preview pill here? */}
-              {imageFile && (
-                <div className="inline-flex items-center gap-2 bg-emerald-500/10 py-1.5 px-4 rounded-full mb-6 border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span className="text-sm font-medium text-emerald-200">Photo Added</span>
+              <div className="mb-8">
+                <div className="relative w-full aspect-video rounded-3xl overflow-hidden mb-8 border border-white/10 shadow-2xl group">
+                  {imageFile && (
+                    <img src={URL.createObjectURL(imageFile)} className="w-full h-full object-cover" />
+                  )}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_#34d399]" />
+                        <span className="text-emerald-300 text-xs font-mono tracking-widest uppercase">Analysis Complete</span>
+                      </div>
+                      <h3 className="text-white font-medium text-lg">
+                        {aiResult && aiResult.length > 0 ? aiResult[0].label : "Identified Item"}
+                      </h3>
+                    </div>
+                  </div>
                 </div>
-              )}
 
-              <div className="w-full">
-                {/* Clean SmartOmnibox - Passed the AI Label from Step 1 */}
+                <div className="text-center mb-8">
+                  <h2 className="text-2xl font-bold text-white mb-2">One Last Thing.</h2>
+                  <p className="text-white/50">Add a quick note or details to help the owner.</p>
+                </div>
+
                 <SmartOmnibox
                   onSubmit={handleSmartSubmit}
-                  placeholder="I found a blue wallet..."
                   isProcessing={isSubmitting}
-                  aiLabel={aiResult && aiResult.length > 0 ? aiResult[0].label : undefined}
+                  mode="found"
                 />
               </div>
-
             </motion.div>
           )}
 
           {step === "SUCCESS" && (
             <motion.div
               key="success"
-              initial={{ opacity: 0, scale: 0.8 }}
+              initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ type: "spring", bounce: 0.5 }}
-              className="flex flex-col items-center justify-center space-y-8 max-w-lg mx-auto"
+              className="flex flex-col items-center justify-center py-20 text-center"
             >
               <KarmaBurst />
-              <div className="w-24 h-24 bg-emerald-500/10 rounded-full flex items-center justify-center shadow-[0_0_50px_rgba(16,185,129,0.3)] animate-float">
-                <CheckCircle2 className="w-12 h-12 text-emerald-500" />
+              <div className="w-24 h-24 rounded-full bg-emerald-500/20 flex items-center justify-center mb-8 border border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.3)]">
+                <CheckCircle2 className="w-10 h-10 text-emerald-400" />
               </div>
+              <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-b from-white to-white/70 mb-4">
+                Karma +100
+              </h2>
+              <p className="text-white/60 max-w-xs mx-auto mb-12 leading-relaxed">
+                You're a legend. The owner has been notified and the universe is smiling at you.
+              </p>
 
-              <div className="text-center space-y-2">
-                <h2 className="text-4xl font-display font-medium text-white">Item Logged!</h2>
-                <p className="text-emerald-400 font-medium tracking-wide mt-2">YOU'RE A HERO</p>
-              </div>
-
-              {/* What Happens Next Card */}
-              <div className="w-full bg-white/5 border border-white/10 rounded-3xl p-8 backdrop-blur-xl hover:bg-white/10 transition-colors duration-500">
-                <h3 className="text-xs font-mono text-slate-400 mb-6 uppercase tracking-widest border-b border-white/10 pb-4">Next Steps</h3>
-                <ul className="space-y-6">
-                  <li className="flex gap-4 items-start group">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
-                      <span className="text-emerald-400 text-xs font-bold">1</span>
-                    </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">We've added this to the public database [ID: {reportResult?.itemId?.slice(0, 8) || "GENERATED"}].</span>
-                  </li>
-                  <li className="flex gap-4 items-start group">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
-                      <span className="text-emerald-400 text-xs font-bold">2</span>
-                    </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">We'll let the owner know as soon as there's a match.</span>
-                  </li>
-                  <li className="flex gap-4 items-start group">
-                    <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:bg-emerald-500/40 transition-colors">
-                      <span className="text-emerald-400 text-xs font-bold">3</span>
-                    </div>
-                    <span className="text-slate-200 text-sm leading-relaxed font-medium">You earned <span className="text-emerald-400 text-shadow-emerald">+50 Karma</span> for helping out.</span>
-                  </li>
-                </ul>
-              </div>
-
-              <MagneticButton
-                onClick={() => router.push('/')}
-                className="w-full py-5 bg-white text-black font-medium rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
-              >
-                Go Home
-              </MagneticButton>
+              <Link href="/">
+                <MagneticButton className="px-10 py-4 bg-white text-black font-medium rounded-full hover:scale-105 active:scale-95 transition-transform">
+                  Return Home
+                </MagneticButton>
+              </Link>
             </motion.div>
           )}
         </AnimatePresence>
       </div>
+
+      {/* Global AI Overlay for processing states if needed */}
+      {/* <AIProcessingOverlay isVisible={isSubmitting && step === 'PROCESSING'} /> */}
+
     </AuroraBackground>
   );
 }
