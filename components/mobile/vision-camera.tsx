@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import Webcam from "react-webcam";
-import { Image as ImageIcon, RotateCcw } from "lucide-react";
+import { Image as ImageIcon, RotateCcw, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface VisionCameraProps {
@@ -17,21 +17,8 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [imgSrc, setImgSrc] = useState<string | null>(null);
     const [cameraActive, setCameraActive] = useState(true);
-    const [dataStream, setDataStream] = useState<string[]>([]);
 
-    // Simulated Intelligence Data Stream
-    useEffect(() => {
-        if (!isScanning) {
-            setDataStream([]);
-            return;
-        }
-        const interval = setInterval(() => {
-            setDataStream(prev => [Math.random().toString(16).substring(2, 8).toUpperCase(), ...prev.slice(0, 5)]);
-        }, 150);
-        return () => clearInterval(interval);
-    }, [isScanning]);
-
-    // Haptic feedback
+    // Haptic feedback helper
     const vibrate = (pattern: number | number[]) => {
         if (typeof navigator !== 'undefined' && navigator.vibrate) navigator.vibrate(pattern);
     };
@@ -39,14 +26,14 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const capture = useCallback(() => {
         const imageSrc = webcamRef.current?.getScreenshot();
         if (imageSrc) {
-            vibrate([10, 20, 10]); // Crisp haptic click
+            vibrate([10, 50, 10]); // Deep haptic thud
             setImgSrc(imageSrc);
             setCameraActive(false);
 
             fetch(imageSrc)
                 .then(res => res.blob())
                 .then(blob => {
-                    const file = new File([blob], "luminous-capture.jpg", { type: "image/jpeg" });
+                    const file = new File([blob], "nebula-capture.jpg", { type: "image/jpeg" });
                     onCapture(file);
                 });
 
@@ -57,7 +44,7 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (file) {
-            vibrate(10);
+            vibrate(20);
             const url = URL.createObjectURL(file);
             setImgSrc(url);
             setCameraActive(false);
@@ -69,16 +56,15 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
     const retake = () => {
         setImgSrc(null);
         setCameraActive(true);
-        setDataStream([]);
     };
 
     const label = scanResult?.[0]?.label;
     const score = scanResult?.[0]?.score;
 
     return (
-        <div className="relative w-full aspect-[4/5] bg-black rounded-3xl overflow-hidden shadow-2xl group isolate font-display">
+        <div className="relative w-full aspect-[4/5] bg-black rounded-[2.5rem] overflow-hidden shadow-2xl group isolate font-sans">
 
-            {/* A. Live Webcam Feed - Zero Distractions */}
+            {/* A. Live Webcam Feed */}
             <div className="absolute inset-0 z-0 bg-black">
                 {cameraActive && (
                     <Webcam
@@ -86,122 +72,124 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                         ref={webcamRef}
                         screenshotFormat="image/jpeg"
                         videoConstraints={{ facingMode: "environment" }}
-                        className="absolute inset-0 w-full h-full object-cover"
+                        className="absolute inset-0 w-full h-full object-cover opacity-90"
                     />
                 )}
                 {!cameraActive && imgSrc && (
                     <img src={imgSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
                 )}
+
+                {/* Nebula Ambience */}
+                <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/60 pointer-events-none" />
             </div>
 
-            {/* B. The Luminous Interface (Layered) */}
-            <div className="absolute inset-0 z-10 flex flex-col justify-between pointer-events-none">
+            {/* B. Deep Glass Interface */}
+            <div className="absolute inset-0 z-10 flex flex-col justify-between p-6 pointer-events-none">
 
-                {/* 1. Intelligence Layer: Top Status */}
-                <div className="pt-6 flex justify-center w-full">
+                {/* 1. Header: Status Orb */}
+                <div className="flex justify-center w-full">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={isScanning ? "scanning" : "ready"}
-                            initial={{ opacity: 0, y: -20, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                            exit={{ opacity: 0, y: 10, filter: "blur(5px)" }}
-                            className="glass-panel px-4 py-2 rounded-full flex items-center gap-3 shadow-lg"
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.9 }}
+                            className="bg-black/30 backdrop-blur-xl border border-white/10 px-5 py-2 rounded-full flex items-center gap-3 shadow-xl"
                         >
-                            <div className={`w-2 h-2 rounded-full transition-colors duration-500 ${isScanning ? 'bg-cyan-400 shadow-[0_0_10px_#22d3ee]' : 'bg-white/50'}`} />
-                            <span className="text-[11px] font-mono tracking-[0.2em] text-white/90">
-                                {isScanning ? "ANALYZING TARGET" : "SYSTEM READY"}
+                            <div className="relative flex items-center justify-center w-3 h-3">
+                                <motion.div
+                                    animate={isScanning ? { scale: [1, 1.5, 1], opacity: [0.5, 0.8, 0.5] } : { scale: 1, opacity: 0.5 }}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                    className={`absolute inset-0 rounded-full ${isScanning ? 'bg-indigo-500 blur-sm' : 'bg-white blur-[2px]'}`}
+                                />
+                                <div className={`relative w-2 h-2 rounded-full ${isScanning ? 'bg-indigo-400' : 'bg-white'}`} />
+                            </div>
+                            <span className={`text-xs font-medium tracking-wider uppercase ${isScanning ? 'text-indigo-200' : 'text-white/80'}`}>
+                                {isScanning ? "Processing" : "Ready"}
                             </span>
                         </motion.div>
                     </AnimatePresence>
                 </div>
 
-                {/* 2. The Smart Aperture (Center) */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                    {/* Reticle - Always visible but subtle */}
-                    <div className={`transition-opacity duration-300 ${isScanning ? 'opacity-0' : 'opacity-30'}`}>
-                        <div className="w-8 h-[1px] bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
-                        <div className="w-[1px] h-8 bg-white absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" />
+                {/* 2. The Nebula Aperture (Center) */}
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none px-8">
+                    {/* The Living Frame */}
+                    <div className="relative w-full aspect-square max-w-[280px]">
+
+                        {/* Gradient Border Glow */}
+                        <motion.div
+                            animate={isScanning ? {
+                                opacity: [0.3, 0.6, 0.3],
+                                rotate: [0, 180, 360],
+                            } : { opacity: 0 }}
+                            transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                            className="absolute -inset-[3px] rounded-[2.5rem] bg-gradient-to-tr from-violet-500 via-fuchsia-500 to-cyan-500 blur-xl opacity-0"
+                        />
+
+                        {/* Glass Frame */}
+                        <div className="absolute inset-0 rounded-[2.2rem] border border-white/10 shadow-[inset_0_0_40px_rgba(255,255,255,0.05)] overflow-hidden">
+                            {/* Scanning Light Sweep */}
+                            <AnimatePresence>
+                                {isScanning && (
+                                    <motion.div
+                                        initial={{ top: "-20%", opacity: 0 }}
+                                        animate={{ top: "120%", opacity: 1 }}
+                                        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                                        className="absolute left-0 right-0 h-32 bg-gradient-to-b from-transparent via-white/10 to-transparent skew-y-12 blur-md"
+                                    />
+                                )}
+                            </AnimatePresence>
+                        </div>
+
+                        {/* Corner Accents (Subtle) */}
+                        <div className="absolute top-0 left-0 w-6 h-6 border-t border-l border-white/30 rounded-tl-2xl" />
+                        <div className="absolute top-0 right-0 w-6 h-6 border-t border-r border-white/30 rounded-tr-2xl" />
+                        <div className="absolute bottom-0 left-0 w-6 h-6 border-b border-l border-white/30 rounded-bl-2xl" />
+                        <div className="absolute bottom-0 right-0 w-6 h-6 border-b border-r border-white/30 rounded-br-2xl" />
+
                     </div>
-
-                    {/* Kinetic Corners */}
-                    <motion.div
-                        initial={false}
-                        animate={isScanning ? "scanning" : "idle"}
-                        variants={{
-                            idle: { width: "16rem", height: "16rem" }, // w-64
-                            scanning: { width: "14rem", height: "14rem" } // tight lock
-                        }}
-                        transition={{ duration: 0.5, type: "spring", stiffness: 200, damping: 20 }}
-                        className="relative"
-                    >
-                        {/* TL */}
-                        <div className="absolute top-0 left-0 w-8 h-8 rounded-tl-2xl border-t-[3px] border-l-[3px] border-white drop-shadow-lg" />
-                        {/* TR */}
-                        <div className="absolute top-0 right-0 w-8 h-8 rounded-tr-2xl border-t-[3px] border-r-[3px] border-white drop-shadow-lg" />
-                        {/* BL */}
-                        <div className="absolute bottom-0 left-0 w-8 h-8 rounded-bl-2xl border-b-[3px] border-l-[3px] border-white drop-shadow-lg" />
-                        {/* BR */}
-                        <div className="absolute bottom-0 right-0 w-8 h-8 rounded-br-2xl border-b-[3px] border-r-[3px] border-white drop-shadow-lg" />
-
-                        {/* Scan Beam */}
-                        <AnimatePresence>
-                            {isScanning && (
-                                <motion.div
-                                    initial={{ top: 0, opacity: 0 }}
-                                    animate={{ top: "100%", opacity: [0, 1, 0] }}
-                                    transition={{ duration: 1.5, ease: "easeInOut", repeat: Infinity }}
-                                    className="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_20px_#22d3ee]"
-                                />
-                            )}
-                        </AnimatePresence>
-                    </motion.div>
                 </div>
 
-                {/* 3. Data Stream (Right Edge) */}
-                <div className="absolute right-4 top-1/3 flex flex-col items-end gap-1 font-mono text-[9px] text-cyan-400/70 select-none">
-                    <AnimatePresence>
-                        {dataStream.map((val, i) => (
-                            <motion.div
-                                key={i}
-                                initial={{ opacity: 0, x: 10 }}
-                                animate={{ opacity: 1 - i * 0.15, x: 0 }}
-                                exit={{ opacity: 0 }}
-                            >
-                                0x{val}
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
-
-                {/* 4. Result Card (Materialized) */}
-                <div className="absolute bottom-32 w-full flex justify-center pointer-events-auto px-6">
+                {/* 3. Result Reveal (Cinematic) */}
+                <div className="relative z-20 flex flex-col items-center justify-center min-h-[120px] mb-20 pointer-events-auto">
                     <AnimatePresence>
                         {label && !isScanning && !cameraActive && (
                             <motion.div
-                                initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                className="glass-panel w-full max-w-sm p-5 rounded-2xl flex items-center justify-between shadow-2xl border-white/20"
+                                initial={{ opacity: 0, scale: 0.9, filter: "blur(10px)" }}
+                                animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                                transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                className="flex flex-col items-center text-center"
                             >
-                                <div className="flex flex-col text-left">
-                                    <span className="text-[10px] font-mono uppercase text-cyan-300 tracking-widest mb-1">Confidence {(score * 100).toFixed(0)}%</span>
-                                    <h1 className="text-2xl text-white font-medium capitalize tracking-tight">{label}</h1>
-                                </div>
-                                <div className="w-10 h-10 rounded-full bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
-                                    <div className="w-3 h-3 bg-cyan-400 rounded-full shadow-[0_0_10px_#22d3ee]" />
-                                </div>
+                                <motion.div
+                                    initial={{ y: 20, opacity: 0 }}
+                                    animate={{ y: 0, opacity: 1 }}
+                                    transition={{ delay: 0.1 }}
+                                    className="bg-black/40 backdrop-blur-2xl px-5 py-2 rounded-full border border-white/10 mb-4 shadow-xl"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="w-3 h-3 text-fuchsia-300" />
+                                        <span className="text-xs font-medium text-fuchsia-100 uppercase tracking-widest">
+                                            {(score * 100).toFixed(0)}% Confidence
+                                        </span>
+                                    </div>
+                                </motion.div>
+
+                                <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-white to-white/70 tracking-tighter capitalize drop-shadow-2xl">
+                                    {label}
+                                </h1>
                             </motion.div>
                         )}
                     </AnimatePresence>
                 </div>
 
-                {/* 5. Control Deck (Glass) */}
-                <div className="w-full h-24 glass-panel border-t border-white/10 backdrop-blur-2xl flex items-center justify-between px-10 pointer-events-auto rounded-t-3xl">
+                {/* 4. Floating Island Controls */}
+                <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center gap-8 pointer-events-auto">
                     {/* Gallery */}
                     <button
                         onClick={() => fileInputRef.current?.click()}
-                        className="p-3 rounded-full hover:bg-white/10 transition-colors group"
+                        className="w-14 h-14 rounded-full bg-black/40 backdrop-blur-xl border border-white/10 flex items-center justify-center text-white/70 hover:bg-white/10 hover:text-white transition-all active:scale-95"
                     >
-                        <ImageIcon className="w-6 h-6 text-white/50 group-hover:text-white transition-colors" />
+                        <ImageIcon className="w-6 h-6" />
                         <input
                             ref={fileInputRef}
                             type="file"
@@ -211,30 +199,33 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                         />
                     </button>
 
-                    {/* Shutter Ring */}
+                    {/* Gradient Orb Shutter */}
                     {cameraActive ? (
                         <button
                             onClick={capture}
-                            className="w-16 h-16 rounded-full border-[3px] border-white flex items-center justify-center group active:scale-95 transition-all duration-300"
+                            className="relative w-20 h-20 rounded-full flex items-center justify-center group"
                         >
-                            <div className="w-14 h-14 rounded-full bg-white opacity-0 group-hover:opacity-10 transition-opacity" />
-                            <div className="w-12 h-12 rounded-full bg-white scale-0 group-active:scale-100 transition-transform duration-100" />
+                            {/* Outer Glow */}
+                            <div className="absolute inset-0 bg-gradient-to-tr from-violet-600 to-fuchsia-600 rounded-full opacity-0 group-hover:opacity-50 blur-xl transition-opacity duration-500" />
+                            {/* Ring */}
+                            <div className="absolute inset-0 border-[1px] border-white/20 rounded-full" />
+                            {/* Inner Orb */}
+                            <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)] group-active:scale-90 transition-transform duration-300 overflow-hidden relative">
+                                <div className="absolute inset-0 bg-gradient-to-tr from-gray-100 to-white opacity-100 group-hover:opacity-90 transition-opacity" />
+                            </div>
                         </button>
                     ) : (
                         <button
                             onClick={retake}
-                            className="w-16 h-16 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+                            className="w-14 h-14 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-white/10"
                         >
                             <RotateCcw className="w-6 h-6" />
                         </button>
                     )}
 
-                    {/* Settings / Close (Placeholder or Close) */}
-                    <div className="p-3 opacity-0 pointer-events-none">
-                        <ImageIcon className="w-6 h-6" />
-                    </div>
+                    {/* Placeholder for Balance */}
+                    <div className="w-14 h-14 opacity-0" />
                 </div>
-
             </div>
         </div>
     );
