@@ -83,40 +83,76 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
             {/* B. Minimalist HUD Interface */}
             <div className="absolute inset-0 z-10 p-6 flex flex-col justify-between pointer-events-none">
 
-                {/* 1. Header: Subtle Status */}
                 <div className="flex justify-between items-start">
-                    <div className="bg-black/20 backdrop-blur-md border border-white/10 px-3 py-1 rounded-full flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full ${isScanning ? 'bg-amber-400 animate-pulse' : 'bg-emerald-400'}`} />
-                        <span className="text-[10px] font-medium text-white/90 tracking-wide uppercase">
-                            {isScanning ? 'ANALYZING' : 'READY'}
+                    <div className="bg-black/20 backdrop-blur-md border border-white/20 px-3 py-1.5 rounded-full flex items-center gap-2.5 shadow-sm">
+                        <div className={`w-2 h-2 rounded-full ${isScanning ? 'bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.8)]' : 'bg-white/80'}`} />
+                        <span className="text-[10px] font-semibold text-white tracking-widest uppercase">
+                            {isScanning ? 'SEARCHING' : 'STANDBY'}
                         </span>
                     </div>
                 </div>
 
                 {/* 2. Center: Precision Reticle */}
                 <div className="absolute inset-0 flex items-center justify-center">
-                    {/* The Framing Corners */}
-                    <div className="relative w-64 h-64 transition-all duration-500">
-                        {/* TL */}
-                        <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white/80 rounded-tl-lg" />
-                        {/* TR */}
-                        <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white/80 rounded-tr-lg" />
-                        {/* BL */}
-                        <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white/80 rounded-bl-lg" />
-                        {/* BR */}
-                        <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white/80 rounded-br-lg" />
+                    {/* The Smart Kinetic Frame */}
+                    <div className="relative w-72 h-72">
 
-                        {/* Active Scanning Line */}
+                        {/* Corners Container - Animated */}
+                        <motion.div
+                            animate={isScanning ? { scale: 0.95 } : { scale: 1 }}
+                            transition={{ duration: 0.4, ease: "easeInOut" }}
+                            className="absolute inset-0"
+                        >
+                            {/* TL */}
+                            <div className="absolute top-0 left-0 w-12 h-12 border-t-[3px] border-l-[3px] border-white rounded-tl-2xl shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                            {/* TR */}
+                            <div className="absolute top-0 right-0 w-12 h-12 border-t-[3px] border-r-[3px] border-white rounded-tr-2xl shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                            {/* BL */}
+                            <div className="absolute bottom-0 left-0 w-12 h-12 border-b-[3px] border-l-[3px] border-white rounded-bl-2xl shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                            {/* BR */}
+                            <div className="absolute bottom-0 right-0 w-12 h-12 border-b-[3px] border-r-[3px] border-white rounded-br-2xl shadow-[0_0_15px_rgba(255,255,255,0.5)]" />
+                        </motion.div>
+
+                        {/* Pro Guides (Rule of Thirds Ticks) */}
+                        <div className="absolute inset-0 opacity-20 pointer-events-none">
+                            {/* Horizontal Ticks */}
+                            <div className="absolute top-1/3 left-0 w-2 h-[1px] bg-white" />
+                            <div className="absolute top-1/3 right-0 w-2 h-[1px] bg-white" />
+                            <div className="absolute top-2/3 left-0 w-2 h-[1px] bg-white" />
+                            <div className="absolute top-2/3 right-0 w-2 h-[1px] bg-white" />
+
+                            {/* Vertical Ticks */}
+                            <div className="absolute top-0 left-1/3 w-[1px] h-2 bg-white" />
+                            <div className="absolute bottom-0 left-1/3 w-[1px] h-2 bg-white" />
+                            <div className="absolute top-0 right-1/3 w-[1px] h-2 bg-white" />
+                            <div className="absolute bottom-0 right-1/3 w-[1px] h-2 bg-white" />
+                        </div>
+
+                        {/* Active Scanning Pulse */}
                         <AnimatePresence>
                             {isScanning && (
                                 <motion.div
-                                    initial={{ top: "0%" }}
-                                    animate={{ top: "100%" }}
-                                    transition={{ duration: 1.5, repeat: Infinity, ease: "linear", repeatType: "reverse" }}
-                                    className="absolute left-0 w-full h-[2px] bg-emerald-400 shadow-[0_0_15px_rgba(52,211,153,0.8)]"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 1.1 }}
+                                    transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                                    className="absolute inset-0 border border-cyan-400/30 rounded-3xl"
                                 >
-                                    {/* Scan Trail */}
-                                    <div className="absolute bottom-0 left-0 w-full h-12 bg-gradient-to-t from-emerald-400/20 to-transparent" />
+                                    <div className="absolute inset-0 bg-cyan-400/5 rounded-3xl blur-md" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Intelligent Scan Line */}
+                        <AnimatePresence>
+                            {isScanning && (
+                                <motion.div
+                                    initial={{ top: "10%", opacity: 0 }}
+                                    animate={{ top: "90%", opacity: 1 }}
+                                    transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut", repeatType: "reverse" }}
+                                    className="absolute left-4 right-4 h-[1px] bg-cyan-400 shadow-[0_0_20px_rgba(34,211,238,1)]"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-400 to-transparent opacity-80" />
                                 </motion.div>
                             )}
                         </AnimatePresence>
@@ -128,12 +164,12 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                             <motion.div
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="absolute bottom-24 bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl text-center shadow-lg pointer-events-auto"
+                                className="absolute bottom-24 bg-white/10 backdrop-blur-xl border border-white/20 px-6 py-4 rounded-2xl text-center shadow-2xl pointer-events-auto"
                             >
-                                <p className="text-[10px] text-emerald-300 font-bold uppercase tracking-wider mb-1">
-                                    CONFIDENCE {(score * 100).toFixed(0)}%
+                                <p className="text-[10px] text-cyan-300 font-bold uppercase tracking-widest mb-1 shadow-black/50 drop-shadow-sm">
+                                    MATCH {(score * 100).toFixed(0)}%
                                 </p>
-                                <h2 className="text-2xl font-bold text-white capitalize">
+                                <h2 className="text-2xl font-bold text-white capitalize drop-shadow-md">
                                     {label}
                                 </h2>
                             </motion.div>
