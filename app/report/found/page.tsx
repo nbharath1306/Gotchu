@@ -180,7 +180,6 @@ export default function ReportFoundPage() {
                 <SmartOmnibox
                   onSubmit={handleSmartSubmit}
                   isProcessing={isSubmitting}
-                  mode="found"
                 />
               </div>
             </motion.div>
