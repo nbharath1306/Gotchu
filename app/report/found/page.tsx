@@ -11,7 +11,7 @@ import { useWorkerAI } from "@/hooks/use-worker-ai";
 import { KarmaBurst } from "@/components/ui/karma-burst";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
-// import { MagneticButton } from "@/components/ui/magnetic-button"; // Unused
+import { MagneticButton } from "@/components/ui/magnetic-button";
 
 export default function ReportFoundPage() {
   const router = useRouter();
@@ -80,7 +80,8 @@ export default function ReportFoundPage() {
       }
     } catch (e: unknown) {
       console.error(e);
-      alert("System Error: " + e.message);
+      const errMsg = e instanceof Error ? e.message : String(e);
+      alert("System Error: " + errMsg);
       setIsSubmitting(false);
     }
   };
@@ -141,7 +142,7 @@ export default function ReportFoundPage() {
                   classifyImage(url);
                 }}
                 isScanning={aiIsLoading}
-                scanResult={aiLogs} // Using logs as transient result or similar
+                scanResult={aiResult}
               />
             </motion.div>
           )}

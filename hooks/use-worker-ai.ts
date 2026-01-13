@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { ScanResultItem } from '@/types';
 
 // Define explicit types for Worker messages to avoid 'any'
 type WorkerStatus = "STARTING" | "CREATING" | "READY" | "ALIVE" | "ERROR" | "CRASHED" | "TERMINATED";
@@ -14,7 +15,7 @@ interface WorkerMessage {
 
 export function useWorkerAI() {
     const workerRef = useRef<Worker | null>(null);
-    const [result, setResult] = useState<unknown>(null);
+    const [result, setResult] = useState<ScanResultItem[] | null>(null);
     const [embedding, setEmbedding] = useState<number[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
@@ -72,7 +73,7 @@ export function useWorkerAI() {
                     } else if (status === 'complete') {
                         addLog(`Complete: ${task}`);
                         if (task === 'vision' || !task) {
-                            setResult(event.data.output);
+                            setResult(event.data.output as ScanResultItem[]);
                         } else if (task === 'nlp') {
                             setEmbedding(event.data.output as number[]);
                         }

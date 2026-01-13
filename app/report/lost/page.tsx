@@ -66,7 +66,8 @@ export default function ReportLostPage() {
 
     } catch (e: unknown) {
       console.error(e);
-      alert("System Error: " + e.message);
+      const errMsg = e instanceof Error ? e.message : String(e);
+      alert("System Error: " + errMsg);
       setIsSubmitting(false);
       setStep("DETAILS");
     }

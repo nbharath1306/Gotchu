@@ -5,17 +5,13 @@ import Webcam from "react-webcam";
 import { Image as ImageIcon, RotateCcw, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-// Define types locally or import (using local for speed/containment)
-interface ScanResultItem {
-    label: string;
-    score: number;
-}
+import { ScanResultItem } from "@/types";
 
 interface VisionCameraProps {
     onCapture: (file: File) => void;
     onScan: (imageUrl: string) => void;
     isScanning: boolean;
-    scanResult: ScanResultItem[] | null;
+    scanResult: ScanResultItem[] | null; // Keep array type but use imported interface
 }
 
 // Ensure useEffect is used or removed
