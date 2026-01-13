@@ -249,7 +249,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       const { url } = await uploadRes.json()
 
       // 2. Send Message
-      const msgRes = await fetch("/api/message", {
+      const msgRes = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -294,7 +294,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     setTimeout(scrollToBottom, 50)
 
     try {
-      const res = await fetch("/api/message", {
+      const res = await fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ chat_id: chatId, content: content })

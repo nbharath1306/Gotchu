@@ -42,7 +42,7 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
-    @apply antialiased selection:bg-purple-500/30;
+    @apply antialiased selection:bg-purple-500/30 min-h-screen;
   }
 }
 
