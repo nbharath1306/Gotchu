@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { HolographicCard } from "@/components/ui/holographic-card";
 import { NeonBadge } from "@/components/ui/neon-badge";
 import { MatrixGrid } from "@/components/ui/matrix-grid";
+import { AuroraBackground } from "@/components/ui/aurora-background";
 
 interface ProfileUser {
   name?: string;
@@ -60,9 +61,9 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
   const safeProgress = Math.min(Math.max(progressPercent, 5), 100);
 
   return (
-    <div className="min-h-screen bg-black relative pt-24 pb-20 px-4 sm:px-6">
-      <MatrixGrid />
-      <div className="relative z-10 max-w-6xl mx-auto">
+    <AuroraBackground className="min-h-screen">
+      <MatrixGrid className="opacity-30" />
+      <div className="relative z-10 max-w-6xl mx-auto w-full pt-24 pb-20 px-4 sm:px-6">
 
         {/* Header Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
@@ -223,7 +224,7 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
         </div>
 
       </div>
-    </div>
+    </AuroraBackground>
   );
 }
 

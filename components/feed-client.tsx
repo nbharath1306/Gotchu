@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Item } from "@/types"
 import { ItemCard } from "./item-card"
 import { MatrixGrid } from "@/components/ui/matrix-grid"
+import { AuroraBackground } from "@/components/ui/aurora-background"
 import { Search, Radio, Shield, Layers, SlidersHorizontal } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
@@ -45,8 +46,8 @@ export function FeedClient({ items }: FeedClientProps) {
   })
 
   return (
-    <div className="min-h-screen bg-black relative">
-      <MatrixGrid />
+    <AuroraBackground className="min-h-screen">
+      <MatrixGrid className="opacity-50" />
       <div className="pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">
           {/* Header */}
@@ -165,6 +166,6 @@ export function FeedClient({ items }: FeedClientProps) {
           )}
         </div>
       </div>
-    </div>
+    </AuroraBackground>
   )
 }
