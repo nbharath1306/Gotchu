@@ -46,7 +46,7 @@ export function FeedClient({ items }: FeedClientProps) {
   })
 
   return (
-    <AuroraBackground className="min-h-screen">
+    <AuroraBackground className="min-h-screen justify-start">
       <MatrixGrid className="opacity-50" />
       <div className="pt-24 md:pt-32 pb-20 px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-7xl mx-auto">

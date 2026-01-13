@@ -31,12 +31,12 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth0.getSession();
-  
+
   // Sync user to Supabase if logged in
   if (session?.user) {
     await syncUser();
   }
-  
+
   return (
     <html lang="en">
       <Auth0Provider user={session?.user}>
@@ -45,7 +45,7 @@ export default async function RootLayout({
         >
           <Navbar />
           {children}
-          <Toaster />
+          <Toaster position="top-center" />
         </body>
       </Auth0Provider>
     </html>

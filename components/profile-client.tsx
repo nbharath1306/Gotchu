@@ -61,7 +61,7 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
   const safeProgress = Math.min(Math.max(progressPercent, 5), 100);
 
   return (
-    <AuroraBackground className="min-h-screen">
+    <AuroraBackground className="min-h-screen justify-start">
       <MatrixGrid className="opacity-30" />
       <div className="relative z-10 max-w-6xl mx-auto w-full pt-24 pb-20 px-4 sm:px-6">
 
