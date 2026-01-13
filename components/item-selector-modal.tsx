@@ -26,25 +26,25 @@ export function ItemSelectorModal({ isOpen, onClose, onSelect, filterType, userI
     const [search, setSearch] = useState('')
 
     useEffect(() => {
+        const fetchItems = async () => {
+            setLoading(true)
+            const supabase = createClient()
+            const { data } = await supabase
+                .from('items')
+                .select('id, title, type, created_at')
+                .eq('user_id', userId)
+                .eq('type', filterType)
+                .eq('status', 'OPEN')
+                .order('created_at', { ascending: false })
+
+            if (data) setItems(data)
+            setLoading(false)
+        }
+
         if (isOpen && userId) {
             fetchItems()
         }
-    }, [isOpen, userId])
-
-    const fetchItems = async () => {
-        setLoading(true)
-        const supabase = createClient()
-        const { data } = await supabase
-            .from('items')
-            .select('id, title, type, created_at')
-            .eq('user_id', userId)
-            .eq('type', filterType)
-            .eq('status', 'OPEN')
-            .order('created_at', { ascending: false })
-
-        if (data) setItems(data)
-        setLoading(false)
-    }
+    }, [isOpen, userId, filterType])
 
     const filteredItems = items.filter(i => i.title.toLowerCase().includes(search.toLowerCase()))
 

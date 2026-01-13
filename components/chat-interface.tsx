@@ -6,18 +6,14 @@ import { MatrixGrid } from "@/components/ui/matrix-grid"
 import { HolographicCard } from "@/components/ui/holographic-card"
 import { NeonBadge } from "@/components/ui/neon-badge"
 import {
-  Send,
   ArrowLeft,
   MoreHorizontal,
   CheckCheck,
   Check,
-  Shield,
   ShieldCheck,
   AlertCircle,
   Clock,
   Paperclip,
-  Smile,
-  Mic,
   CornerDownLeft,
   X,
   FileText,
@@ -155,6 +151,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       scrollToBottom()
     }
     // 3. Otherwise (scrolled up reading history), DO NOT scroll.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, isLoading, currentUserId]) // Removed showScrollButton dependency to avoid loops
 
   // --- HANDLERS ---
@@ -303,7 +300,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
         body: JSON.stringify({ chat_id: chatId, content: content })
       })
       if (!res.ok) toast.error("Delivery failed")
-    } catch (error) {
+    } catch {
       toast.error("Delivery failed")
     }
   }

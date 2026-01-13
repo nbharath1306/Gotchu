@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Item } from "@/types";
 import { formatDistanceToNow } from "date-fns";
-import { Trash2, ExternalLink, MapPin, Search, Filter } from "lucide-react";
+import { Trash2, ExternalLink, MapPin, Search } from "lucide-react";
 import Link from "next/link";
 import { deleteItem } from "@/app/actions";
 import { toast } from "sonner";
@@ -71,8 +71,8 @@ export function AdminItemTable({ initialItems }: AdminItemTableProps) {
                             key={f}
                             onClick={() => setFilter(f)}
                             className={`px-3 py-1.5 rounded-md text-xs font-mono font-bold transition-all whitespace-nowrap ${filter === f
-                                    ? "bg-black text-white"
-                                    : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+                                ? "bg-black text-white"
+                                : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                                 }`}
                         >
                             {f}
@@ -101,6 +101,7 @@ export function AdminItemTable({ initialItems }: AdminItemTableProps) {
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex-shrink-0">
                                                 {item.image_url ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={item.image_url} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">IMG</div>
@@ -114,7 +115,7 @@ export function AdminItemTable({ initialItems }: AdminItemTableProps) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2 py-1 rounded text-[10px] font-bold tracking-wider uppercase ${item.status === 'RESOLVED' ? 'bg-green-100 text-green-700' :
-                                                item.type === 'LOST' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
+                                            item.type === 'LOST' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'
                                             }`}>
                                             {item.status === 'RESOLVED' ? 'RESOLVED' : item.type}
                                         </span>

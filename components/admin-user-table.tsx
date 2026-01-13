@@ -67,6 +67,7 @@ export function AdminUserTable({ initialUsers }: AdminUserTableProps) {
                                         <div className="flex items-center gap-3">
                                             <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border border-gray-200">
                                                 {user.avatar_url ? (
+                                                    // eslint-disable-next-line @next/next/no-img-element
                                                     <img src={user.avatar_url} alt="" className="w-full h-full object-cover" />
                                                 ) : (
                                                     <User className="w-5 h-5 text-gray-400" />
@@ -80,8 +81,8 @@ export function AdminUserTable({ initialUsers }: AdminUserTableProps) {
                                     </td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase border ${user.role === 'ADMIN' ? 'bg-purple-50 text-purple-700 border-purple-200' :
-                                                user.role === 'MODERATOR' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                                                    'bg-gray-50 text-gray-600 border-gray-200'
+                                            user.role === 'MODERATOR' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                                                'bg-gray-50 text-gray-600 border-gray-200'
                                             }`}>
                                             {user.role === 'ADMIN' && <Shield className="w-3 h-3" />}
                                             {user.role}

@@ -1,10 +1,10 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { motion, HTMLMotionProps } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-interface MagneticButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface MagneticButtonProps extends HTMLMotionProps<"button"> {
     children: React.ReactNode;
     className?: string;
     intensity?: number; // How strong the pull is (default 0.5)
@@ -45,7 +45,7 @@ export const MagneticButton = ({
             transition={{ type: "spring", stiffness: 150, damping: 15, mass: 0.1 }}
             onMouseMove={handleMouse}
             onMouseLeave={reset}
-            {...(props as any)}
+            {...props}
         >
             {children}
         </motion.button>

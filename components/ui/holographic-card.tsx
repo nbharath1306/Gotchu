@@ -10,7 +10,7 @@ interface HolographicCardProps {
     intensity?: "low" | "medium" | "high";
 }
 
-export function HolographicCard({ children, className, intensity = "medium" }: HolographicCardProps) {
+export function HolographicCard({ children, className }: HolographicCardProps) {
     return (
         <motion.div
             initial={{ opacity: 0, scale: 0.95 }}

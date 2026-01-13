@@ -1,7 +1,7 @@
 "use client"
 
 import { AuroraBackground } from "@/components/ui/aurora-background"
-import { TextReveal } from "@/components/ui/text-reveal"
+// import { TextReveal } from "@/components/ui/text-reveal" // Unused
 import { MagneticButton } from "@/components/ui/magnetic-button"
 import { ArrowLeft, ShieldCheck } from "lucide-react"
 import Link from "next/link"
@@ -32,12 +32,12 @@ export default function LoginPage() {
         {/* Login Card */}
         <div className="glass-panel p-6 md:p-8 rounded-3xl space-y-6 border border-white/10 bg-white/5 backdrop-blur-xl">
           <MagneticButton className="w-full">
-            <a
+            <Link
               href="/api/auth/login"
               className="w-full block py-3.5 md:py-4 bg-white text-black text-center font-medium rounded-xl hover:bg-slate-200 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)] text-sm md:text-base active:scale-95 transform duration-100"
             >
               Log In / Sign Up
-            </a>
+            </Link>
           </MagneticButton>
 
           <div className="relative">

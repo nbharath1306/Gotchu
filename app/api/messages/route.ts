@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { auth0 } from '@/lib/auth0';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,7 @@ export async function GET(req: NextRequest) {
         }
 
         // Use Admin Client to bypass RLS
-        const supabase = await createAdminClient();
+        const supabase = await createServiceRoleClient();
 
         if (!supabase) {
             return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });

@@ -42,6 +42,7 @@ export function AuthButton() {
         className="flex items-center gap-2 pl-1 pr-3 py-1 rounded-full border border-[#E5E5E5] bg-white hover:border-black transition-colors duration-200 group"
       >
         {user.picture ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={user.picture}
             alt={user.name || "User"}

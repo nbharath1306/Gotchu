@@ -1,4 +1,4 @@
-import { createAdminClient, createClient } from "@/lib/supabase-server";
+import { createServiceRoleClient, createClient } from "@/lib/supabase-server";
 import { auth0 } from "@/lib/auth0";
 import { Shield, Users, Package, MessageSquare } from "lucide-react";
 import { AdminItemTable } from "@/components/admin-item-table";
@@ -9,7 +9,7 @@ export default async function AdminDashboard() {
     const user = session?.user;
 
     // Use Admin Client to fetch global stats (bypass RLS)
-    const supabase = (await createAdminClient()) || (await createClient());
+    const supabase = (await createServiceRoleClient()) || (await createClient());
 
     // Parallel Fetching
     const [

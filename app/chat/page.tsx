@@ -23,9 +23,9 @@ export default async function ChatListPage() {
     )
   }
 
-  // Use Admin Client to bypass RLS token issues
-  const { createAdminClient } = await import("@/lib/supabase-server");
-  const supabase = await createAdminClient();
+  // Use Service Role Client to bypass RLS token issues
+  const { createServiceRoleClient } = await import("@/lib/supabase-server");
+  const supabase = await createServiceRoleClient();
 
   if (!supabase) {
     return <div className="p-8 text-sm text-red-500 font-medium">System Error: Database connection failed.</div>;

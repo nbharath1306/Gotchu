@@ -1,16 +1,26 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback } from "react";
 import Webcam from "react-webcam";
 import { Image as ImageIcon, RotateCcw, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+
+// Define types locally or import (using local for speed/containment)
+interface ScanResultItem {
+    label: string;
+    score: number;
+}
 
 interface VisionCameraProps {
     onCapture: (file: File) => void;
     onScan: (imageUrl: string) => void;
     isScanning: boolean;
-    scanResult: any;
+    scanResult: ScanResultItem[] | null;
 }
+
+// Ensure useEffect is used or removed
+// import { useState, useRef, useCallback, useEffect } from "react"; 
+// -> import { useState, useRef, useCallback } from "react"; (if useEffect truly unused)
 
 export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: VisionCameraProps) {
     const webcamRef = useRef<Webcam>(null);
@@ -76,6 +86,7 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                     />
                 )}
                 {!cameraActive && imgSrc && (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img src={imgSrc} alt="Captured" className="absolute inset-0 w-full h-full object-cover" />
                 )}
 
@@ -169,7 +180,7 @@ export function VisionCamera({ onCapture, onScan, isScanning, scanResult }: Visi
                                     <div className="flex items-center gap-2">
                                         <Sparkles className="w-3 h-3 text-fuchsia-300" />
                                         <span className="text-xs font-medium text-fuchsia-100 uppercase tracking-widest">
-                                            {(score * 100).toFixed(0)}% Confidence
+                                            {((score || 0) * 100).toFixed(0)}% Confidence
                                         </span>
                                     </div>
                                 </motion.div>

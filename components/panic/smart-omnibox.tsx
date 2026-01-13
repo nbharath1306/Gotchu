@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Mic, Send, Sparkles } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -18,6 +18,7 @@ export function SmartOmnibox({ onSubmit, placeholder = "Describe the item...", i
     // Voice Recognition
     const startListening = () => {
         if (typeof window !== 'undefined' && ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
             const recognition = new SpeechRecognition();
             recognition.continuous = false;
@@ -25,6 +26,7 @@ export function SmartOmnibox({ onSubmit, placeholder = "Describe the item...", i
 
             recognition.onstart = () => setIsListening(true);
             recognition.onend = () => setIsListening(false);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             recognition.onresult = (event: any) => {
                 const transcript = event.results[0][0].transcript;
                 setQuery(prev => prev + " " + transcript);
@@ -73,8 +75,8 @@ export function SmartOmnibox({ onSubmit, placeholder = "Describe the item...", i
                         type="button"
                         onClick={startListening}
                         className={`p-3 rounded-xl transition-all ${isListening
-                                ? 'bg-red-500/20 text-red-500 animate-pulse'
-                                : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10'
+                            ? 'bg-red-500/20 text-red-500 animate-pulse'
+                            : 'bg-white/5 text-white/40 hover:text-white hover:bg-white/10'
                             }`}
                     >
                         <Mic className="w-5 h-5" />

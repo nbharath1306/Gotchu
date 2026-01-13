@@ -1,11 +1,20 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 // import { Session } from "@auth0/nextjs-auth0";
 
+interface Auth0User {
+    sub: string;
+    email?: string | null;
+    name?: string | null;
+    nickname?: string | null;
+    picture?: string | null;
+    [key: string]: unknown;
+}
+
 /**
  * Ensures the Auth0 user exists in the public.users table.
  * This should be called before any operation that requires a foreign key to users.id.
  */
-export async function ensureUserExists(supabase: SupabaseClient, user: any) {
+export async function ensureUserExists(supabase: SupabaseClient, user: Auth0User) {
     if (!user || !user.sub) {
         console.error("ensureUserExists: No user or user.sub provided", user);
         return { success: false, error: "Missing user data" };

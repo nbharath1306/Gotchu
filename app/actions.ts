@@ -1,6 +1,6 @@
 "use server"
 
-import { createClient, createAdminClient } from "@/lib/supabase-server"
+import { createClient, createServiceRoleClient } from "@/lib/supabase-server"
 import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
 import { nanoid } from "nanoid";
@@ -11,7 +11,7 @@ export async function resolveExchange(chatId: string) {
   const user = session?.user;
   if (!user) return { error: "Unauthorized" };
 
-  const adminClient = await createAdminClient();
+  const adminClient = await createServiceRoleClient();
   const supabase = adminClient || await createClient();
 
   await ensureUserExists(supabase, user);
@@ -140,7 +140,7 @@ export async function submitReportAction(formData: FormData) {
     let usingAdmin = false;
 
     // STRATEGY: Prefer Admin Client (Service Role) for guaranteed writes
-    const adminClient = await createAdminClient();
+    const adminClient = await createServiceRoleClient();
     if (adminClient) {
       supabase = adminClient;
       usingAdmin = true;
@@ -220,7 +220,7 @@ export async function startChat(itemId: string, relatedItemId?: string) {
 
   // STRATEGY: Prefer Admin Client
   let supabase;
-  const adminClient = await createAdminClient();
+  const adminClient = await createServiceRoleClient();
   if (adminClient) {
     supabase = adminClient;
   } else {
@@ -316,7 +316,7 @@ export async function deleteItem(itemId: string) {
   // Use Admin Client to ensure we can force delete (bypassing restrictive RLS if needed, though usually owner can delete)
   // But strictly, we check ownership first.
   let supabase;
-  const adminClient = await createAdminClient();
+  const adminClient = await createServiceRoleClient();
   if (adminClient) {
     supabase = adminClient;
   } else {
@@ -418,7 +418,7 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
     const finalLocation = locationMap[signal.location?.toLowerCase() || ""] || "Other";
 
     // 3. Create Item directly (Bypassing strict form schema for now to allow "Magic")
-    const adminClient = await createAdminClient();
+    const adminClient = await createServiceRoleClient();
     const supabase = adminClient || await createClient(); // Fallback
 
     await ensureUserExists(supabase, user);

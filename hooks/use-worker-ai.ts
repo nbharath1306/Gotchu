@@ -1,39 +1,56 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 
+// Define explicit types for Worker messages to avoid 'any'
+type WorkerStatus = "STARTING" | "CREATING" | "READY" | "ALIVE" | "ERROR" | "CRASHED" | "TERMINATED";
+
+interface WorkerMessage {
+    status: string;
+    task?: string;
+    file?: string;
+    progress?: number;
+    output?: unknown; // output can vary (vision vs nlp)
+    error?: string;
+}
+
 export function useWorkerAI() {
     const workerRef = useRef<Worker | null>(null);
-    const [result, setResult] = useState<any>(null);
+    const [result, setResult] = useState<unknown>(null);
     const [embedding, setEmbedding] = useState<number[] | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [logs, setLogs] = useState<string[]>([]);
 
-    const addLog = (msg: string) => setLogs(prev => [msg, ...prev].slice(0, 5));
+    const addLog = useCallback((msg: string) => {
+        setLogs((prev: string[]) => [msg, ...prev].slice(0, 5));
+    }, []);
 
     const [progress, setProgress] = useState<{ status: string; task?: string; progress?: number; file?: string } | null>(null);
     const [error, setError] = useState<string | null>(null);
-    const [workerStatus, setWorkerStatus] = useState<string>("STARTING");
+    const [workerStatus, setWorkerStatus] = useState<WorkerStatus>("READY");
 
     useEffect(() => {
         if (!workerRef.current) {
             try {
-                // Load from public folder to avoid Webpack bundling weirdness
-                setWorkerStatus("CREATING");
-                addLog("Creating Worker...");
-                workerRef.current = new Worker('/ai-worker.js', { type: "module" });
-                setWorkerStatus("READY");
+                // Initialize Worker
+                const worker = new Worker('/ai-worker.js', { type: "module" });
+                workerRef.current = worker;
 
-                workerRef.current.onerror = (err) => {
-                    const msg = err instanceof Event ? "Worker load failed (404/CORS)" : (err as any).message || String(err);
+                // addLog("Worker Created"); // Removed to avoid setState in effect warning
+
+                worker.onerror = (err) => {
+                    const msg = err instanceof Event ? "Worker load failed (404/CORS)" : (err as Error).message || String(err);
                     console.error("AI Worker Startup Error:", err);
-                    setError(msg);
-                    addLog("Worker Error: " + msg);
-                    setWorkerStatus("ERROR");
-                    setIsLoading(false);
+                    // Defer state update to avoid synchronous effect warning
+                    setTimeout(() => {
+                        setError(msg);
+                        addLog("Worker Error: " + msg);
+                        setWorkerStatus("ERROR");
+                        setIsLoading(false);
+                    }, 0);
                 };
 
-                workerRef.current.addEventListener('message', (event) => {
+                worker.addEventListener('message', (event: MessageEvent<WorkerMessage>) => {
                     const { status, task } = event.data;
-                    console.log("Worker Message:", status);
+                    // console.log("Worker Message:", status); // Reduced noise
 
                     if (status === 'init_alive') {
                         addLog("Worker Alive Signal Received");
@@ -46,19 +63,18 @@ export function useWorkerAI() {
                     }
 
                     if (status === 'progress') {
-                        const { file, progress } = event.data;
-                        if (progress !== undefined) {
-                            // Only log sporadic progress to avoid spam
-                            if (Math.round(progress) % 10 === 0) addLog(`Progress: ${Math.round(progress)}%`);
+                        const { file, progress: p } = event.data;
+                        if (p !== undefined) {
+                            if (Math.round(p) % 10 === 0) addLog(`Progress: ${Math.round(p)}%`);
                         }
-                        setProgress({ status: 'loading', task, file, progress });
+                        setProgress({ status: 'loading', task, file, progress: p });
                         setIsLoading(true);
                     } else if (status === 'complete') {
                         addLog(`Complete: ${task}`);
                         if (task === 'vision' || !task) {
                             setResult(event.data.output);
                         } else if (task === 'nlp') {
-                            setEmbedding(event.data.output);
+                            setEmbedding(event.data.output as number[]);
                         }
                         setProgress(null);
                         setIsLoading(false);
@@ -70,11 +86,15 @@ export function useWorkerAI() {
                         setProgress(null);
                     }
                 });
-            } catch (e: any) {
+            } catch (e: unknown) {
+                const errMsg = e instanceof Error ? e.message : String(e);
                 console.error("Worker Init Failed", e);
-                setError("Worker Init Failed: " + e.message);
-                addLog("Crash: " + e.message);
-                setWorkerStatus("CRASHED");
+                // Defer state update
+                setTimeout(() => {
+                    setError("Worker Init Failed: " + errMsg);
+                    addLog("Crash: " + errMsg);
+                    setWorkerStatus("CRASHED");
+                }, 0);
             }
         }
 
@@ -86,7 +106,7 @@ export function useWorkerAI() {
                 setWorkerStatus("TERMINATED");
             }
         };
-    }, []);
+    }, [addLog]); // Added addLog to inputs (it's memoized)
 
     const classifyImage = useCallback((imageUrl: string) => {
         addLog("Classify Requested");
@@ -102,13 +122,14 @@ export function useWorkerAI() {
             console.log("Posting message to worker...");
             workerRef.current.postMessage({ type: 'classify', payload: imageUrl });
             addLog("Message Posted to Worker");
-        } catch (e: any) {
+        } catch (e: unknown) {
+            const errMsg = e instanceof Error ? e.message : String(e);
             console.error("PostMessage Failed", e);
-            setError("PostMessage Failed: " + e.message);
+            setError("PostMessage Failed: " + errMsg);
             addLog("PostMessage Crash");
             setIsLoading(false);
         }
-    }, []);
+    }, [addLog]);
 
     const embedText = useCallback((text: string) => {
         if (workerRef.current) {

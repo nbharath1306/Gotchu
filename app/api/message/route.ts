@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { nanoid } from 'nanoid';
 import { auth0 } from '@/lib/auth0';
 import { ensureUserExists } from '@/lib/users';
-import { createAdminClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Use Admin Client for reliable writes (bypassing Auth0 token RLS issues)
-    const supabase = await createAdminClient();
+    const supabase = await createServiceRoleClient();
 
     if (!supabase) {
       return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });

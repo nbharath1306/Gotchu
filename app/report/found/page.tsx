@@ -11,7 +11,7 @@ import { useWorkerAI } from "@/hooks/use-worker-ai";
 import { KarmaBurst } from "@/components/ui/karma-burst";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
-import { MagneticButton } from "@/components/ui/magnetic-button";
+// import { MagneticButton } from "@/components/ui/magnetic-button"; // Unused
 
 export default function ReportFoundPage() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function ReportFoundPage() {
   const [reportResult, setReportResult] = useState<{ itemId: string } | null>(null);
 
   // AI State
-  const { classifyImage, embedText, result: aiResult, embedding: nlpEmbedding, isLoading: aiIsLoading, logs: aiLogs, workerStatus } = useWorkerAI();
+  const { classifyImage, result: aiResult, embedding: nlpEmbedding, isLoading: aiIsLoading, logs: aiLogs } = useWorkerAI();
 
   const handleCapture = (file: File) => {
     setImageFile(file);
@@ -58,7 +58,7 @@ export default function ReportFoundPage() {
       }
 
       // 2. Text Embedding (if needed)
-      let embedding = nlpEmbedding;
+      const embedding = nlpEmbedding;
       if (!embedding && text) {
         // Just in case we want to generate it on the fly, but useWorkerAI usually does this.
         // For this demo, we assume the hook handles it or we skip it.
@@ -78,7 +78,7 @@ export default function ReportFoundPage() {
         alert("Error: " + result.error);
         setIsSubmitting(false);
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       alert("System Error: " + e.message);
       setIsSubmitting(false);
@@ -157,7 +157,8 @@ export default function ReportFoundPage() {
               <div className="mb-8">
                 <div className="relative w-full aspect-video rounded-3xl overflow-hidden mb-8 border border-white/10 shadow-2xl group">
                   {imageFile && (
-                    <img src={URL.createObjectURL(imageFile)} className="w-full h-full object-cover" />
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={URL.createObjectURL(imageFile)} className="w-full h-full object-cover" alt="Captured Item" />
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-6">
                     <div>
@@ -200,7 +201,7 @@ export default function ReportFoundPage() {
                 Karma +100
               </h2>
               <p className="text-white/60 max-w-xs mx-auto mb-12 leading-relaxed">
-                You're a legend. The owner has been notified and the universe is smiling at you.
+                You&apos;re a legend. The owner has been notified and the universe is smiling at you.
               </p>
 
               <Link href="/">

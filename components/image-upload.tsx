@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react"
 import { createClient } from "@/lib/supabase"
-import { Upload, X, Check, Loader2, ImageIcon } from "lucide-react"
+import { Upload, X } from "lucide-react"
 import { toast } from "sonner"
 import { nanoid } from "nanoid"
 
@@ -81,9 +81,10 @@ export function ImageUpload({ onUploadComplete, onUploadStart, className = "" }:
             onUploadComplete(publicUrl)
             toast.success("Image uploaded successfully")
 
-        } catch (error: any) {
+        } catch (error: unknown) {
+            const msg = error instanceof Error ? error.message : String(error)
             console.error("Upload failed:", error)
-            toast.error("Upload failed: " + error.message)
+            toast.error("Upload failed: " + msg)
             setPreview(null)
             if (fileInputRef.current) fileInputRef.current.value = ""
         } finally {
@@ -142,6 +143,7 @@ export function ImageUpload({ onUploadComplete, onUploadStart, className = "" }:
                     )}
 
                     <div className="relative aspect-video bg-[#F2F2F2] overflow-hidden">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                             src={preview}
                             alt="Preview"

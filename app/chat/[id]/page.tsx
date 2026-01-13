@@ -20,9 +20,9 @@ export default async function ChatPage({ params }: ChatPageProps) {
     redirect("/login")
   }
 
-  // Use Admin Client to bypass RLS token issues
-  const { createAdminClient } = await import("@/lib/supabase-server");
-  const supabase = await createAdminClient();
+  // Use Service Role Client to bypass RLS token issues
+  const { createServiceRoleClient } = await import("@/lib/supabase-server");
+  const supabase = await createServiceRoleClient();
 
   if (!supabase) {
     console.error("Critical: Admin client failed to initialize.");

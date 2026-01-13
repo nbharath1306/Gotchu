@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { auth0 } from '@/lib/auth0';
 import { nanoid } from 'nanoid';
 
@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'File too large (Max 50MB)' }, { status: 400 });
         }
 
-        const supabase = await createAdminClient();
+        const supabase = await createServiceRoleClient();
         if (!supabase) return NextResponse.json({ error: 'Server Config Error' }, { status: 500 });
 
         // Generate path: chat-uploads/SANITIZED_USER_ID/RANDOM_FILENAME

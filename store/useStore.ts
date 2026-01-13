@@ -1,8 +1,16 @@
 import { create } from 'zustand'
 
+interface User {
+  id: string;
+  email?: string | null;
+  name?: string | null;
+  picture?: string | null;
+  [key: string]: unknown;
+}
+
 interface AppState {
-  user: any | null
-  setUser: (user: any | null) => void
+  user: User | null
+  setUser: (user: User | null) => void
 }
 
 export const useStore = create<AppState>((set) => ({

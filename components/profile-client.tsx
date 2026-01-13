@@ -76,6 +76,7 @@ export function ProfileClient({ user, profile, items }: ProfileClientProps) {
               <div className="relative">
                 <div className="relative z-10">
                   {user.picture ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={user.picture}
                       alt={user.name || "Profile"}

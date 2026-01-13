@@ -6,10 +6,10 @@ import { AuthButton } from "@/components/auth-button"
 import {
     ArrowRight,
     ArrowUpRight,
-    CheckCircle2,
-    Users,
-    Clock,
-    Trophy
+    // CheckCircle2,
+    // Users,
+    // Clock,
+    // Trophy
 } from "lucide-react"
 
 // Stagger animation variants
@@ -175,7 +175,7 @@ export function LandingPageClient({ stats }: LandingPageProps) {
                     >
                         <div className="relative z-10 max-w-3xl">
                             <h2 className="text-4xl md:text-6xl font-display font-bold mb-6 tracking-tight text-white">
-                                WE'VE GOT YOU.
+                                WE&apos;VE GOT YOU.
                             </h2>
                             <p className="text-lg text-gray-400 mb-8 max-w-xl">
                                 Join {stats.totalUsers > 1 ? stats.totalUsers : "thousands of"} students helping each other keep safe. Your item is likely already found.

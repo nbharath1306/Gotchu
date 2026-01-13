@@ -30,7 +30,7 @@ export function ContactButton({ itemId, relatedItemId, label = "CONTACT OWNER" }
         toast.success("Starting chat...")
         router.push(`/chat/${result.chatId}`)
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to start chat:", error)
       toast.error("Something went wrong. Please try again.")
     } finally {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createAdminClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 import { auth0 } from '@/lib/auth0';
 
 export async function POST(req: NextRequest) {
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
         }
 
-        const supabase = await createAdminClient();
+        const supabase = await createServiceRoleClient();
         if (!supabase) {
             return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
         }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase-server';
+import { createServiceRoleClient } from '@/lib/supabase-server';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -7,7 +7,10 @@ export async function GET(req: NextRequest) {
   if (!id || typeof id !== 'string' || id.trim() === '') {
     return NextResponse.json({ error: 'Invalid item ID' }, { status: 400 });
   }
-  const supabase = await createClient();
+  const supabase = await createServiceRoleClient();
+  if (!supabase) {
+    return NextResponse.json({ error: 'Database connection failed' }, { status: 500 });
+  }
   const { data: item, error } = await supabase
     .from('items')
     .select('*')

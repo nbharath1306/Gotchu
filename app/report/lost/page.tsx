@@ -18,7 +18,7 @@ export default function ReportLostPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
 
   // AI State
-  const { classifyImage, result: aiResult, isLoading: aiIsLoading, logs: aiLogs, workerStatus } = useWorkerAI();
+  const { classifyImage, result: aiResult, isLoading: aiIsLoading } = useWorkerAI();
 
   const handleCapture = (file: File) => {
     setImageFile(file);
@@ -64,7 +64,7 @@ export default function ReportLostPage() {
         setStep("DETAILS");
       }
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e);
       alert("System Error: " + e.message);
       setIsSubmitting(false);
@@ -119,7 +119,7 @@ export default function ReportLostPage() {
               className="space-y-12"
             >
               <div className="text-center space-y-4">
-                <div className="flex justify-center">
+                <div className="text-center">
                   <TextReveal
                     text="Tell us what you lost."
                     className="text-4xl md:text-5xl font-display font-medium text-white tracking-tighter justify-center"
@@ -132,7 +132,7 @@ export default function ReportLostPage() {
                   transition={{ delay: 0.8 }}
                   className="text-white/40 text-lg font-light"
                 >
-                  Take a deep breath. A photo helps us search, but it's okay if you don't have one.
+                  Take a deep breath. A photo helps us search, but it&apos;s okay if you don&apos;t have one.
                 </motion.p>
               </div>
 
@@ -154,7 +154,7 @@ export default function ReportLostPage() {
 
               <div className="text-center">
                 <MagneticButton onClick={() => setStep("DETAILS")} className="text-sm text-white/40 hover:text-white underline decoration-dashed underline-offset-4 cursor-pointer">
-                  I don't have a photo
+                  I don&apos;t have a photo
                 </MagneticButton>
               </div>
             </motion.div>
@@ -237,7 +237,7 @@ export default function ReportLostPage() {
               </div>
 
               <div className="text-center space-y-2">
-                <h2 className="text-4xl font-display font-medium text-white">We've started the search.</h2>
+                <h2 className="text-4xl font-display font-medium text-white">We&apos;ve started the search.</h2>
                 <p className="text-emerald-400/80 tracking-wide font-mono text-sm">NOTIFICATIONS ACTIVE</p>
               </div>
 
@@ -255,7 +255,7 @@ export default function ReportLostPage() {
                     <div className="w-6 h-6 rounded-full bg-indigo-500/20 flex items-center justify-center shrink-0 group-hover:bg-indigo-500/40 transition-colors">
                       <span className="text-indigo-400 text-xs font-bold">2</span>
                     </div>
-                    <span className="text-slate-300 text-sm leading-relaxed">If someone finds something similar, we'll alert you immediately.</span>
+                    <span className="text-slate-300 text-sm leading-relaxed">If someone finds something similar, we&apos;ll alert you immediately.</span>
                   </li>
                 </ul>
               </div>

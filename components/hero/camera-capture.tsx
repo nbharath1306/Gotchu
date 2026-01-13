@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Camera, Image as ImageIcon, X } from "lucide-react";
-import { motion } from "framer-motion";
+import { Camera, X } from "lucide-react";
+// import { motion } from "framer-motion"; // Unused
 
 interface CameraCaptureProps {
     onCapture: (file: File) => void;
@@ -39,6 +39,7 @@ export function CameraCapture({ onCapture }: CameraCaptureProps) {
 
             {preview ? (
                 <div className="relative w-full h-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={preview} alt="Captured" className="w-full h-full object-cover" />
                     <button
                         onClick={(e) => { e.stopPropagation(); clear(); }}

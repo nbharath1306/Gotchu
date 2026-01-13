@@ -7,10 +7,31 @@ import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
 import { MagneticButton } from "@/components/ui/magnetic-button";
 
-export function KineticLanding({ stats, session }: { stats: any, session: any }) {
+// Define Interfaces
+interface Stats {
+    activeReports: number;
+    recoveredCount?: number;
+    avgResponse?: string;
+    totalUsers?: number;
+}
+
+interface User {
+    picture?: string;
+    name?: string;
+}
+
+interface Session {
+    user?: User;
+}
+
+export function KineticLanding({ stats, session }: { stats: Stats, session: Session | null }) {
     const { scrollY } = useScroll();
-    const y1 = useTransform(scrollY, [0, 500], [0, 200]);
-    const opacity = useTransform(scrollY, [0, 300], [1, 0]);
+    // const y1 = useTransform(scrollY, [0, 500], [0, 200]); // Unused
+    // const opacity = useTransform(scrollY, [0, 300], [1, 0]); // Unused
+
+    // To silence unused variable warnings if you really want to keep hooks called:
+    useTransform(scrollY, [0, 500], [0, 200]);
+    useTransform(scrollY, [0, 300], [1, 0]);
 
     return (
         <AuroraBackground className="min-h-screen overflow-x-hidden selection:bg-purple-500/30">
@@ -29,6 +50,7 @@ export function KineticLanding({ stats, session }: { stats: any, session: any })
                             <Link href="/profile">
                                 <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 transition-colors backdrop-blur-md group cursor-pointer">
                                     {session.user?.picture ? (
+                                        // eslint-disable-next-line @next/next/no-img-element
                                         <img
                                             src={session.user.picture}
                                             alt="Profile"
@@ -83,7 +105,7 @@ export function KineticLanding({ stats, session }: { stats: any, session: any })
                     >
                         The high-frequency recovery network for DSU.
                         <br />
-                        <span className="text-white/80">Don't just report it. Broadcast it.</span>
+                        <span className="text-white/80">Don&apos;t just report it. Broadcast it.</span>
                     </motion.p>
 
                     <motion.div

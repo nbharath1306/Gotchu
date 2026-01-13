@@ -7,8 +7,8 @@ import {
     CreditCard,
     Key,
     HelpCircle,
-    MapPin,
-    Calendar,
+    // MapPin,
+    // Calendar,
     Camera,
     CheckCircle2,
     ArrowLeft,
@@ -73,7 +73,7 @@ export function ReportWizard({ type }: WizardProps) {
         setStep(s => Math.max(s - 1, 1))
     }
 
-    const updateField = (field: keyof ReportType, value: any) => {
+    const updateField = (field: keyof ReportType, value: string | undefined) => {
         setFormData(prev => ({ ...prev, [field]: value }))
     }
 
@@ -166,7 +166,7 @@ export function ReportWizard({ type }: WizardProps) {
                                     ].map((cat) => (
                                         <button
                                             key={cat.val}
-                                            onClick={() => updateField("category", cat.val as any)}
+                                            onClick={() => updateField("category", cat.val as "Electronics" | "ID" | "Keys" | "Other")}
                                             className={`p-6 border text-left transition-all duration-200 flex flex-col gap-3 group
                         ${formData.category === cat.val
                                                     ? "border-black bg-black text-white"
@@ -202,7 +202,7 @@ export function ReportWizard({ type }: WizardProps) {
                                             {["Innovation_Labs", "Canteen", "Bus_Bay", "Library", "Hostels", "Other"].map((loc) => (
                                                 <button
                                                     key={loc}
-                                                    onClick={() => updateField("location", loc as any)}
+                                                    onClick={() => updateField("location", loc)}
                                                     className={`px-3 py-3 border text-xs font-mono uppercase tracking-wide truncate transition-all
                             ${formData.location === loc
                                                             ? "border-black bg-black text-white"
