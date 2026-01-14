@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "dependencies": {
     "@auth0/nextjs-auth0": "^4.13.2",
     "@hookform/resolvers": "^5.2.2",
