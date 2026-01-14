@@ -1,52 +1,58 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-display: var(--font-inter-tight), system-ui, sans-serif;
-  --font-mono: var(--font-space-mono), monospace;
+@layer base {
+  :root {
+    --font-display: var(--font-inter-tight), system-ui, sans-serif;
+    --font-mono: var(--font-space-mono), monospace;
 
-  /* Project AURA Palette */
-  --color-background: #000000;
-  /* True Obsidian */
-  --color-foreground: #ffffff;
+    /* Project AURA Palette */
+    --background: 0 0% 0%;
+    /* #000000 */
+    --foreground: 0 0% 100%;
+    /* #ffffff */
 
-  --color-card: #09090b;
-  --color-card-foreground: #ffffff;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-  --color-popover: #09090b;
-  --color-popover-foreground: #ffffff;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-  --color-primary: #6366f1;
-  /* Indigo */
-  --color-primary-foreground: #ffffff;
+    --primary: 243.4 75.4% 58.6%;
+    --primary-foreground: 210 40% 98%;
 
-  --color-secondary: #27272a;
-  --color-secondary-foreground: #ffffff;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-  --color-muted: #18181b;
-  --color-muted-foreground: #71717a;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-  --color-accent: #27272a;
-  --color-accent-foreground: #ffffff;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
 
-  --color-border: #27272a;
-  --color-input: #27272a;
-  --color-ring: #6366f1;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
 
-  --radius: 0.75rem;
+    --radius: 0.75rem;
+
+    --color-background: #000000;
+    --color-foreground: #ffffff;
+  }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-display);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    @apply antialiased selection:bg-indigo-500/30 selection:text-indigo-200 min-h-screen;
+    @apply bg-background text-foreground antialiased selection:bg-indigo-500/30 selection:text-indigo-200 min-h-screen font-display;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
