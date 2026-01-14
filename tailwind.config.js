@@ -96,6 +96,6 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [require("tailwindcss-animate"), require("mini-svg-data-uri")],
 }
 
