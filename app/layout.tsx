@@ -41,7 +41,7 @@ export default async function RootLayout({
     <html lang="en">
       <Auth0Provider user={session?.user}>
         <body
-          className={`${interTight.variable} ${spaceMono.variable} antialiased bg-[#F2F2F2] text-black selection:bg-black selection:text-white`}
+          className={`${interTight.variable} ${spaceMono.variable} antialiased bg-background text-foreground`}
         >
           <Navbar />
           {children}
