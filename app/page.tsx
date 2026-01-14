@@ -1,4 +1,5 @@
-import { KineticLanding } from "@/components/landing/kinetic-landing";
+// import { KineticLanding } from "@/components/landing/kinetic-landing";
+import { AuraHero } from "@/components/landing/aura-hero";
 import { createClient } from "@/lib/supabase-server";
 import { auth0 } from "@/lib/auth0";
 
@@ -22,11 +23,11 @@ export default async function Home() {
   const stats = {
     activeReports: openCount || 0,
     recoveredCount: resolvedCount || 0,
-    avgResponse: "~12m",
+    // avgResponse: "~12m", 
     totalUsers: usersCount || 0
   };
 
   return (
-    <KineticLanding stats={stats} session={session} />
+    <AuraHero stats={stats} session={session} />
   );
 }

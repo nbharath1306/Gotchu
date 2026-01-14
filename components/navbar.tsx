@@ -30,11 +30,11 @@ export function Navbar() {
   return (
     <>
       {/* Desktop Top Bar */}
-      <nav className="nav-topbar hidden md:flex fixed top-0 left-0 right-0 z-50 bg-[var(--bg-paper)]/90 backdrop-blur-md border-b border-[var(--border-default)] h-16 items-center px-6 justify-between">
+      <nav className="nav-topbar hidden md:flex fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-white/10 h-16 items-center px-6 justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-3">
-          <span className="font-display text-xl font-bold tracking-tight text-[#111111]">GOTCHU</span>
-          <span className="pill-tag">BETA</span>
+          <span className="font-display text-xl font-bold tracking-tight text-white">GOTCHU</span>
+          <span className="px-2 py-0.5 rounded-full bg-purple-500/20 text-[10px] font-mono font-bold text-purple-300 border border-purple-500/30">BETA</span>
         </Link>
 
         {/* Center Nav Items */}
@@ -44,8 +44,8 @@ export function Navbar() {
             return (
               <Link key={item.href} href={item.href}>
                 <div className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 flex items-center gap-2 ${isActive
-                  ? "bg-[#111111] text-white"
-                  : "text-[#666666] hover:text-[#111111] hover:bg-[#FFFFFF]"
+                  ? "bg-white/10 text-white"
+                  : "text-white/60 hover:text-white hover:bg-white/5"
                   }`}>
                   <item.icon className="w-5 h-5" />
                   {item.label}
@@ -62,18 +62,18 @@ export function Navbar() {
       </nav>
 
       {/* Mobile Bottom Bar */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[#FFFFFF] border-t border-[#E5E5E5] pb-safe">
+      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-background/90 backdrop-blur-xl border-t border-white/10 pb-safe">
         <div className="flex justify-around items-center h-16 px-2">
           {navItems.map((item) => {
             const isActive = pathname === item.href
             return (
               <Link key={item.href} href={item.href} className="flex-1">
                 <div className="flex flex-col items-center justify-center gap-1 py-2">
-                  <div className={`p-1.5 rounded-full transition-colors ${isActive ? "bg-[#111111] text-white" : "text-[#666666]"
+                  <div className={`p-1.5 rounded-full transition-colors ${isActive ? "bg-white/10 text-white" : "text-white/60"
                     }`}>
                     <item.icon className="w-5 h-5" strokeWidth={2} />
                   </div>
-                  <span className="text-[10px] font-medium text-[#666666]">{item.label}</span>
+                  <span className={`text-[10px] font-medium ${isActive ? "text-white" : "text-white/60"}`}>{item.label}</span>
                 </div>
               </Link>
             )
