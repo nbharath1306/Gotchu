@@ -27,6 +27,8 @@ export default function ReportLostPage() {
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const [reportResult, setReportResult] = useState<{ itemId: string } | null>(null);
+
   const handleSubmit = async (text: string) => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -57,6 +59,7 @@ export default function ReportLostPage() {
       const result = await submitNeuralReport(text, finalImageUrl, "LOST", undefined, aiLabel);
 
       if (result.success && result.itemId) {
+        setReportResult({ itemId: result.itemId });
         setStep("SUCCESS");
       } else {
         alert("Signal jammed: " + result.error);
@@ -261,11 +264,19 @@ export default function ReportLostPage() {
                 </ul>
               </div>
 
+              <Link href={reportResult ? `/item/${reportResult.itemId}/matches` : '/feed'}>
+                <MagneticButton
+                  className="w-full mb-4 py-5 bg-indigo-500 text-white font-medium rounded-2xl hover:bg-indigo-600 transition-all active:scale-95 shadow-[0_0_30px_rgba(99,102,241,0.4)]"
+                >
+                  View Potential Matches
+                </MagneticButton>
+              </Link>
+
               <MagneticButton
                 onClick={() => router.push('/')}
-                className="w-full py-5 bg-white text-black font-medium rounded-2xl hover:bg-slate-200 transition-all active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.2)]"
+                className="w-full py-5 bg-white/5 border border-white/10 text-white/60 font-medium rounded-2xl hover:bg-white/10 hover:text-white transition-all active:scale-95"
               >
-                Go Home
+                Return Home
               </MagneticButton>
             </motion.div>
           )}

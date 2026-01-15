@@ -205,8 +205,13 @@ export default function ReportFoundPage() {
                 You&apos;re a legend. The owner has been notified and the universe is smiling at you.
               </p>
 
+              <Link href={reportResult ? `/item/${reportResult.itemId}/matches` : '/feed'}>
+                <MagneticButton className="px-10 py-4 mb-4 bg-emerald-500 text-black font-medium rounded-full hover:scale-105 active:scale-95 transition-transform shadow-[0_0_30px_rgba(16,185,129,0.4)]">
+                  Scan for Matches
+                </MagneticButton>
+              </Link>
               <Link href="/">
-                <MagneticButton className="px-10 py-4 bg-white text-black font-medium rounded-full hover:scale-105 active:scale-95 transition-transform">
+                <MagneticButton className="px-10 py-4 bg-white/10 text-white font-medium rounded-full hover:bg-white/20 transition-all">
                   Return Home
                 </MagneticButton>
               </Link>
