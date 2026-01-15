@@ -21,18 +21,25 @@ const categoryEmojis: Record<string, string> = {
   Other: "📦",
 }
 
-async function fetchItem(id: string): Promise<Item | null> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || ""}/api/item?id=${id}`)
-  if (!res.ok) return null
-  const data = await res.json()
-  if (data.error) return null
-  return data.item as Item
-}
+import { createClient } from "@/lib/supabase-server"
+
+// Removed fetchItem in favor of direct DB access
+
 
 export default async function ItemDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!id) notFound()
-  const item = await fetchItem(id)
+
+  const supabase = await createClient()
+  const { data: item, error } = await supabase
+    .from('items')
+    .select('*')
+    .eq('id', id)
+    .single()
+
+  if (error) {
+    console.error("Error fetching item:", error)
+  }
 
   if (!item) {
     return (

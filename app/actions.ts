@@ -5,11 +5,12 @@ import { auth0 } from "@/lib/auth0";
 import { revalidatePath } from "next/cache"
 import { nanoid } from "nanoid";
 import { ensureUserExists } from "@/lib/users";
+import { ActionResponse } from "@/types";
 
-export async function resolveExchange(chatId: string) {
+export async function resolveExchange(chatId: string): Promise<ActionResponse> {
   const session = await auth0.getSession();
   const user = session?.user;
-  if (!user) return { error: "Unauthorized" };
+  if (!user) return { success: false, error: "Unauthorized" };
 
   const adminClient = await createServiceRoleClient();
   const supabase = adminClient || await createClient();
@@ -23,7 +24,7 @@ export async function resolveExchange(chatId: string) {
     .eq('id', chatId)
     .single();
 
-  if (chatError || !chat) return { error: "Chat not found" };
+  if (chatError || !chat) return { success: false, error: "Chat not found" };
 
   const itemA = chat.item as any; // Type casting for convenience in raw sql response
   const itemB = chat.related as any;
@@ -38,7 +39,7 @@ export async function resolveExchange(chatId: string) {
   const isOwnerB = itemB?.user_id === user.sub;
 
   if (!isOwnerA && !isOwnerB) {
-    return { error: "You are not a participant in this exchange." };
+    return { success: false, error: "You are not a participant in this exchange." };
   }
 
   // 3. Resolve Both Items
@@ -50,7 +51,7 @@ export async function resolveExchange(chatId: string) {
     .update({ status: 'RESOLVED' })
     .in('id', itemsToResolve);
 
-  if (updateError) return { error: "Failed to update items." };
+  if (updateError) return { success: false, error: "Failed to update items." };
 
   // 4. Award Karma
   // Who gets Karma? The finder.
@@ -89,13 +90,13 @@ export async function createItem(data: {
   bounty_text?: string,
   user_id: string
 }) {
-  return { error: "Deprecated: use submitReportAction" }
+  return { success: false, error: "Deprecated: use submitReportAction" }
 }
 
 
 import { ReportSchema } from "@/lib/schemas";
 
-export async function submitReportAction(formData: FormData) {
+export async function submitReportAction(formData: FormData): Promise<ActionResponse<{ itemId: string }>> {
   console.log("submitReportAction started");
   try {
     // 1. Authentication
@@ -104,14 +105,14 @@ export async function submitReportAction(formData: FormData) {
       session = await auth0.getSession();
     } catch (authError) {
       console.error("Auth0 getSession error:", authError);
-      return { error: "Authentication failed" };
+      return { success: false, error: "Authentication failed" };
     }
 
     const user = session?.user;
 
     if (!user) {
       console.log("No user found in session");
-      return { error: "Unauthorized" }
+      return { success: false, error: "Unauthorized" }
     }
     console.log("User authenticated:", user.sub);
 
@@ -130,7 +131,7 @@ export async function submitReportAction(formData: FormData) {
 
     if (!validationResult.success) {
       const firstError = validationResult.error.issues[0].message;
-      return { error: firstError };
+      return { success: false, error: firstError };
     }
 
     const val = validationResult.data;
@@ -164,7 +165,7 @@ export async function submitReportAction(formData: FormData) {
     const syncResult = await ensureUserExists(supabase, user);
     if (!syncResult.success) {
       console.error("Failed to sync user to database:", syncResult.error);
-      return { error: `User Sync Failed: ${syncResult.error}. (Admin: ${usingAdmin})` };
+      return { success: false, error: `User Sync Failed: ${syncResult.error}. (Admin: ${usingAdmin})` };
     }
 
     console.log("Inserting item into database...");
@@ -188,11 +189,11 @@ export async function submitReportAction(formData: FormData) {
 
     if (insertError) {
       console.error("Insert error:", insertError)
-      return { error: "Database error: " + insertError.message }
+      return { success: false, error: "Database error: " + insertError.message }
     }
 
     if (!newItem || !newItem.id) {
-      return { error: "Failed to create item: No ID returned." }
+      return { success: false, error: "Failed to create item: No ID returned." }
     }
 
     console.log("Item created successfully:", newItem.id);
@@ -203,19 +204,19 @@ export async function submitReportAction(formData: FormData) {
       console.error("revalidatePath error:", revalidateError);
     }
 
-    return { success: true, itemId: newItem.id }
+    return { success: true, data: { itemId: newItem.id } }
   } catch (e: any) {
     console.error("CRITICAL ERROR in submitReportAction:", e)
-    return { error: "Server error: " + (e.message || "Unknown error") }
+    return { success: false, error: "Server error: " + (e.message || "Unknown error") }
   }
 }
 
-export async function startChat(itemId: string, relatedItemId?: string) {
+export async function startChat(itemId: string, relatedItemId?: string): Promise<ActionResponse<{ chatId: string }>> {
   const session = await auth0.getSession();
   const user = session?.user;
 
   if (!user) {
-    return { error: "Unauthorized" }
+    return { success: false, error: "Unauthorized" }
   }
 
   // STRATEGY: Prefer Admin Client
@@ -239,11 +240,11 @@ export async function startChat(itemId: string, relatedItemId?: string) {
     .single()
 
   if (itemError || !item) {
-    return { error: "Item not found" }
+    return { success: false, error: "Item not found" }
   }
 
   if (item.user_id === user.sub) {
-    return { error: `You cannot chat with yourself. (ItemOwner: ${item.user_id}, You: ${user.sub})` }
+    return { success: false, error: `You cannot chat with yourself. (ItemOwner: ${item.user_id}, You: ${user.sub})` }
   }
 
   // 1.5 Verify Related Item (if provided)
@@ -255,15 +256,15 @@ export async function startChat(itemId: string, relatedItemId?: string) {
       .single();
 
     if (!relatedItem) {
-      return { error: "Related item not found" };
+      return { success: false, error: "Related item not found" };
     }
 
     if (relatedItem.user_id !== user.sub) {
-      return { error: "You can only link items you reported." };
+      return { success: false, error: "You can only link items you reported." };
     }
 
     if (relatedItem.type === item.type) {
-      return { error: `Cannot link two ${item.type} items. Must link LOST with FOUND.` };
+      return { success: false, error: `Cannot link two ${item.type} items. Must link LOST with FOUND.` };
     }
   }
 
@@ -276,7 +277,7 @@ export async function startChat(itemId: string, relatedItemId?: string) {
     .single()
 
   if (existingChat) {
-    return { chatId: existingChat.id }
+    return { success: true, data: { chatId: existingChat.id } }
   }
 
   // 3. Create new chat with unique id AND related item
@@ -295,22 +296,22 @@ export async function startChat(itemId: string, relatedItemId?: string) {
 
   if (createError) {
     console.error("Create chat error:", createError)
-    return { error: "Failed to create chat" }
+    return { success: false, error: "Failed to create chat" }
   }
 
-  return { chatId: newChat.id }
+  return { success: true, data: { chatId: newChat.id } }
 }
 
 export async function resolveMatch(chatId: string) {
-  return { error: "Deprecated: Use POST /api/chat/close instead." }
+  return { success: false, error: "Deprecated: Use POST /api/chat/close instead." }
 }
 
-export async function deleteItem(itemId: string) {
+export async function deleteItem(itemId: string): Promise<ActionResponse> {
   const session = await auth0.getSession();
   const user = session?.user;
 
   if (!user) {
-    return { error: "Unauthorized" }
+    return { success: false, error: "Unauthorized" }
   }
 
   // Use Admin Client to ensure we can force delete (bypassing restrictive RLS if needed, though usually owner can delete)
@@ -333,7 +334,7 @@ export async function deleteItem(itemId: string) {
     .single()
 
   if (fetchError || !item) {
-    return { error: "Item not found" }
+    return { success: false, error: "Item not found" }
   }
 
   // Check Admin Role from DB
@@ -346,7 +347,7 @@ export async function deleteItem(itemId: string) {
   const isAdmin = dbUser?.role === 'ADMIN' || (!!user.email && ["n.bharath3430@gmail.com", "amazingakhil2006@gmail.com"].includes(user.email));
 
   if (item.user_id !== user.sub && !isAdmin) {
-    return { error: "You can only delete your own items" }
+    return { success: false, error: "You can only delete your own items" }
   }
 
   // 3. Manual Cascade: Delete linked chats/messages first
@@ -374,7 +375,7 @@ export async function deleteItem(itemId: string) {
 
   if (deleteError) {
     console.error("Delete item error:", deleteError)
-    return { error: `Delete failed: ${deleteError.message} (${deleteError.code})` }
+    return { success: false, error: `Delete failed: ${deleteError.message} (${deleteError.code})` }
   }
 
   revalidatePath('/feed')
@@ -385,12 +386,12 @@ export async function deleteItem(itemId: string) {
 }
 import { NeuralParser } from "@/lib/neural/parser";
 
-export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST", embedding?: number[], aiHint?: string) {
+export async function submitNeuralReport(query: string, imageUrl?: string, reportType: "LOST" | "FOUND" = "LOST", embedding?: number[], aiHint?: string): Promise<ActionResponse<{ itemId: string }>> {
   try {
     const session = await auth0.getSession();
     const user = session?.user;
 
-    if (!user) return { error: "Unauthorized" };
+    if (!user) return { success: false, error: "Unauthorized" };
 
     // 1. Parse the input (with AI Hint!)
     const signal = NeuralParser.parse(query, aiHint);
@@ -440,7 +441,7 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
       if (timeSince < 60000) { // 60 seconds window
         console.log("Duplicate submission detected. Returning existing item.", recentItem.id);
         revalidatePath('/feed');
-        return { success: true, itemId: recentItem.id };
+        return { success: true, data: { itemId: recentItem.id } };
       }
     }
 
@@ -466,10 +467,10 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
     if (error) throw new Error(error.message);
 
     revalidatePath('/feed');
-    return { success: true, itemId };
+    return { success: true, data: { itemId } };
 
   } catch (e: any) {
     console.error("Neural Submit Error:", e);
-    return { error: e.message };
+    return { success: false, error: e.message };
   }
 }

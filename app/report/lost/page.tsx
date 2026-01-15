@@ -59,8 +59,8 @@ export default function ReportLostPage() {
       // Static import used instead of dynamic to prevent chunk loading errors
       const result = await submitNeuralReport(text, finalImageUrl, "LOST", undefined, aiLabel);
 
-      if (result.success && result.itemId) {
-        setReportResult({ itemId: result.itemId });
+      if (result.success && result.data?.itemId) {
+        setReportResult({ itemId: result.data.itemId });
         setStep("SUCCESS");
       } else {
         alert("Signal jammed: " + result.error);

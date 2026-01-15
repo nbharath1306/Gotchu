@@ -70,8 +70,8 @@ export default function ReportFoundPage() {
       // Static import
       const result = await submitNeuralReport(text, finalImageUrl, "FOUND", undefined, aiLabel);
 
-      if (result.success && result.itemId) {
-        setReportResult({ itemId: result.itemId });
+      if (result.success && result.data?.itemId) {
+        setReportResult({ itemId: result.data.itemId });
         setStep("SUCCESS");
       } else {
         alert("Error: " + result.error);

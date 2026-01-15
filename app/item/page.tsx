@@ -89,9 +89,9 @@ export default function ItemPageClient() {
       const res = await startChat(id, myItemId)
       if (res.error) {
         toast.error(res.error)
-      } else if (res.chatId) {
+      } else if (res.data?.chatId) {
         toast.success("Connection established!")
-        router.push(`/chat/${res.chatId}`)
+        router.push(`/chat/${res.data.chatId}`)
       }
     } catch (e) {
       toast.error("Failed to connect")

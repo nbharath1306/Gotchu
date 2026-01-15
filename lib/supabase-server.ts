@@ -1,4 +1,5 @@
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+// import { Database } from './database.types'
 
 // Use anon key for user-facing requests, and pass Auth0 JWT for RLS
 export const createClient = async (jwt?: string) => {

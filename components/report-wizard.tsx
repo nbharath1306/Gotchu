@@ -98,7 +98,11 @@ export function ReportWizard({ type }: WizardProps) {
             toast.success("We are now scanning for matches...")
             // Redirect after a short delay for calmness
             setTimeout(() => {
-                router.push(`/item/${result.itemId}/matches`)
+                if (result.data?.itemId) {
+                    router.push(`/item/${result.data.itemId}/matches`)
+                } else {
+                    router.push('/feed') // Fallback
+                }
             }, 1500)
         }
     }

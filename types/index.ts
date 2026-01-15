@@ -33,3 +33,9 @@ export interface User {
   karma_points: number;
   created_at: string;
 }
+
+export interface ActionResponse<T = any> {
+  success: boolean;
+  data?: T;
+  error?: string;
+}

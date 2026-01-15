@@ -22,13 +22,13 @@ export function ContactButton({ itemId, relatedItemId, label = "CONTACT OWNER" }
       const result = await startChat(itemId, relatedItemId)
       console.log("[ContactButton] startChat result:", result)
 
-      if (result.error) {
+      if (!result.success || result.error) {
         toast.error(result.error)
         // If "You cannot chat with yourself" (meaning you ARE the owner but UI didn't catch it), redirect to dashboard?
         // But for now just show error.
-      } else if (result.chatId) {
+      } else if (result.data?.chatId) {
         toast.success("Starting chat...")
-        router.push(`/chat/${result.chatId}`)
+        router.push(`/chat/${result.data.chatId}`)
       }
     } catch (error: unknown) {
       console.error("Failed to start chat:", error)
