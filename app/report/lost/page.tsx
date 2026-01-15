@@ -11,6 +11,7 @@ import { useWorkerAI } from "@/hooks/use-worker-ai";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { submitNeuralReport } from "@/app/actions";
 
 export default function ReportLostPage() {
   const router = useRouter();
@@ -55,7 +56,7 @@ export default function ReportLostPage() {
       }
 
       const aiLabel = aiResult && aiResult.length > 0 ? aiResult[0].label : undefined;
-      const { submitNeuralReport } = await import("@/app/actions");
+      // Static import used instead of dynamic to prevent chunk loading errors
       const result = await submitNeuralReport(text, finalImageUrl, "LOST", undefined, aiLabel);
 
       if (result.success && result.itemId) {

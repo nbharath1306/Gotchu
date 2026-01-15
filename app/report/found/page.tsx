@@ -12,6 +12,7 @@ import { KarmaBurst } from "@/components/ui/karma-burst";
 import { AuroraBackground } from "@/components/ui/aurora-background";
 import { TextReveal } from "@/components/ui/text-reveal";
 import { MagneticButton } from "@/components/ui/magnetic-button";
+import { submitNeuralReport } from "@/app/actions";
 
 export default function ReportFoundPage() {
   const router = useRouter();
@@ -66,9 +67,7 @@ export default function ReportFoundPage() {
 
       // 3. Submit
       const aiLabel = aiResult && aiResult.length > 0 ? aiResult[0].label : undefined;
-      const { submitNeuralReport } = await import("@/app/actions");
-
-      // Found items might need location. For now undefined.
+      // Static import
       const result = await submitNeuralReport(text, finalImageUrl, "FOUND", undefined, aiLabel);
 
       if (result.success && result.itemId) {
