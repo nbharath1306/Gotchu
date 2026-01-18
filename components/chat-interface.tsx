@@ -1,10 +1,9 @@
 "use client"
 
 import { useEffect, useState, useRef } from "react"
+import Image from "next/image"
 import { toast } from "sonner"
 import { MatrixGrid } from "@/components/ui/matrix-grid"
-import { HolographicCard } from "@/components/ui/holographic-card"
-import { NeonBadge } from "@/components/ui/neon-badge"
 import {
   ArrowLeft,
   MoreHorizontal,
@@ -20,7 +19,6 @@ import {
   Download,
   Camera,
   Image as ImageIcon,
-  File,
   Lock
 } from "lucide-react"
 import { format } from "date-fns"
@@ -131,7 +129,7 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
     fetchMessages()
     const interval = setInterval(fetchMessages, 2000)
     return () => clearInterval(interval)
-  }, [chatId])
+  }, [chatId, router])
 
   // Smart Scroll Effect
   useEffect(() => {
@@ -196,9 +194,10 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
       }
 
       setIsActionsOpen(false);
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error(e)
-      toast.error(e.message || "Failed to process request");
+      const message = e instanceof Error ? e.message : "Failed to process request";
+      toast.error(message);
     } finally {
       setIsConfirmModalOpen(false)
       setIsProcessing(false)
@@ -262,8 +261,9 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
 
       if (!msgRes.ok) throw new Error('Send failed')
 
-    } catch (error: any) {
-      toast.error(error.message || "Failed to send file")
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Failed to send file"
+      toast.error(message)
       setMessages(prev => prev.filter(m => m.id !== optimisticId)) // Rollback optimistic
     } finally {
       setIsUploading(false)
@@ -327,9 +327,11 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 ${isGrouped && !isOwn ? 'rounded-tl-2xl' : ''}
             `}>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-sm z-10 pointer-events-none mix-blend-overlay" />
-          <img
+          <Image
             src={msg.media_url || ''}
             alt="Sent image"
+            width={280}
+            height={200}
             className="block max-w-[280px] w-full h-auto object-cover rounded-lg relative z-0"
           />
         </div>
@@ -407,8 +409,8 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
             <ArrowLeft className="w-5 h-5 stroke-[1.5]" />
           </Link>
           <div className="flex items-center gap-3 min-w-0">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold tracking-tight shrink-0 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] ${otherUser.avatar_url ? 'bg-black' : getRandomColor(otherUser.full_name || 'U')}`}>
-              {otherUser.avatar_url ? <img src={otherUser.avatar_url} className="w-full h-full rounded-xl object-cover" alt="" /> : otherUser.full_name?.[0]}
+            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold tracking-tight shrink-0 border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.05)] overflow-hidden relative ${otherUser.avatar_url ? 'bg-black' : getRandomColor(otherUser.full_name || 'U')}`}>
+              {otherUser.avatar_url ? <Image src={otherUser.avatar_url} fill className="object-cover" alt="" /> : otherUser.full_name?.[0]}
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
@@ -537,13 +539,13 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                             {/* Logic: If Own -> user.picture; If Other -> otherUser.avatar_url; Else -> Initials */}
                             {isOwn ? (
                               user?.picture ? (
-                                <img src={user.picture} alt="Me" className="w-full h-full object-cover opacity-80" />
+                                <Image src={user.picture} alt="Me" fill className="object-cover opacity-80" />
                               ) : (
                                 <div className="w-full h-full bg-white/10 text-white flex items-center justify-center text-[10px] font-bold">ME</div>
                               )
                             ) : (
                               otherUser.avatar_url ? (
-                                <img src={otherUser.avatar_url} alt={otherUser.full_name} className="w-full h-full object-cover opacity-80" />
+                                <Image src={otherUser.avatar_url} alt={otherUser.full_name} fill className="object-cover opacity-80" />
                               ) : (
                                 <div className={`w-full h-full flex items-center justify-center text-[10px] font-bold ${getRandomColor(otherUser.full_name || 'U')}`}>
                                   {otherUser.full_name?.[0]}

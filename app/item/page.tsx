@@ -1,6 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 // import { ContactButton } from "@/components/contact-button" // Deprecated for inline logic
 import type { Item } from "@/types"
@@ -100,9 +101,12 @@ export default function ItemPageClient() {
 
   useEffect(() => {
     if (!id) {
-      setError("No item ID provided in URL.")
-      setLoading(false)
-      return
+      // Delay state update to avoid synchronous render warning
+      const t = setTimeout(() => {
+        setError("No item ID provided in URL.")
+        setLoading(false)
+      }, 0)
+      return () => clearTimeout(t)
     }
     fetch(`/api/item?id=${id}`)
       .then(res => res.json())
@@ -175,10 +179,11 @@ export default function ItemPageClient() {
                 <div className="glass-panel p-2 rounded-3xl overflow-hidden relative transform transition-transform duration-700 group-hover:rotate-x-2 group-hover:rotate-y-2">
                   {item.image_url ? (
                     <div className="aspect-square relative rounded-2xl overflow-hidden bg-black/20">
-                      <img
+                      <Image
                         src={item.image_url}
                         alt={item.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
                       />
                       {/* Scanline Overlay */}
                       <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-50 pointer-events-none mix-blend-overlay" />

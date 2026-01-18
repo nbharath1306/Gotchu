@@ -34,7 +34,7 @@ export interface User {
   created_at: string;
 }
 
-export interface ActionResponse<T = any> {
+export interface ActionResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;

@@ -26,8 +26,8 @@ export async function resolveExchange(chatId: string): Promise<ActionResponse> {
 
   if (chatError || !chat) return { success: false, error: "Chat not found" };
 
-  const itemA = chat.item as any; // Type casting for convenience in raw sql response
-  const itemB = chat.related as any;
+  const itemA = Array.isArray(chat.item) ? chat.item[0] : chat.item;
+  const itemB = Array.isArray(chat.related) ? chat.related[0] : chat.related;
 
   // 2. Verify Ownership (Must be one of the involved parties)
   // Actually, usually the "Loser" (Creator of Lost Item) should confirm receipt.
@@ -205,9 +205,10 @@ export async function submitReportAction(formData: FormData): Promise<ActionResp
     }
 
     return { success: true, data: { itemId: newItem.id } }
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
     console.error("CRITICAL ERROR in submitReportAction:", e)
-    return { success: false, error: "Server error: " + (e.message || "Unknown error") }
+    return { success: false, error: "Server error: " + errorMessage }
   }
 }
 
@@ -397,7 +398,7 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
     const signal = NeuralParser.parse(query, aiHint);
 
     // 2. Map to Enum values (Simple heuristics for now)
-    const categoryMap: any = {
+    const categoryMap: Record<string, string> = {
       "electronics": "Electronics",
       "keys": "Keys",
       "id / wallet": "ID",
@@ -406,7 +407,7 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
     };
 
     // Schema demands: "Innovation_Labs", "Canteen", "Bus_Bay", "Library", "Hostels", "Other"
-    const locationMap: any = {
+    const locationMap: Record<string, string> = {
       "innovation_labs": "Innovation_Labs",
       "canteen": "Canteen",
       "bus_bay": "Bus_Bay",
@@ -469,8 +470,9 @@ export async function submitNeuralReport(query: string, imageUrl?: string, repor
     revalidatePath('/feed');
     return { success: true, data: { itemId } };
 
-  } catch (e: any) {
+  } catch (e: unknown) {
+    const errorMessage = e instanceof Error ? e.message : "Unknown error";
     console.error("Neural Submit Error:", e);
-    return { success: false, error: e.message };
+    return { success: false, error: errorMessage };
   }
 }

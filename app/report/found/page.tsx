@@ -6,7 +6,7 @@ import { VisionCamera } from "@/components/mobile/vision-camera";
 import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
 import { useWorkerAI } from "@/hooks/use-worker-ai";
 import { KarmaBurst } from "@/components/ui/karma-burst";
 import { AuroraBackground } from "@/components/ui/aurora-background";
@@ -15,13 +15,12 @@ import { MagneticButton } from "@/components/ui/magnetic-button";
 import { submitNeuralReport } from "@/app/actions";
 
 export default function ReportFoundPage() {
-  const router = useRouter();
   const [step, setStep] = useState<"CAPTURE" | "DETAILS" | "SUCCESS" | "PROCESSING">("CAPTURE");
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [reportResult, setReportResult] = useState<{ itemId: string } | null>(null);
 
   // AI State
-  const { classifyImage, result: aiResult, embedding: nlpEmbedding, isLoading: aiIsLoading, logs: aiLogs } = useWorkerAI();
+  const { classifyImage, result: aiResult, embedding: nlpEmbedding, isLoading: aiIsLoading } = useWorkerAI();
 
   const handleCapture = (file: File) => {
     setImageFile(file);
