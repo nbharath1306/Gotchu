@@ -327,13 +327,17 @@ export default function ChatInterface({ chatId, currentUserId, otherUser, itemTi
                 ${isGrouped && !isOwn ? 'rounded-tl-2xl' : ''}
             `}>
           <div className="absolute inset-0 bg-white/5 backdrop-blur-sm z-10 pointer-events-none mix-blend-overlay" />
-          <Image
-            src={msg.media_url || ''}
-            alt="Sent image"
-            width={280}
-            height={200}
-            className="block max-w-[280px] w-full h-auto object-cover rounded-lg relative z-0"
-          />
+          {msg.media_url ? (
+            <Image
+              src={msg.media_url}
+              alt="Sent image"
+              width={280}
+              height={200}
+              className="block max-w-[280px] w-full h-auto object-cover rounded-lg relative z-0"
+            />
+          ) : (
+            <div className="w-[200px] h-[150px] flex items-center justify-center bg-white/10 text-white/40 text-xs">Image Error</div>
+          )}
         </div>
       )
     }
