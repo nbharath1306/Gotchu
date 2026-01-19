@@ -1,99 +1,82 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-  --font-display: var(--font-inter-tight), system-ui, sans-serif;
-  --font-mono: var(--font-space-mono), monospace;
+@layer base {
+  :root {
+    --font-display: var(--font-inter-tight), system-ui, sans-serif;
+    --font-mono: var(--font-space-mono), monospace;
 
-  /* Extending colors directly in the theme */
-  --color-background: #020202;
-  --color-foreground: #ffffff;
+    /* Project AURA Color Palette - Configured in tailwind.config.js usually, 
+       but defining vars here for potential non-tailwind usage if needed, 
+       though primarily Tailwind v3 uses config. 
+       Keeping these for redundancy or specific variable usage in code. */
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
 
-  --color-card: #0a0a0a;
-  --color-card-foreground: #ffffff;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
 
-  --color-popover: #0a0a0a;
-  --color-popover-foreground: #ffffff;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
 
-  --color-primary: #8b5cf6;
-  --color-primary-foreground: #ffffff;
+    --primary: 243.4 75.4% 58.6%;
+    --primary-foreground: 210 40% 98%;
 
-  --color-secondary: #27272a;
-  --color-secondary-foreground: #ffffff;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
 
-  --color-muted: #27272a;
-  --color-muted-foreground: #a1a1aa;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
 
-  --color-accent: #27272a;
-  --color-accent-foreground: #ffffff;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
 
-  --color-destructive: #ef4444;
-  --color-destructive-foreground: #ffffff;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
 
-  --color-border: #27272a;
-  --color-input: #27272a;
-  --color-ring: #8b5cf6;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+
+    --radius: 0.75rem;
+  }
 }
 
 @layer base {
+  * {
+    @apply border-border;
+  }
+
   body {
-    background-color: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-display);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
-    @apply antialiased selection:bg-purple-500/30 min-h-screen;
+    @apply bg-background text-foreground antialiased selection:bg-indigo-500/30 selection:text-indigo-200 min-h-screen font-display;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
 @layer utilities {
+  .bg-noise {
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 50;
+  }
+
   .glass-panel {
-    @apply bg-white/5 backdrop-blur-xl border border-white/10;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    @apply bg-white/[0.03] backdrop-blur-xl border border-white/10 shadow-[0_8px_32px_0_rgba(0, 0, 0, 0.36)];
   }
 
   .glass-card {
-    @apply bg-white/5 backdrop-blur-lg border border-white/10 transition-all duration-300 hover:bg-white/10 hover:border-white/20;
+    @apply bg-zinc-900/40 backdrop-blur-md border border-white/5 transition-all duration-500 hover:border-white/20 hover:bg-zinc-900/60;
   }
 
-  .glass-card:hover {
-    box-shadow: 0 0 30px rgba(139, 92, 246, 0.1);
+  .text-gradient-aura {
+    @apply bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/40;
   }
 
-  .card-swiss {
-    @apply bg-white/5 backdrop-blur-md border border-white/10 shadow-lg text-white;
+  .text-gradient-indigo {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-indigo-400 animate-gradient-x;
   }
 
-  .input-swiss {
-    @apply w-full bg-white/5 border border-white/10 px-4 py-3 text-sm font-medium outline-none transition-all placeholder:text-white/20 text-white focus:border-purple-500/50 focus:ring-1 focus:ring-purple-500/50 rounded-lg backdrop-blur-sm;
-  }
-
-  .btn-swiss {
-    @apply bg-white text-black px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed rounded-lg;
-  }
-
-  .btn-outline {
-    @apply bg-transparent border border-white/20 text-white px-6 py-3 text-sm font-bold uppercase tracking-wider hover:bg-white/5 hover:border-white/40 transition-colors rounded-lg;
-  }
-
-  .label-caps {
-    @apply text-[10px] font-mono uppercase tracking-widest text-white/40 font-bold mb-1 block;
-  }
-
-  /* Text Gradients */
-  .text-gradient-purple {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-400;
-  }
-
-  .text-gradient-emerald {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 to-teal-400;
-  }
-
-  .text-gradient-amber {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-400;
-  }
-
-  /* Scrollbar */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -101,25 +84,5 @@
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
-  }
-
-  /* Scanline Effect */
-  .scanlines::before {
-    content: " ";
-    display: block;
-    position: absolute;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(to bottom,
-        rgba(255, 255, 255, 0),
-        rgba(255, 255, 255, 0) 50%,
-        rgba(0, 0, 0, 0.2) 50%,
-        rgba(0, 0, 0, 0.2));
-    background-size: 100% 4px;
-    z-index: 50;
-    pointer-events: none;
-    opacity: 0.15;
   }
 }
